@@ -1,10 +1,14 @@
+using Application.Interfaces;
+using Application.Services;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
+using Infrastructure.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Register appsettings.json
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile("appsettings.json", false, true);
 builder.Configuration.AddUserSecrets<Program>();
 
 // Add services to the container.
@@ -14,18 +18,28 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add Discord socket client
-var discordSocketConfig = builder.Configuration.GetRequiredSection("Discord:SocketConfig").Get<DiscordSocketConfig>()
-    ?? throw new InvalidOperationException("DiscordSocketConfig is null.");
-builder.Services.AddSingleton(discordSocketConfig);
+// Configure Discord
+var discordConfig = builder.Configuration.GetRequiredSection("Discord").Get<DiscordConfiguration>()
+    ?? throw new InvalidOperationException("Discord configuration is missing");
+discordConfig.SocketConfig.GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent;
+
+builder.Services.AddSingleton(discordConfig);
+builder.Services.AddSingleton(discordConfig.SocketConfig);
 builder.Services.AddSingleton<DiscordSocketClient>();
+builder.Services.AddSingleton<CommandService>();
+
+builder.Services.AddSingleton<ICommandHandlingService, CommandHandlingService>();
 
 var app = builder.Build();
 
 // Start the Discord client
 var discordClient = app.Services.GetRequiredService<DiscordSocketClient>();
-await discordClient.LoginAsync(TokenType.Bot, app.Configuration["Discord:BotToken"]);
+await discordClient.LoginAsync(TokenType.Bot, discordConfig.BotToken);
 await discordClient.StartAsync();
+await discordClient.SetStatusAsync(UserStatus.DoNotDisturb);
+
+// Initialize the command handler
+await app.Services.GetRequiredService<ICommandHandlingService>().InitializeAsync();
 await discordClient.SetStatusAsync(UserStatus.Online);
 
 // Make sure the bot logs out instantly when the app stops
