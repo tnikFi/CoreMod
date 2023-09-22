@@ -1,9 +1,11 @@
 ﻿using System.Reflection;
 using Application.Interfaces;
+using Application.Queries.Configuration.GetCommandPrefix;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Infrastructure.Configuration;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Services;
 
@@ -12,12 +14,10 @@ public class CommandHandlingService : ICommandHandlingService
     private readonly DiscordSocketClient _client;
     private readonly CommandService _commands;
     private readonly IServiceProvider _services;
-    private readonly DiscordConfiguration _discordConfig;
 
-    public CommandHandlingService(IServiceProvider services, DiscordSocketClient client, CommandService commands, DiscordConfiguration discordConfig)
+    public CommandHandlingService(IServiceProvider services, DiscordSocketClient client, CommandService commands)
     {
         _commands = commands;
-        _discordConfig = discordConfig;
         _client = client;
         _services = services;
         _commands.CommandExecuted += CommandExecutedAsync;
@@ -38,18 +38,30 @@ public class CommandHandlingService : ICommandHandlingService
         // Command prefix end index
         var argPos = 0;
 
-        // Perform prefix check using the prefix in the configuration file.
-        // Mention prefixes are also allowed.
-        if (!message.HasStringPrefix(_discordConfig.DefaultPrefix, ref argPos)
-            && !message.HasMentionPrefix(_client.CurrentUser, ref argPos))
-            return;
+        // Get the guild-specific prefix via the GetCommandPrefixQuery
+        var guild = (message.Channel as SocketGuildChannel)?.Guild;
+        // Create a scope for the dependency injection
+        using (var scope = _services.CreateScope())
+        {
+            // Make sure the db context is available and in the scope
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var prefix = await mediator.Send(new GetCommandPrefixQuery {GuildId = guild?.Id});
+            if (!message.HasStringPrefix(prefix, ref argPos)
+                && !message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+                return;
+        }
+
+        ;
 
         // Create the websocket context
         var context = new SocketCommandContext(_client, message);
 
         // Perform the execution of the command. In this method, the command service will perform precondition
         // and parsing check, then execute the command if one is matched.
-        await _commands.ExecuteAsync(context, argPos, _services);
+        using (var commandScope = _services.CreateScope())
+        {
+            await _commands.ExecuteAsync(context, argPos, commandScope.ServiceProvider);
+        }
     }
 
     private static async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context,

@@ -1,9 +1,12 @@
+using Application;
 using Application.Interfaces;
 using Application.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Infrastructure.Configuration;
+using Infrastructure.Data.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,13 @@ builder.Configuration.AddJsonFile("appsettings.json", false, true);
 builder.Configuration.AddUserSecrets<Program>();
 
 // Add services to the container.
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.RegisterRequestHandlers();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -32,14 +42,22 @@ builder.Services.AddSingleton<ICommandHandlingService, CommandHandlingService>()
 
 var app = builder.Build();
 
+// Migrate the database
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+
 // Start the Discord client
 var discordClient = app.Services.GetRequiredService<DiscordSocketClient>();
 await discordClient.LoginAsync(TokenType.Bot, discordConfig.BotToken);
 await discordClient.StartAsync();
 await discordClient.SetStatusAsync(UserStatus.DoNotDisturb);
 
-// Initialize the command handler
-await app.Services.GetRequiredService<ICommandHandlingService>().InitializeAsync();
+// Initialize the command handler for each scope
+var commandHandlingService = app.Services.GetRequiredService<ICommandHandlingService>();
+await commandHandlingService.InitializeAsync();
 await discordClient.SetStatusAsync(UserStatus.Online);
 
 // Make sure the bot logs out instantly when the app stops
