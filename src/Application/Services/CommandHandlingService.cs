@@ -58,6 +58,7 @@ public class CommandHandlingService : ICommandHandlingService
 
         // Perform the execution of the command. In this method, the command service will perform precondition
         // and parsing check, then execute the command if one is matched.
+        // Create a scope for the command in order to inject the dependencies like the db context and the mediator.
         using (var commandScope = _services.CreateScope())
         {
             await _commands.ExecuteAsync(context, argPos, commandScope.ServiceProvider);
