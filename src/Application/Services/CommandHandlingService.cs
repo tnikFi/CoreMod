@@ -43,7 +43,6 @@ public class CommandHandlingService : ICommandHandlingService
         // Create a scope for the dependency injection
         using (var scope = _services.CreateScope())
         {
-            // Make sure the db context is available and in the scope
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var prefix = await mediator.Send(new GetCommandPrefixQuery {GuildId = guild?.Id});
             if (!message.HasStringPrefix(prefix, ref argPos)
