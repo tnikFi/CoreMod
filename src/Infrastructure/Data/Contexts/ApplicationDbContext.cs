@@ -6,6 +6,7 @@ namespace Infrastructure.Data.Contexts;
 public class ApplicationDbContext : DbContext
 {
     public DbSet<GuildSettings> GuildSettings { get; set; }
+    public DbSet<Moderation> Moderations { get; set; }
     
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -13,6 +14,5 @@ public class ApplicationDbContext : DbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<GuildSettings>();
     }
 }
