@@ -26,6 +26,11 @@ public class Moderation
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int CaseNumber { get; set; }
     
+    /// <summary>
+    /// If the moderation action is used to pardon another case, this will be the case number of the pardoned action.
+    /// </summary>
+    public int? PardonedCaseNumber { get; set; }
+    
     [Required]
     public ModerationType Type { get; set; }
 }
