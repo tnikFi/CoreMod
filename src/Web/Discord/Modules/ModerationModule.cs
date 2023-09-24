@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Application.Queries.Moderation.GetModerations;
 using Common.Extensions;
+using Common.Utils;
 using Discord;
 using Discord.Commands;
 using Domain.Enums;
@@ -33,10 +34,13 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
     {
         if (Context.User is not IGuildUser guildUser)
             return;
+        
+        var embedColor = ModLogUtils.GetEmbedColorForModerationType(ModerationType.Warning);
+        
         var dmEmbed = new EmbedBuilder()
             .WithTitle($"You were warned in {Context.Guild.Name}")
             .AddField("Reason", reason ?? "No reason provided.")
-            .WithColor(Color.Gold)
+            .WithColor(embedColor)
             .Build();
         var sentDm = await user.TrySendMessageAsync(embed: dmEmbed);
 
@@ -46,7 +50,7 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
             .AddField("User", user.Mention)
             .AddField("Moderator", guildUser.Mention)
             .AddField("Reason", reason ?? "No reason provided.")
-            .WithColor(Color.Gold)
+            .WithColor(embedColor)
             .Build();
         await _loggingService.SendLogAsync(Context.Guild.Id, embed: auditLogEmbed);
 
@@ -111,6 +115,7 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
                     .AddField("Moderator", Context.Guild.GetUser(modLog.ModeratorId).Mention)
                     .WithTimestamp(modLog.Timestamp.ToLocalTime())
                     .WithFooter($"Case #{modLog.Id}")
+                    .WithColor(ModLogUtils.GetEmbedColorForModerationType(modLog.Type))
                     .Build();
 
                 await ReplyAsync(embed: embed);
