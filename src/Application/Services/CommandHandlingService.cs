@@ -54,8 +54,6 @@ public class CommandHandlingService : ICommandHandlingService
                 return;
         }
 
-        ;
-
         // Create the websocket context
         var context = new SocketCommandContext(_client, message);
 
