@@ -3,7 +3,6 @@ using Discord;
 using Domain.Enums;
 using FluentAssertions;
 using NSubstitute;
-using NSubstitute.Extensions;
 
 namespace Integration.Tests.Commands.Moderation.ModerateUser;
 
@@ -29,7 +28,7 @@ public class ModerateUserCommandTests : TestBase
         await SendAsync(request);
         TestDbContext.Moderations.FirstOrDefault(x => x.UserId == 1ul)?.Reason.Should().Be("test");
     }
-    
+
     [Test]
     public async Task ShouldAddModerationWhenReasonIsNull()
     {
@@ -47,7 +46,7 @@ public class ModerateUserCommandTests : TestBase
         await SendAsync(request);
         TestDbContext.Moderations.FirstOrDefault(x => x.UserId == 1ul)?.Reason.Should().BeNull();
     }
-    
+
     [Test]
     public async Task ReasonShouldBeNullIfEmptyOrWhitespace()
     {
