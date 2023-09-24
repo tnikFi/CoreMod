@@ -56,7 +56,7 @@ public class Moderation
     public Moderation? RelatedCase { get; set; }
 
     /// <summary>
-    ///     Moderation action that revoked this action, if any. Equal to <see cref="PardonedCase" /> if this
+    ///     Moderation action that revoked this action, if any. Equal to <see cref="RelatedCase" /> if this
     ///     action has been pardoned.
     /// </summary>
     [NotMapped]
