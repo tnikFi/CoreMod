@@ -26,7 +26,7 @@ public class Moderation
     /// <summary>
     ///     Timestamp of the moderation action
     /// </summary>
-    [Required]
+    [Required, DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public DateTime Timestamp { get; set; }
 
     /// <summary>
