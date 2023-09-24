@@ -38,7 +38,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("GuildId");
 
-                    b.ToTable("GuildSettings");
+                    b.ToTable("GuildSettings", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Moderation", b =>
@@ -69,7 +69,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<DateTime>("Timestamp")
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime2");
 
                     b.Property<byte>("Type")
@@ -82,7 +81,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("RelatedCaseGuildId", "RelatedCaseCaseNumber");
 
-                    b.ToTable("Moderations");
+                    b.ToTable("Moderations", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Moderation", b =>

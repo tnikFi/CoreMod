@@ -26,8 +26,8 @@ public class Moderation
     /// <summary>
     ///     Timestamp of the moderation action
     /// </summary>
-    [Required, DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public DateTime Timestamp { get; set; }
+    [Required]
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     ///     Expiration time of the moderation action
