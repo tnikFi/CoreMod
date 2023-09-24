@@ -15,13 +15,17 @@ public class CommandHandlingService : ICommandHandlingService
     private readonly CommandService _commands;
     private readonly IServiceProvider _services;
 
-    public CommandHandlingService(IServiceProvider services, DiscordSocketClient client, CommandService commands)
+    public CommandHandlingService(IServiceProvider services, DiscordSocketClient client, CommandService commands,
+        ILoggingService loggingService)
     {
         _commands = commands;
         _client = client;
         _services = services;
         _commands.CommandExecuted += CommandExecutedAsync;
         _client.MessageReceived += MessageReceivedAsync;
+        _client.MessageUpdated += loggingService.LogMessageEdit;
+        _client.MessageDeleted += loggingService.LogMessageDelete;
+        _client.MessagesBulkDeleted += loggingService.LogBulkMessageDelete;
     }
 
     public async Task InitializeAsync()
