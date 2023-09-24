@@ -2,7 +2,7 @@
 
 public enum ModerationType : byte
 {
-    Warn = 1,
+    Warning = 1,
     Mute = 2,
     Kick = 3,
     Ban = 4,

@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Common.Extensions;
 using Discord;
 using Discord.Commands;
+using Domain.Enums;
 using MediatR;
 
 namespace Web.Discord.Modules;
@@ -54,7 +55,8 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
             Guild = Context.Guild,
             User = user,
             Moderator = guildUser,
-            Reason = reason
+            Reason = reason,
+            Type = ModerationType.Warning
         });
         
         if (sentDm is not null)
