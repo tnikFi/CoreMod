@@ -5,9 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Models;
 
-[PrimaryKey(nameof(GuildId), nameof(CaseNumber))]
+[PrimaryKey(nameof(Id))]
 public class Moderation
 {
+    /// <summary>
+    ///     Id of the moderation action
+    /// </summary>
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+    
     /// <summary>
     ///     ID of the guild where the moderation action was performed
     /// </summary>
@@ -39,10 +45,6 @@ public class Moderation
     /// </summary>
     [MaxLength(2000)]
     public string? Reason { get; set; }
-
-    // Make case numbers auto increment for each guild
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int CaseNumber { get; set; }
 
     /// <summary>
     ///     Indicates whether or not the moderation action should be considered active.
