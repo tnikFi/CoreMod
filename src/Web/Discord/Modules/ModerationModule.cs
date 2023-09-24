@@ -1,5 +1,6 @@
 ﻿using Application.Commands.Moderation.ModerateUser;
 using Application.Interfaces;
+using Application.Queries.Moderation.GetModerations;
 using Common.Extensions;
 using Discord;
 using Discord.Commands;
@@ -13,23 +14,22 @@ namespace Web.Discord.Modules;
 [RequireContext(ContextType.Guild)]
 public class ModerationModule : ModuleBase<SocketCommandContext>
 {
-    private readonly IMediator _mediator;
     private readonly ILoggingService _loggingService;
+    private readonly IMediator _mediator;
 
     public ModerationModule(IMediator mediator, ILoggingService loggingService)
     {
         _mediator = mediator;
         _loggingService = loggingService;
     }
-    
+
     [Command("warn")]
     [Summary("Warns a user.")]
     [RequireUserPermission(GuildPermission.KickMembers)]
     public async Task WarnAsync(
-        [Summary("The user to warn.")]
-        IGuildUser user,
-        [Summary("The reason for the warning.")]
-        [Remainder] string? reason = null)
+        [Summary("The user to warn.")] IGuildUser user,
+        [Summary("The reason for the warning.")] [Remainder]
+        string? reason = null)
     {
         if (Context.User is not IGuildUser guildUser)
             return;
@@ -39,7 +39,7 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
             .WithColor(Color.Gold)
             .Build();
         var sentDm = await user.TrySendMessageAsync(embed: dmEmbed);
-        
+
         var auditLogEmbed = new EmbedBuilder()
             .WithAuthor(Context.User)
             .WithTitle("User Warned")
@@ -49,7 +49,7 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
             .WithColor(Color.Gold)
             .Build();
         await _loggingService.SendLogAsync(Context.Guild.Id, embed: auditLogEmbed);
-        
+
         await _mediator.Send(new ModerateUserCommand
         {
             Guild = Context.Guild,
@@ -58,10 +58,67 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
             Reason = reason,
             Type = ModerationType.Warning
         });
-        
+
         if (sentDm is not null)
-            await ReplyAsync($"User has been warned.");
+            await ReplyAsync("User has been warned.");
         else
-            await ReplyAsync($"User could not be messaged. The warning has been logged.");
+            await ReplyAsync("User could not be messaged. The warning has been logged.");
+    }
+
+    [Command("modlogs")]
+    [Summary("Gets the moderation logs for a user.")]
+    [RequireUserPermission(GuildPermission.KickMembers)]
+    public async Task GetModLogsAsync(
+        [Summary("The user to get the moderation logs for. Leave blank to list moderation logs for all users.")]
+        IGuildUser? user = null)
+    {
+        var modLogs = await _mediator.Send(new GetModerationsQuery
+        {
+            Guild = Context.Guild,
+            User = user
+        });
+
+        if (modLogs.Any())
+        {
+            // Show an embed with the number of found mod logs before sending the actual mod logs.
+            var summary = new EmbedBuilder()
+                .WithTitle("Moderation Logs")
+                .WithDescription(user is null
+                    ? $"Found {modLogs.Count()} moderation logs."
+                    : $"Found {modLogs.Count()} moderation logs for {user.Mention}.")
+                .Build();
+
+            await ReplyAsync(embed: summary);
+
+            foreach (var modLog in modLogs)
+            {
+                var typeLabel = modLog.Type switch
+                {
+                    ModerationType.Ban => "Ban",
+                    ModerationType.Kick => "Kick",
+                    ModerationType.Mute => "Mute",
+                    ModerationType.Warning => "Warning",
+                    ModerationType.Unmute => "Unmute",
+                    ModerationType.Unban => "Unban",
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                var embed = new EmbedBuilder()
+                    .WithAuthor(Context.Guild.GetUser(modLog.ModeratorId))
+                    .WithTitle(typeLabel)
+                    .WithDescription(modLog.Reason ?? "No reason provided.")
+                    .AddField("User", Context.Guild.GetUser(modLog.UserId).Mention)
+                    .AddField("Moderator", Context.Guild.GetUser(modLog.ModeratorId).Mention)
+                    .WithTimestamp(modLog.Timestamp.ToLocalTime())
+                    .WithFooter($"Case #{modLog.Id}")
+                    .Build();
+
+                await ReplyAsync(embed: embed);
+            }
+        }
+        else
+        {
+            await ReplyAsync("No moderation logs found.");
+        }
     }
 }
