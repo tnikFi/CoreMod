@@ -2,7 +2,7 @@
 using Domain.Models;
 using FluentAssertions;
 
-namespace Integration.Tests.Queries.GetCommandPrefix;
+namespace Integration.Tests.Queries.Configuration.GetCommandPrefix;
 
 [TestFixture]
 public class GetCommandPrefixQueryTests : TestBase

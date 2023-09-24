@@ -2,7 +2,7 @@
 using Domain.Models;
 using FluentAssertions;
 
-namespace Integration.Tests.Commands.SetCommandPrefix;
+namespace Integration.Tests.Commands.Configuration.SetCommandPrefix;
 
 [TestFixture]
 public class SetCommandPrefixCommandTests : TestBase

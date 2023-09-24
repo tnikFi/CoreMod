@@ -2,7 +2,7 @@
 using Domain.Models;
 using FluentAssertions;
 
-namespace Integration.Tests.Commands.SetLogChannelId;
+namespace Integration.Tests.Commands.Configuration.SetLogChannelId;
 
 [TestFixture]
 public class SetLogChannelIdCommandTests : TestBase
