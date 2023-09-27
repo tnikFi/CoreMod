@@ -1,9 +1,12 @@
 ﻿using Application;
+using Application.Interfaces;
+using Discord.WebSocket;
 using Infrastructure.Configuration;
 using Infrastructure.Data.Contexts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
 
 namespace Integration.Tests;
 
@@ -39,6 +42,9 @@ public class TestBase
             DefaultPrefix = "!",
             MaxPrefixLength = 5
         });
+        services.AddSingleton(Substitute.For<DiscordSocketClient>());
+        services.AddSingleton(Substitute.For<ILoggingService>());
+        services.AddSingleton(Substitute.For<IModerationMessageService>());
         _serviceProvider = services.BuildServiceProvider();
         _mediator = _serviceProvider.GetRequiredService<IMediator>();
     }
