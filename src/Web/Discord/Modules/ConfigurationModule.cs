@@ -1,5 +1,6 @@
 ﻿using Application.Commands.Configuration.SetCommandPrefix;
 using Application.Commands.Configuration.SetLogChannelId;
+using Application.Commands.Configuration.SetWelcomeMessage;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -61,5 +62,25 @@ public class ConfigurationModule : ModuleBase<SocketCommandContext>
             await ReplyAsync("Logging disabled.");
         else
             await ReplyAsync($"Set the log channel to {channel.Mention}.");
+    }
+
+    [Command("welcomemessage")]
+    [Summary("Sets the welcome message sent to new users.")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    [Alias("welcome")]
+    [Remarks("Available placeholders:\n{user} - Mention the user who joined\n{guild} - The guild's name")]
+    public async Task SetWelcomeMessageAsync(
+        [Summary("Welcome message. Leave empty to disable.")] [Remainder]
+        string? message = null)
+    {
+        await _mediator.Send(new SetWelcomeMessageCommand
+        {
+            GuildId = Context.Guild.Id,
+            WelcomeMessage = message
+        });
+        if (message is null)
+            await ReplyAsync("Welcome message disabled.");
+        else
+            await ReplyAsync($"Set the welcome message to:\n{message}");
     }
 }
