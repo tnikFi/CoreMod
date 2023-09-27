@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.Net;
 
-namespace Common.Extensions;
+namespace Application.Extensions;
 
 public static class UserExtensions
 {

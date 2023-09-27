@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Common.Utils;
+using Domain.Attributes;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,10 +37,19 @@ public class Moderation
     [Required]
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
+    [NotMapped]
+    private DateTime? _expiresAt;
+    
     /// <summary>
-    ///     Expiration time of the moderation action
+    ///     Expiration time of the moderation action. Can only be set if the moderation action type allows temporary
+    ///     moderation actions.
     /// </summary>
-    public DateTime? ExpiresAt { get; set; }
+    public DateTime? ExpiresAt
+    {
+        get => _expiresAt;
+        // Only allow setting the expiration date if the moderation action type can be temporary
+        set => _expiresAt = EnumUtils.HasAttribute<CanBeTemporaryAttribute>(Type) ? value : null;
+    }
 
     /// <summary>
     ///     Reason for the moderation action given by the moderator

@@ -1,8 +1,9 @@
-﻿using Application.Interfaces;
-using Common.Extensions;
+﻿using Application.Extensions;
+using Application.Interfaces;
 using Common.Utils;
 using Discord;
 using Discord.WebSocket;
+using Domain.Attributes;
 using Domain.Enums;
 using Domain.Models;
 
@@ -40,8 +41,7 @@ public class ModerationMessageService : IModerationMessageService
         var dmEmbedBuilder = new EmbedBuilder()
             .WithTitle(GetDmEmbedTitleForModeration(moderation.Type, guild))
             .WithTimestamp(moderation.Timestamp)
-            .AddField("Reason", moderation.Reason ?? "No reason provided.")
-            .WithColor(ModLogUtils.GetEmbedColorForModerationType(moderation.Type));
+            .AddField("Reason", moderation.Reason ?? "No reason provided.");
 
         var logEmbedBuilder = new EmbedBuilder()
             .WithAuthor(moderator)
@@ -50,8 +50,7 @@ public class ModerationMessageService : IModerationMessageService
             .AddField("Moderator", moderator.Mention)
             .AddField("Reason", moderation.Reason ?? "No reason provided.")
             .WithTimestamp(moderation.Timestamp)
-            .WithFooter($"Case #{moderation.Id}")
-            .WithColor(ModLogUtils.GetEmbedColorForModerationType(moderation.Type));
+            .WithFooter($"Case #{moderation.Id}");
 
         // Add expiration if it's set
         if (moderation.ExpiresAt.HasValue)
@@ -60,6 +59,14 @@ public class ModerationMessageService : IModerationMessageService
             var timestampTag = new TimestampTag(moderation.ExpiresAt.Value, TimestampTagStyles.LongDateTime);
             dmEmbedBuilder.AddField(title, timestampTag);
             logEmbedBuilder.AddField(title, timestampTag);
+        }
+        
+        // Set the embed color
+        var color = EnumUtils.GetAttributeValue<EmbedColorAttribute>(moderation.Type)?.Color;
+        if (color.HasValue)
+        {
+            dmEmbedBuilder.WithColor(color.Value);
+            logEmbedBuilder.WithColor(color.Value);
         }
 
         // Send the message to the user

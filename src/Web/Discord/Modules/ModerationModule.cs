@@ -4,6 +4,7 @@ using Application.Queries.Moderation.GetModerations;
 using Common.Utils;
 using Discord;
 using Discord.Commands;
+using Domain.Attributes;
 using Domain.Enums;
 using MediatR;
 
@@ -101,7 +102,7 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
                     .AddField("Moderator", Context.Guild.GetUser(modLog.ModeratorId).Mention)
                     .WithTimestamp(modLog.Timestamp.ToLocalTime())
                     .WithFooter($"Case #{modLog.Id}")
-                    .WithColor(ModLogUtils.GetEmbedColorForModerationType(modLog.Type))
+                    .WithColor(EnumUtils.GetAttributeValue<EmbedColorAttribute>(modLog.Type)?.Color ?? Color.Default)
                     .Build();
 
                 await ReplyAsync(embed: embed);

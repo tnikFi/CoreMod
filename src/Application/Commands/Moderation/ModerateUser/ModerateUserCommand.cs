@@ -13,6 +13,7 @@ public class ModerateUserCommand : IRequest<Domain.Models.Moderation>
     public IGuildUser Moderator { get; set; }
     public string? Reason { get; set; }
     public ModerationType Type { get; set; }
+    public TimeSpan? Duration { get; set; }
     public bool SendModerationMessage { get; set; } = true;
 }
 
