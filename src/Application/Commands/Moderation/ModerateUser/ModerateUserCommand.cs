@@ -22,7 +22,8 @@ public class ModerateUserCommandHandler : IRequestHandler<ModerateUserCommand, D
     private readonly ApplicationDbContext _dbContext;
     private readonly IModerationMessageService _moderationMessageService;
 
-    public ModerateUserCommandHandler(ApplicationDbContext dbContext, IModerationMessageService moderationMessageService)
+    public ModerateUserCommandHandler(ApplicationDbContext dbContext,
+        IModerationMessageService moderationMessageService)
     {
         _dbContext = dbContext;
         _moderationMessageService = moderationMessageService;
@@ -39,14 +40,43 @@ public class ModerateUserCommandHandler : IRequestHandler<ModerateUserCommand, D
             Type = request.Type
         };
 
+        // Apply the moderation to the user. Warning isn't a Discord action, so it doesn't need to be applied.
+        switch (request.Type)
+        {
+            case ModerationType.Mute:
+                await request.User.SetTimeOutAsync(request.Duration ?? TimeSpan.MaxValue, new RequestOptions
+                {
+                    AuditLogReason = request.Reason
+                });
+                break;
+            case ModerationType.Kick:
+                await request.User.KickAsync(request.Reason);
+                break;
+            case ModerationType.Ban:
+                await request.Guild.AddBanAsync(request.User, 0, request.Reason);
+                break;
+            case ModerationType.Unmute:
+                await request.User.RemoveTimeOutAsync(new RequestOptions
+                {
+                    AuditLogReason = request.Reason
+                });
+                break;
+            case ModerationType.Unban:
+                await request.Guild.RemoveBanAsync(request.User, new RequestOptions
+                {
+                    AuditLogReason = request.Reason
+                });
+                break;
+        }
+
         // Add the moderation to the database
         _dbContext.Moderations.Add(moderation);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        
+
         // Send the moderation message if requested
         if (request.SendModerationMessage)
             await _moderationMessageService.SendModerationMessageAsync(moderation);
-        
+
         return moderation;
     }
 }

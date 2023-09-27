@@ -74,4 +74,95 @@ public class ModerateUserCommandTests : TestBase
         TestDbContext.Moderations.FirstOrDefault(x => x.Id == case1.Id)?.Reason.Should().BeNull();
         TestDbContext.Moderations.FirstOrDefault(x => x.Id == case2.Id)?.Reason.Should().BeNull();
     }
+
+    [Test]
+    public async Task ShouldTimeOutUser()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new ModerateUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test",
+            Type = ModerationType.Mute,
+            Duration = TimeSpan.FromDays(7)
+        };
+        await SendAsync(request);
+        await user.Received().SetTimeOutAsync(TimeSpan.FromDays(7), Arg.Any<RequestOptions>());
+    }
+
+    [Test]
+    public async Task ShouldRemoveUserTimeOut()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new ModerateUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test",
+            Type = ModerationType.Unmute
+        };
+        await SendAsync(request);
+        await user.Received().RemoveTimeOutAsync(Arg.Any<RequestOptions>());
+    }
+
+    [Test]
+    public async Task ShouldKickUser()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new ModerateUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test",
+            Type = ModerationType.Kick
+        };
+        await SendAsync(request);
+        await user.Received().KickAsync("test");
+    }
+
+    [Test]
+    public async Task ShouldBanUser()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new ModerateUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test",
+            Type = ModerationType.Ban
+        };
+        await SendAsync(request);
+        await guild.Received().AddBanAsync(user, 0, "test");
+    }
+
+    [Test]
+    public async Task ShouldUnbanUser()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new ModerateUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test",
+            Type = ModerationType.Unban
+        };
+        await SendAsync(request);
+        await guild.Received().RemoveBanAsync(user, Arg.Any<RequestOptions>());
+    }
 }
