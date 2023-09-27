@@ -86,7 +86,7 @@ public class Moderation
     ///     True if the moderation action type is a pardon.
     /// </summary>
     [NotMapped]
-    public bool IsPardon => Type is ModerationType.Unban or ModerationType.Unmute;
+    public bool IsPardon => EnumUtils.HasAttribute<PardonAttribute>(Type);
 
     /// <summary>
     ///     True if the moderation action has been pardoned.

@@ -14,7 +14,9 @@ public enum ModerationType : byte
     [EmbedColor(231, 76, 60)] [CanBeTemporary]
     Ban = 4,
 
-    [EmbedColor(46, 204, 113)] Unmute = 5,
+    [EmbedColor(46, 204, 113)] [Pardon(Mute)]
+    Unmute = 5,
 
-    [EmbedColor(46, 204, 113)] Unban = 6
+    [EmbedColor(46, 204, 113)] [Pardon(Ban)]
+    Unban = 6
 }
