@@ -56,6 +56,27 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
             await ReplyAsync("User could not be messaged. The warning has been logged.");
     }
 
+    [Command("purge")]
+    [Summary("Deletes multiple messages from the current channel.")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    public async Task PurgeAsync(
+        [Summary("The number of messages to delete.")]
+        int count)
+    {
+        var messages = await Context.Channel.GetMessagesAsync(count + 1).FlattenAsync();
+        var messageArray = messages.ToArray();
+        await ((ITextChannel) Context.Channel).DeleteMessagesAsync(messageArray);
+        await ReplyAsync($"Deleted {messageArray.Length - 1} messages.");
+        await _loggingService.SendLogAsync(Context.Guild.Id, embed: new EmbedBuilder()
+            .WithAuthor(Context.User)
+            .WithTitle($"Purged {messageArray.Length - 1} messages")
+            .WithDescription(
+                $"Purged {messageArray.Length - 1} messages in {((ITextChannel) Context.Channel).Mention}.")
+            .WithColor(Color.Red)
+            .WithCurrentTimestamp()
+            .Build());
+    }
+
     [Command("modlogs")]
     [Summary("Gets the moderation logs for a user.")]
     [RequireUserPermission(GuildPermission.KickMembers)]
