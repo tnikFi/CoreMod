@@ -1,7 +1,6 @@
 ﻿using Application.Commands.Moderation.ModerateUser;
 using Application.Interfaces;
 using Application.Queries.Moderation.GetModerations;
-using Common.Extensions;
 using Common.Utils;
 using Discord;
 using Discord.Commands;
@@ -19,7 +18,8 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
     private readonly IMediator _mediator;
     private readonly IModerationMessageService _moderationMessageService;
 
-    public ModerationModule(IMediator mediator, ILoggingService loggingService, IModerationMessageService moderationMessageService)
+    public ModerationModule(IMediator mediator, ILoggingService loggingService,
+        IModerationMessageService moderationMessageService)
     {
         _mediator = mediator;
         _loggingService = loggingService;
@@ -36,14 +36,15 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
     {
         if (Context.User is not IGuildUser guildUser)
             return;
-        
+
         var moderation = await _mediator.Send(new ModerateUserCommand
         {
             Guild = Context.Guild,
             User = user,
             Moderator = guildUser,
             Reason = reason,
-            Type = ModerationType.Warning
+            Type = ModerationType.Warning,
+            SendModerationMessage = false // We need to know if the DM was sent or not so we'll do it manually
         });
 
         var sentDm = await _moderationMessageService.SendModerationMessageAsync(moderation);
