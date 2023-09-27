@@ -10,9 +10,10 @@ public static class DiscordTestUtils
         var user = Substitute.For<IGuildUser>();
         user.Id.Returns(id);
         user.Username.Returns(name);
+        user.Mention.Returns($"<@{id}>");
         return user;
     }
-    
+
     public static IGuild CreateGuild(ulong id, string? name = null)
     {
         var guild = Substitute.For<IGuild>();

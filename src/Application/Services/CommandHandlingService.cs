@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Application.Interfaces;
 using Application.Queries.Configuration.GetCommandPrefix;
+using Application.Queries.DiscordApiCalls.SendWelcomeMessage;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -26,6 +27,7 @@ public class CommandHandlingService : ICommandHandlingService
         _client.MessageUpdated += loggingService.LogMessageEdit;
         _client.MessageDeleted += loggingService.LogMessageDelete;
         _client.MessagesBulkDeleted += loggingService.LogBulkMessageDelete;
+        _client.UserJoined += HandleJoinAsync;
     }
 
     public async Task InitializeAsync()
@@ -75,5 +77,15 @@ public class CommandHandlingService : ICommandHandlingService
 
         // If a command failed, notify the user with the result
         await context.Channel.SendMessageAsync($"Error: {result}");
+    }
+
+    private async Task HandleJoinAsync(IGuildUser user)
+    {
+        using var scope = _services.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.Send(new SendWelcomeMessageQuery
+        {
+            User = user
+        });
     }
 }
