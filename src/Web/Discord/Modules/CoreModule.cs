@@ -76,6 +76,12 @@ public class CoreModule : ModuleBase<SocketCommandContext>
                 {
                     embedBuilder.AddField("Aliases", string.Join('\n', aliases));
                 }
+                
+                // Add remarks if available
+                if (!string.IsNullOrEmpty(command.Remarks))
+                {
+                    embedBuilder.AddField("Remarks", command.Remarks);
+                }
             }
             else if (module is not null)
             {
