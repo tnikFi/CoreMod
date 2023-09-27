@@ -71,7 +71,7 @@ public class ModerateUserCommandTests : TestBase
         };
         var case1 = await SendAsync(request1);
         var case2 = await SendAsync(request2);
-        TestDbContext.Moderations.FirstOrDefault(x => x.Id == case1)?.Reason.Should().BeNull();
-        TestDbContext.Moderations.FirstOrDefault(x => x.Id == case2)?.Reason.Should().BeNull();
+        TestDbContext.Moderations.FirstOrDefault(x => x.Id == case1.Id)?.Reason.Should().BeNull();
+        TestDbContext.Moderations.FirstOrDefault(x => x.Id == case2.Id)?.Reason.Should().BeNull();
     }
 }

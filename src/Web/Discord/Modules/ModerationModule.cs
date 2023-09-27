@@ -17,11 +17,13 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
 {
     private readonly ILoggingService _loggingService;
     private readonly IMediator _mediator;
+    private readonly IModerationMessageService _moderationMessageService;
 
-    public ModerationModule(IMediator mediator, ILoggingService loggingService)
+    public ModerationModule(IMediator mediator, ILoggingService loggingService, IModerationMessageService moderationMessageService)
     {
         _mediator = mediator;
         _loggingService = loggingService;
+        _moderationMessageService = moderationMessageService;
     }
 
     [Command("warn")]
@@ -35,26 +37,7 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
         if (Context.User is not IGuildUser guildUser)
             return;
         
-        var embedColor = ModLogUtils.GetEmbedColorForModerationType(ModerationType.Warning);
-        
-        var dmEmbed = new EmbedBuilder()
-            .WithTitle($"You were warned in {Context.Guild.Name}")
-            .AddField("Reason", reason ?? "No reason provided.")
-            .WithColor(embedColor)
-            .Build();
-        var sentDm = await user.TrySendMessageAsync(embed: dmEmbed);
-
-        var auditLogEmbed = new EmbedBuilder()
-            .WithAuthor(Context.User)
-            .WithTitle("User Warned")
-            .AddField("User", user.Mention)
-            .AddField("Moderator", guildUser.Mention)
-            .AddField("Reason", reason ?? "No reason provided.")
-            .WithColor(embedColor)
-            .Build();
-        await _loggingService.SendLogAsync(Context.Guild.Id, embed: auditLogEmbed);
-
-        await _mediator.Send(new ModerateUserCommand
+        var moderation = await _mediator.Send(new ModerateUserCommand
         {
             Guild = Context.Guild,
             User = user,
@@ -63,7 +46,9 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
             Type = ModerationType.Warning
         });
 
-        if (sentDm is not null)
+        var sentDm = await _moderationMessageService.SendModerationMessageAsync(moderation);
+
+        if (sentDm)
             await ReplyAsync("User has been warned.");
         else
             await ReplyAsync("User could not be messaged. The warning has been logged.");

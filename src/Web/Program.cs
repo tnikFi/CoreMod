@@ -39,6 +39,7 @@ builder.Services.AddSingleton<DiscordSocketClient>();
 builder.Services.AddSingleton<CommandService>();
 
 builder.Services.AddSingleton<ILoggingService, LoggingService>();
+builder.Services.AddSingleton<IModerationMessageService, ModerationMessageService>();
 builder.Services.AddSingleton<ICommandHandlingService, CommandHandlingService>();
 
 var app = builder.Build();
