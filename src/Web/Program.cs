@@ -31,7 +31,8 @@ builder.Services.AddSwaggerGen();
 // Configure Discord
 var discordConfig = builder.Configuration.GetRequiredSection("Discord").Get<DiscordConfiguration>()
                     ?? throw new InvalidOperationException("Discord configuration is missing");
-discordConfig.SocketConfig.GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent;
+discordConfig.SocketConfig.GatewayIntents =
+    GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent | GatewayIntents.GuildMembers;
 
 builder.Services.AddSingleton(discordConfig);
 builder.Services.AddSingleton(discordConfig.SocketConfig);
