@@ -165,4 +165,43 @@ public class ModerateUserCommandTests : TestBase
         await SendAsync(request);
         await guild.Received().RemoveBanAsync(user, Arg.Any<RequestOptions>());
     }
+
+    [Test]
+    public async Task ShouldAddExpirationTime()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new ModerateUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test",
+            Type = ModerationType.Mute,
+            Duration = TimeSpan.FromDays(7)
+        };
+        var moderation = await SendAsync(request);
+        // Check that the DateTime is within 1 minute of the expected time. The test should never take longer than this to run.
+        moderation.ExpiresAt.Should().BeCloseTo(DateTime.UtcNow.Add(request.Duration.Value), TimeSpan.FromMinutes(1));
+    }
+
+    [Test]
+    public async Task ShouldNotAddExpirationTimeIfModerationTypeDoesNotSupportTemporaryModerations()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new ModerateUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test",
+            Type = ModerationType.Warning,
+            Duration = TimeSpan.FromDays(7)
+        };
+        var moderation = await SendAsync(request);
+        moderation.ExpiresAt.Should().BeNull();
+    }
 }

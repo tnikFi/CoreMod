@@ -1,5 +1,7 @@
 ﻿using Application.Interfaces;
+using Common.Utils;
 using Discord;
+using Domain.Attributes;
 using Domain.Enums;
 using Infrastructure.Data.Contexts;
 using MediatR;
@@ -68,6 +70,9 @@ public class ModerateUserCommandHandler : IRequestHandler<ModerateUserCommand, D
                 });
                 break;
         }
+        
+        if (EnumUtils.HasAttribute<CanBeTemporaryAttribute>(moderation.Type) && request.Duration.HasValue)
+            moderation.ExpiresAt = DateTime.UtcNow + request.Duration.Value;
 
         // Add the moderation to the database
         _dbContext.Moderations.Add(moderation);
