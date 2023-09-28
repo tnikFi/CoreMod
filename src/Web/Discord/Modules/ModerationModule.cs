@@ -55,6 +55,32 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
         else
             await ReplyAsync("User could not be messaged. The warning has been logged.");
     }
+    
+    [Command("mute")]
+    [Summary("Mutes a user.")]
+    [RequireUserPermission(GuildPermission.MuteMembers)]
+    [Alias("timeout")]
+    public async Task MuteAsync(
+        [Summary("The user to mute.")] IGuildUser user,
+        [Summary("The duration of the mute.")] TimeSpan duration,
+        [Summary("The reason for the mute.")] [Remainder]
+        string? reason = null)
+    {
+        if (Context.User is not IGuildUser guildUser)
+            return;
+
+        var moderation = await _mediator.Send(new ModerateUserCommand
+        {
+            Guild = Context.Guild,
+            User = user,
+            Moderator = guildUser,
+            Reason = reason,
+            Type = ModerationType.Mute,
+            Duration = duration
+        });
+        
+        await ReplyAsync("User has been muted.");
+    }
 
     [Command("purge")]
     [Summary("Deletes multiple messages from the current channel.")]
