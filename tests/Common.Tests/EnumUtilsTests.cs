@@ -13,6 +13,12 @@ internal class SampleAttribute : Attribute
     }
 }
 
+[AttributeUsage(AttributeTargets.Field)]
+// ReSharper disable once ClassNeverInstantiated.Global
+internal class UnusedAttribute : Attribute
+{
+}
+
 [TestFixture]
 public class EnumUtilsTests
 {
@@ -20,7 +26,9 @@ public class EnumUtilsTests
     {
         [Sample(1)]
         Option1,
-        Option2
+        Option2,
+        [Sample(3)]
+        Option3
     }
     
     [Test]
@@ -50,5 +58,21 @@ public class EnumUtilsTests
     {
         var result = EnumUtils.GetAttributeValue<SampleAttribute>(TestEnum.Option2);
         Assert.That(result, Is.Null);
+    }
+    
+    [Test]
+    public void GetValuesWithAttribute_ReturnsValues_WhenAttributeExists()
+    {
+        var result = EnumUtils.GetValuesWithAttribute<TestEnum, SampleAttribute>().ToArray();
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.EquivalentTo(new[] { TestEnum.Option1, TestEnum.Option3 }));
+    }
+    
+    [Test]
+    public void GetValuesWithAttribute_ReturnsEmpty_WhenAttributeDoesNotExist()
+    {
+        var result = EnumUtils.GetValuesWithAttribute<TestEnum, UnusedAttribute>().ToArray();
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Empty);
     }
 }

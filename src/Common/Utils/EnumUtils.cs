@@ -30,4 +30,22 @@ public static class EnumUtils
             .OfType<T>()
             .FirstOrDefault();
     }
+
+    /// <summary>
+    ///     Get all enum values that have the given attribute
+    /// </summary>
+    /// <typeparam name="TEnum">Enum type</typeparam>
+    /// <typeparam name="TAttribute">Attribute type</typeparam>
+    /// <returns></returns>
+    public static IEnumerable<TEnum> GetValuesWithAttribute<TEnum, TAttribute>()
+        where TEnum : struct, Enum where TAttribute : Attribute
+    {
+        var values = Enum.GetValues<TEnum>();
+        foreach (var value in values)
+        {
+            var attributeValue = GetAttributeValue<TAttribute>(value);
+            if (attributeValue != null)
+                yield return value;
+        }
+    }
 }
