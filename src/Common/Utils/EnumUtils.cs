@@ -38,14 +38,9 @@ public static class EnumUtils
     /// <typeparam name="TAttribute">Attribute type</typeparam>
     /// <returns></returns>
     public static IEnumerable<TEnum> GetValuesWithAttribute<TEnum, TAttribute>()
-        where TEnum : struct, Enum where TAttribute : Attribute
+        where TEnum : struct, Enum
+        where TAttribute : Attribute
     {
-        var values = Enum.GetValues<TEnum>();
-        foreach (var value in values)
-        {
-            var attributeValue = GetAttributeValue<TAttribute>(value);
-            if (attributeValue != null)
-                yield return value;
-        }
+        return Enum.GetValues<TEnum>().Where(x => HasAttribute<TAttribute>(x));
     }
 }
