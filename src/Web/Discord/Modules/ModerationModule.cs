@@ -55,7 +55,7 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
         else
             await ReplyAsync("User could not be messaged. The warning has been logged.");
     }
-    
+
     [Command("mute")]
     [Summary("Mutes a user.")]
     [RequireUserPermission(GuildPermission.MuteMembers)]
@@ -78,8 +78,66 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
             Type = ModerationType.Mute,
             Duration = duration
         });
-        
+
         await ReplyAsync("User has been muted.");
+    }
+
+    [Command("ban")]
+    [Summary("Bans a user.")]
+    [RequireUserPermission(GuildPermission.BanMembers)]
+    [Remarks("Use the `tempban` command to ban a user temporarily.")]
+    public async Task BanAsync(
+        [Summary("The user to ban.")] IGuildUser user,
+        [Summary("The reason for the ban.")] [Remainder]
+        string? reason = null)
+    {
+        if (Context.User is not IGuildUser guildUser)
+            return;
+
+        await _mediator.Send(new ModerateUserCommand
+        {
+            Guild = Context.Guild,
+            User = user,
+            Moderator = guildUser,
+            Reason = reason,
+            Type = ModerationType.Ban
+        });
+
+        await ReplyAsync("User has been banned.");
+    }
+
+    [Command("tempban")]
+    [Summary("Bans a user temporarily.")]
+    [RequireUserPermission(GuildPermission.BanMembers)]
+    [Remarks("The user will be unbanned automatically after the specified duration.")]
+    public async Task TempBanAsync(
+        [Summary("The user to ban.")] IGuildUser user,
+        [Summary("The duration of the ban.")] TimeSpan duration,
+        [Summary("The reason for the ban.")] [Remainder]
+        string? reason = null)
+    {
+        if (Context.User is not IGuildUser guildUser)
+            return;
+
+        var moderation = await _mediator.Send(new ModerateUserCommand
+        {
+            Guild = Context.Guild,
+            User = user,
+            Moderator = guildUser,
+            Reason = reason,
+            Type = ModerationType.Ban,
+            Duration = duration
+        });
+
+        if (moderation.ExpiresAt != null)
+        {
+            var timestampTag = new TimestampTag(moderation.ExpiresAt.Value, TimestampTagStyles.LongDateTime);
+            await ReplyAsync($"User has been banned until {timestampTag}.");
+        }
+        else
+        {
+            await ReplyAsync("User has been banned.");
+        }
     }
 
     [Command("purge")]

@@ -4,6 +4,7 @@ using Application.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Hangfire;
 using Infrastructure.Configuration;
 using Infrastructure.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ builder.Configuration.AddUserSecrets<Program>();
 
 // Add services to the container.
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -28,6 +30,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Hangfire
+builder.Services.AddHangfire(x => x.UseSqlServerStorage(connectionString));
+builder.Services.AddHangfireServer();
+
 // Configure Discord
 var discordConfig = builder.Configuration.GetRequiredSection("Discord").Get<DiscordConfiguration>()
                     ?? throw new InvalidOperationException("Discord configuration is missing");
@@ -37,11 +43,13 @@ discordConfig.SocketConfig.GatewayIntents =
 builder.Services.AddSingleton(discordConfig);
 builder.Services.AddSingleton(discordConfig.SocketConfig);
 builder.Services.AddSingleton<DiscordSocketClient>();
+builder.Services.AddSingleton<IDiscordClient>(x => x.GetRequiredService<DiscordSocketClient>());
 builder.Services.AddSingleton<CommandService>();
 
 builder.Services.AddSingleton<ILoggingService, LoggingService>();
 builder.Services.AddSingleton<IModerationMessageService, ModerationMessageService>();
 builder.Services.AddSingleton<ICommandHandlingService, CommandHandlingService>();
+builder.Services.AddScoped<IUnbanSchedulingService, UnbanSchedulingService>();
 
 var app = builder.Build();
 
@@ -78,6 +86,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseHangfireDashboard();
 
 app.UseHttpsRedirection();
 

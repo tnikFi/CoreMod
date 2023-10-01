@@ -23,12 +23,14 @@ public class ModerateUserCommandHandler : IRequestHandler<ModerateUserCommand, D
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IModerationMessageService _moderationMessageService;
+    private readonly IUnbanSchedulingService _unbanSchedulingService;
 
     public ModerateUserCommandHandler(ApplicationDbContext dbContext,
-        IModerationMessageService moderationMessageService)
+        IModerationMessageService moderationMessageService, IUnbanSchedulingService unbanSchedulingService)
     {
         _dbContext = dbContext;
         _moderationMessageService = moderationMessageService;
+        _unbanSchedulingService = unbanSchedulingService;
     }
 
     public async Task<Domain.Models.Moderation> Handle(ModerateUserCommand request, CancellationToken cancellationToken)
@@ -42,6 +44,10 @@ public class ModerateUserCommandHandler : IRequestHandler<ModerateUserCommand, D
             Type = request.Type
         };
 
+        // Set the expiration date if the moderation type allows it and a duration was provided
+        if (EnumUtils.HasAttribute<CanBeTemporaryAttribute>(moderation.Type) && request.Duration.HasValue)
+            moderation.ExpiresAt = DateTime.UtcNow + request.Duration.Value;
+
         // Apply the moderation to the user. Warning isn't a Discord action, so it doesn't need to be applied.
         switch (request.Type)
         {
@@ -52,9 +58,13 @@ public class ModerateUserCommandHandler : IRequestHandler<ModerateUserCommand, D
                 });
                 break;
             case ModerationType.Kick:
+                // Send the moderation message before kicking the user to make sure it can be delivered
+                await _moderationMessageService.SendModerationMessageAsync(moderation, false);
                 await request.User.KickAsync(request.Reason);
                 break;
             case ModerationType.Ban:
+                // Send the moderation message before banning the user to make sure it can be delivered
+                await _moderationMessageService.SendModerationMessageAsync(moderation, false);
                 await request.Guild.AddBanAsync(request.User, 0, request.Reason);
                 break;
             case ModerationType.Unmute:
@@ -70,13 +80,14 @@ public class ModerateUserCommandHandler : IRequestHandler<ModerateUserCommand, D
                 });
                 break;
         }
-        
-        if (EnumUtils.HasAttribute<CanBeTemporaryAttribute>(moderation.Type) && request.Duration.HasValue)
-            moderation.ExpiresAt = DateTime.UtcNow + request.Duration.Value;
 
         // Add the moderation to the database
         _dbContext.Moderations.Add(moderation);
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Schedule the unban if the moderation is a temporary ban
+        if (moderation is {Type: ModerationType.Ban, ExpiresAt: not null})
+            _unbanSchedulingService.ScheduleBanExpiration(moderation);
 
         // Send the moderation message if requested
         if (request.SendModerationMessage)

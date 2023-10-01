@@ -189,6 +189,14 @@
           "Discord.Net.Rest": "3.12.0"
         }
       },
+      "Hangfire.Core": {
+        "type": "Transitive",
+        "resolved": "1.8.5",
+        "contentHash": "OA5D59dkgS04rU9UDQkSypT36pn5RbtFpFZwhbHA4LL3VDeE0aaf4rShvKRJihJze62fr5AhjktJf4cJMDpYyQ==",
+        "dependencies": {
+          "Newtonsoft.Json": "11.0.1"
+        }
+      },
       "MediatR.Contracts": {
         "type": "Transitive",
         "resolved": "2.0.1",
@@ -729,6 +737,7 @@
         "dependencies": {
           "Common": "[1.0.0, )",
           "Discord.Net": "[3.12.0, )",
+          "Hangfire.Core": "[1.8.5, )",
           "Infrastructure": "[1.0.0, )",
           "MediatR": "[12.1.1, )",
           "MediatR.Contracts": "[2.0.1, )"

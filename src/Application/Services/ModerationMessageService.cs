@@ -60,7 +60,62 @@ public class ModerationMessageService : IModerationMessageService
             dmEmbedBuilder.AddField(title, timestampTag);
             logEmbedBuilder.AddField(title, timestampTag);
         }
-        
+
+        // Set the embed color
+        var color = EnumUtils.GetAttributeValue<EmbedColorAttribute>(moderation.Type)?.Color;
+        if (color.HasValue)
+        {
+            dmEmbedBuilder.WithColor(color.Value);
+            logEmbedBuilder.WithColor(color.Value);
+        }
+
+        // Send the message to the user
+        var dmEmbed = dmEmbedBuilder.Build();
+        var sentDm = await user.TrySendMessageAsync(embed: dmEmbed);
+
+        // Log the moderation in the audit log channel
+        if (sendLogMessage)
+        {
+            var logEmbed = logEmbedBuilder.Build();
+            await _loggingService.SendLogAsync(moderation.GuildId, embed: logEmbed);
+        }
+
+        return sentDm != null;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> SendBanExpirationMessageAsync(Moderation moderation, bool sendLogMessage)
+    {
+        var user = await _client.GetUserAsync(moderation.UserId);
+        var guild = _client.GetGuild(moderation.GuildId);
+        var moderator = guild.CurrentUser;
+
+        // These shouldn't be null, but if they are, we can't send the message
+        if (user is null || moderator is null)
+            return false;
+
+        var dmEmbedBuilder = new EmbedBuilder()
+            .WithTitle(GetDmEmbedTitleForModeration(ModerationType.Unban, guild))
+            .WithCurrentTimestamp();
+
+        var logEmbedBuilder = new EmbedBuilder()
+            .WithAuthor(moderator)
+            .WithTitle(GetLogEmbedTitleForModeration(ModerationType.Unban))
+            .AddField("User", user.Mention)
+            .AddField("Moderator", moderator.Mention)
+            .AddField("Reason", "Ban expired.")
+            .WithTimestamp(moderation.Timestamp)
+            .WithFooter($"Case #{moderation.Id}");
+
+        // Add expiration if it's set
+        if (moderation.ExpiresAt.HasValue)
+        {
+            const string title = "Expired at";
+            var timestampTag = new TimestampTag(moderation.ExpiresAt.Value, TimestampTagStyles.LongDateTime);
+            dmEmbedBuilder.AddField(title, timestampTag);
+            logEmbedBuilder.AddField(title, timestampTag);
+        }
+
         // Set the embed color
         var color = EnumUtils.GetAttributeValue<EmbedColorAttribute>(moderation.Type)?.Color;
         if (color.HasValue)
@@ -105,7 +160,7 @@ public class ModerationMessageService : IModerationMessageService
     }
 
     /// <summary>
-    /// Get the title for the embed sent to the audit log channel
+    ///     Get the title for the embed sent to the audit log channel
     /// </summary>
     /// <param name="moderationType">Type of moderation</param>
     /// <returns></returns>

@@ -48,6 +48,7 @@ public class TestBase
         services.AddSingleton(Substitute.For<ILoggingService>());
         services.AddSingleton(Substitute.For<IModerationMessageService>());
         services.AddSingleton(Substitute.For<IDiscordClient>());
+        services.AddSingleton(Substitute.For<IUnbanSchedulingService>());
         _serviceProvider = services.BuildServiceProvider();
         _mediator = _serviceProvider.GetRequiredService<IMediator>();
     }

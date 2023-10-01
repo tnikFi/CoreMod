@@ -16,6 +16,17 @@
           "Discord.Net.Webhook": "3.12.0"
         }
       },
+      "Hangfire": {
+        "type": "Direct",
+        "requested": "[1.8.5, )",
+        "resolved": "1.8.5",
+        "contentHash": "Abnr/4fDi+BegLgou39KxLpjlJxYcYcpC7f4QR4aBocJPNLqdChsBFK+KhKaAMczWIrwWsYne3lLJXrwlZQLiA==",
+        "dependencies": {
+          "Hangfire.AspNetCore": "[1.8.5]",
+          "Hangfire.Core": "[1.8.5]",
+          "Hangfire.SqlServer": "[1.8.5]"
+        }
+      },
       "MediatR": {
         "type": "Direct",
         "requested": "[12.1.1, )",
@@ -131,6 +142,41 @@
         "dependencies": {
           "Discord.Net.Core": "3.12.0",
           "Discord.Net.Rest": "3.12.0"
+        }
+      },
+      "Hangfire.AspNetCore": {
+        "type": "Transitive",
+        "resolved": "1.8.5",
+        "contentHash": "STs4GxcT0eVrA1DZZ065RadOUOMTm2XkdWLiESx8VAJT9uPxNw8bC7tYpeYh0CddTDo6xjy21v/E4nIC0Cp9Yg==",
+        "dependencies": {
+          "Hangfire.NetCore": "[1.8.5]"
+        }
+      },
+      "Hangfire.Core": {
+        "type": "Transitive",
+        "resolved": "1.8.5",
+        "contentHash": "OA5D59dkgS04rU9UDQkSypT36pn5RbtFpFZwhbHA4LL3VDeE0aaf4rShvKRJihJze62fr5AhjktJf4cJMDpYyQ==",
+        "dependencies": {
+          "Newtonsoft.Json": "11.0.1"
+        }
+      },
+      "Hangfire.NetCore": {
+        "type": "Transitive",
+        "resolved": "1.8.5",
+        "contentHash": "ZwVZBBkzEpWlcXLvuytMghT+EYzvQDbdsGK6zO+ygWsW6I7GxKPxsY/U+9DEj3xB0lqqFmOUnBmOea5AvC7K8A==",
+        "dependencies": {
+          "Hangfire.Core": "[1.8.5]",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "3.0.0",
+          "Microsoft.Extensions.Hosting.Abstractions": "3.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "3.0.0"
+        }
+      },
+      "Hangfire.SqlServer": {
+        "type": "Transitive",
+        "resolved": "1.8.5",
+        "contentHash": "U7lYPtSPjgxkCHAeGwtXWiTTIUReuR/+rS4F5ZLZbxYiLT1PXVpw3HJ/9Mgf09ReGCLTto6QLCep+BPjLH8Wvg==",
+        "dependencies": {
+          "Hangfire.Core": "[1.8.5]"
         }
       },
       "MediatR.Contracts": {
@@ -314,6 +360,17 @@
         "type": "Transitive",
         "resolved": "7.0.0",
         "contentHash": "2jONjKHiF+E92ynz2ZFcr9OvxIw+rTGMPEH+UZGeHTEComVav93jQUWGkso8yWwVBcEJGcNcZAaqY01FFJcj7w=="
+      },
+      "Microsoft.Extensions.Hosting.Abstractions": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "qeDWS5ErmkUN96BdQqpmeCmLk5HJWQ/SPw3ux5v5/Qb0hKZS5wojBMulnBC7JUEiBwg7Ir71Yjf1lFiRT5MdtQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "3.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "3.0.0",
+          "Microsoft.Extensions.FileProviders.Abstractions": "3.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "3.0.0"
+        }
       },
       "Microsoft.Extensions.Logging": {
         "type": "Transitive",
@@ -658,6 +715,7 @@
         "dependencies": {
           "Common": "[1.0.0, )",
           "Discord.Net": "[3.12.0, )",
+          "Hangfire.Core": "[1.8.5, )",
           "Infrastructure": "[1.0.0, )",
           "MediatR": "[12.1.1, )",
           "MediatR.Contracts": "[2.0.1, )"

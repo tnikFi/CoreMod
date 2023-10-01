@@ -16,6 +16,15 @@
           "Discord.Net.Webhook": "3.12.0"
         }
       },
+      "Hangfire.Core": {
+        "type": "Direct",
+        "requested": "[1.8.5, )",
+        "resolved": "1.8.5",
+        "contentHash": "OA5D59dkgS04rU9UDQkSypT36pn5RbtFpFZwhbHA4LL3VDeE0aaf4rShvKRJihJze62fr5AhjktJf4cJMDpYyQ==",
+        "dependencies": {
+          "Newtonsoft.Json": "11.0.1"
+        }
+      },
       "MediatR": {
         "type": "Direct",
         "requested": "[12.1.1, )",
