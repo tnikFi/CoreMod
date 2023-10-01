@@ -1,5 +1,6 @@
 ﻿using Application;
 using Application.Interfaces;
+using Discord;
 using Discord.WebSocket;
 using Infrastructure.Configuration;
 using Infrastructure.Data.Contexts;
@@ -45,10 +46,11 @@ public class TestBase
         services.AddSingleton(Substitute.For<DiscordSocketClient>());
         services.AddSingleton(Substitute.For<ILoggingService>());
         services.AddSingleton(Substitute.For<IModerationMessageService>());
+        services.AddSingleton(Substitute.For<IDiscordClient>());
         _serviceProvider = services.BuildServiceProvider();
         _mediator = _serviceProvider.GetRequiredService<IMediator>();
     }
-    
+
     [TearDown]
     public void TearDown()
     {
@@ -74,9 +76,9 @@ public class TestBase
     {
         await _mediator.Send(request);
     }
-    
+
     /// <summary>
-    /// Add an entity to the test database.
+    ///     Add an entity to the test database.
     /// </summary>
     /// <param name="entity"></param>
     /// <typeparam name="TEntity"></typeparam>
