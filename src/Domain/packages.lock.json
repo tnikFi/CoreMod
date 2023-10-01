@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net7.0": {
+      "Discord.Net.Core": {
+        "type": "Direct",
+        "requested": "[3.12.0, )",
+        "resolved": "3.12.0",
+        "contentHash": "9MU124jnJYqfOt5nIGtpUZhQCFR6Ag2pB5KNDZRqZNMsKE2L3OkHuzDeD+iLSbOYYRPrbk+dfKOdnJZl+K1itA==",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.2",
+          "System.Collections.Immutable": "5.0.0",
+          "System.Interactive.Async": "5.0.0",
+          "System.ValueTuple": "4.5.0"
+        }
+      },
+      "Microsoft.EntityFrameworkCore.Abstractions": {
+        "type": "Direct",
+        "requested": "[7.0.11, )",
+        "resolved": "7.0.11",
+        "contentHash": "IoOnhycZ0/VtLowf0HgB0cujxwksokzkS3/5108AHOcbntHUTqwxtCjG4E4FCly/45G+mxb+4PxBdFZhA49lwQ=="
+      },
+      "System.ComponentModel.Annotations": {
+        "type": "Direct",
+        "requested": "[5.0.0, )",
+        "resolved": "5.0.0",
+        "contentHash": "dMkqfy2el8A8/I76n2Hi1oBFEbG1SfxD2l5nhwXV3XjlnOmwxJlQbYpJH4W51odnU9sARCSAgv7S3CyAFMkpYg=="
+      },
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.2",
+        "contentHash": "R2pZ3B0UjeyHShm9vG+Tu0EBb2lC8b0dFzV9gVn50ofHXh9Smjk6kTn7A/FdAsC8B5cKib1OnGYOXxRBz5XQDg=="
+      },
+      "System.Collections.Immutable": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "FXkLXiK0sVVewcso0imKQoOxjoPAj42R8HtjjbSjVPAzwDfzoyoznWxgA3c38LDbN9SJux1xXoXYAhz98j7r2g=="
+      },
+      "System.Interactive.Async": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "QaqhQVDiULcu4vm6o89+iP329HcK44cETHOYgy/jfEjtzeFy0ZxmuM7nel9ocjnKxEM4yh1mli7hgh8Q9o+/Iw==",
+        "dependencies": {
+          "System.Linq.Async": "5.0.0"
+        }
+      },
+      "System.Linq.Async": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "cPtIuuH8TIjVHSi2ewwReWGW1PfChPE0LxPIDlfwVcLuTM9GANFTXiMB7k3aC4sk3f0cQU25LNKzx+jZMxijqw=="
+      },
+      "System.ValueTuple": {
+        "type": "Transitive",
+        "resolved": "4.5.0",
+        "contentHash": "okurQJO6NRE/apDIP23ajJ0hpiNmJ+f0BwOlB/cSqTLQlw5upkf+5+96+iG2Jw40G1fCVCyPz/FhIABUjMR+RQ=="
+      },
+      "common": {
+        "type": "Project",
+        "dependencies": {
+          "Discord.Net.Core": "[3.12.0, )"
+        }
+      }
+    }
+  }
+}
