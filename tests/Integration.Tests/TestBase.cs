@@ -18,6 +18,7 @@ public class TestBase
 {
     private IMediator _mediator;
     private IServiceProvider _serviceProvider;
+    protected IDiscordClient DiscordClient => _serviceProvider.GetRequiredService<IDiscordClient>();
 
     protected ApplicationDbContext TestDbContext => _serviceProvider.GetRequiredService<ApplicationDbContext>();
 
