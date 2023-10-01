@@ -53,14 +53,13 @@ public class ExpireBanQueryHandler : IRequestHandler<ExpireBanQuery>
         if (moderation is null)
             throw new InvalidOperationException("Moderation not found.");
 
-        var user = await _discordClient.GetUserAsync(moderation.UserId);
-        var ban = await guild.GetBanAsync(user);
+        var ban = await guild.GetBanAsync(moderation.UserId);
 
         // If the user is not banned, do nothing
         if (ban is null) return;
 
         // Check that the user doesn't have new bans
-        var newBan = guildBans.FirstOrDefault(x => x.UserId == user.Id && x.Timestamp > moderation.Timestamp);
+        var newBan = guildBans.FirstOrDefault(x => x.UserId == moderation.UserId && x.Timestamp > moderation.Timestamp);
 
         // If the user has a new ban, don't unban the user
         if (newBan is not null) return;
@@ -68,7 +67,7 @@ public class ExpireBanQueryHandler : IRequestHandler<ExpireBanQuery>
         // If the ban has been pardoned or the expiration date is in the future, don't unban the user
         if (moderation.RelatedCase is not null || !(moderation.ExpiresAt <= DateTime.UtcNow)) return;
 
-        await guild.RemoveBanAsync(user, new RequestOptions
+        await guild.RemoveBanAsync(moderation.UserId, new RequestOptions
         {
             AuditLogReason = $"Ban from case #{moderation.Id} expired."
         });

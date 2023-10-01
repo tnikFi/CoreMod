@@ -21,10 +21,10 @@ public class ExpireBanQueryTests : TestBase
         DiscordClient.GetGuildAsync(Guild.Id).Returns(Guild);
 
         // Configure guild.GetBanAsync to return a ban
-        Guild.GetBanAsync(User).ReturnsForAnyArgs(callInfo => Task.FromResult(Substitute.For<IBan>()));
+        Guild.GetBanAsync(User.Id).ReturnsForAnyArgs(callInfo => Task.FromResult(Substitute.For<IBan>()));
 
         // Configure guild.RemoveBanAsync to increment UnbanCount
-        Guild.RemoveBanAsync(Arg.Is<IUser>(User), Arg.Any<RequestOptions>()).Returns(callInfo => Task.CompletedTask)
+        Guild.RemoveBanAsync(User.Id, Arg.Any<RequestOptions>()).Returns(callInfo => Task.CompletedTask)
             .AndDoes(callInfo => { UnbanCount++; });
     }
 
@@ -106,7 +106,7 @@ public class ExpireBanQueryTests : TestBase
         AddEntity(moderation);
 
         // Configure guild.GetBanAsync to return null (user is not banned)
-        Guild.GetBanAsync(User).ReturnsNullForAnyArgs();
+        Guild.GetBanAsync(User.Id).ReturnsNullForAnyArgs();
 
         await SendAsync(new ExpireBanQuery
         {
