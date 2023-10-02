@@ -104,7 +104,7 @@ public class ModerationMessageService : IModerationMessageService
             .AddField("User", user.Mention)
             .AddField("Moderator", moderator.Mention)
             .AddField("Reason", "Ban expired.")
-            .WithTimestamp(moderation.Timestamp)
+            .WithCurrentTimestamp()
             .WithFooter($"Case #{moderation.Id}");
 
         // Add expiration if it's set
