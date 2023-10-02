@@ -111,7 +111,7 @@ public class ModerationMessageService : IModerationMessageService
         if (moderation.ExpiresAt.HasValue)
         {
             const string title = "Expired at";
-            var timestampTag = new TimestampTag(moderation.ExpiresAt.Value, TimestampTagStyles.LongDateTime);
+            var timestampTag = new TimestampTag(moderation.ExpiresAt.Value.ToLocalTime(), TimestampTagStyles.LongDateTime);
             dmEmbedBuilder.AddField(title, timestampTag);
             logEmbedBuilder.AddField(title, timestampTag);
         }
