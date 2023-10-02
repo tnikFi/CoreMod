@@ -204,4 +204,41 @@ public class ModerateUserCommandTests : TestBase
         var moderation = await SendAsync(request);
         moderation.ExpiresAt.Should().BeNull();
     }
+
+    [Test]
+    public async Task ShouldScheduleBanExpirationForTemporaryBans()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new ModerateUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test",
+            Type = ModerationType.Ban,
+            Duration = TimeSpan.FromDays(7)
+        };
+        var result = await SendAsync(request);
+        UnbanSchedulingService.Received().ScheduleBanExpiration(result);
+    }
+
+    [Test]
+    public async Task ShouldNotScheduleBanExpirationForPermanentBans()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new ModerateUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test",
+            Type = ModerationType.Ban
+        };
+        var result = await SendAsync(request);
+        UnbanSchedulingService.DidNotReceive().ScheduleBanExpiration(result);
+    }
 }
