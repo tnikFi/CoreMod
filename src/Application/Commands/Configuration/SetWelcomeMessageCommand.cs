@@ -3,7 +3,7 @@ using Infrastructure.Data.Contexts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Commands.Configuration.SetWelcomeMessage;
+namespace Application.Commands.Configuration;
 
 public class SetWelcomeMessageCommand : IRequest
 {

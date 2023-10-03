@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Queries.Configuration.GetWelcomeMessage;
+namespace Application.Queries.Configuration;
 
 public class GetWelcomeMessageQuery : IRequest<string?>
 {

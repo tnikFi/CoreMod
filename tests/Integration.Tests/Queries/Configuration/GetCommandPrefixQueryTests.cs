@@ -1,8 +1,8 @@
-﻿using Application.Queries.Configuration.GetCommandPrefix;
+﻿using Application.Queries.Configuration;
 using Domain.Models;
 using FluentAssertions;
 
-namespace Integration.Tests.Queries.Configuration.GetCommandPrefix;
+namespace Integration.Tests.Queries.Configuration;
 
 [TestFixture]
 public class GetCommandPrefixQueryTests : TestBase

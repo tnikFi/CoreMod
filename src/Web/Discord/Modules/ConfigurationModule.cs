@@ -1,6 +1,4 @@
-﻿using Application.Commands.Configuration.SetCommandPrefix;
-using Application.Commands.Configuration.SetLogChannelId;
-using Application.Commands.Configuration.SetWelcomeMessage;
+﻿using Application.Commands.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;

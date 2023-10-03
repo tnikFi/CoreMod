@@ -1,8 +1,8 @@
-﻿using Application.Queries.Moderation.GetModerations;
+﻿using Application.Queries.Moderation;
 using Domain.Enums;
 using FluentAssertions;
 
-namespace Integration.Tests.Queries.Moderation.GetModerations;
+namespace Integration.Tests.Queries.Moderation;
 
 public class GetModerationsQueryTests : TestBase
 {

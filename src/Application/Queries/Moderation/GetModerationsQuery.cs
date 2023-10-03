@@ -3,7 +3,7 @@ using Domain.Enums;
 using Infrastructure.Data.Contexts;
 using MediatR;
 
-namespace Application.Queries.Moderation.GetModerations;
+namespace Application.Queries.Moderation;
 
 public class GetModerationsQuery : IRequest<IQueryable<Domain.Models.Moderation>>
 {

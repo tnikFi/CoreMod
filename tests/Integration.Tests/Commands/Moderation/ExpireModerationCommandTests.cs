@@ -1,9 +1,9 @@
-﻿using Application.Commands.Moderation.PardonModeration;
+﻿using Application.Commands.Moderation;
 using Domain.Enums;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Integration.Tests.Commands.Moderation.ExpireModeration;
+namespace Integration.Tests.Commands.Moderation;
 
 [TestFixture]
 public class ExpireModerationCommandTests : TestBase

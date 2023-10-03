@@ -1,8 +1,8 @@
-﻿using Application.Queries.Configuration.GetWelcomeMessage;
+﻿using Application.Queries.Configuration;
 using Domain.Models;
 using FluentAssertions;
 
-namespace Integration.Tests.Queries.Configuration.GetWelcomeMessage;
+namespace Integration.Tests.Queries.Configuration;
 
 [TestFixture]
 public class GetWelcomeMessageQueryTests : TestBase

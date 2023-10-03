@@ -1,10 +1,10 @@
-﻿using Application.Commands.Moderation.ModerateUser;
+﻿using Application.Commands.Moderation;
 using Discord;
 using Domain.Enums;
 using FluentAssertions;
 using NSubstitute;
 
-namespace Integration.Tests.Commands.Moderation.ModerateUser;
+namespace Integration.Tests.Commands.Moderation;
 
 public class ModerateUserCommandTests : TestBase
 {

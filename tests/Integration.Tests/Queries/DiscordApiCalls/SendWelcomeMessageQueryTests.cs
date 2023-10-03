@@ -1,11 +1,11 @@
-﻿using Application.Queries.DiscordApiCalls.SendWelcomeMessage;
+﻿using Application.Queries.DiscordApiCalls;
 using Discord;
 using Domain.Models;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 
-namespace Integration.Tests.Queries.DiscordApiCalls.SendWelcomeMessage;
+namespace Integration.Tests.Queries.DiscordApiCalls;
 
 public class SendWelcomeMessageQueryTests : TestBase
 {

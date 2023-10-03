@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces;
-using Application.Queries.Moderation.ExpireBan;
+using Application.Queries.Moderation;
 using Discord;
 using Domain.Enums;
 using Domain.Models;

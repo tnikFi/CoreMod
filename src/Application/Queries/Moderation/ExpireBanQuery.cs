@@ -5,7 +5,7 @@ using Infrastructure.Data.Contexts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Queries.Moderation.ExpireBan;
+namespace Application.Queries.Moderation;
 
 /// <summary>
 ///     Unban a user after a ban expires.

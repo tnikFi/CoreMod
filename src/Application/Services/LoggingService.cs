@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces;
-using Application.Queries.Configuration.GetLogChannelId;
+using Application.Queries.Configuration;
 using Discord;
 using Discord.WebSocket;
 using MediatR;

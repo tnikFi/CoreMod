@@ -3,7 +3,7 @@ using Infrastructure.Configuration;
 using Infrastructure.Data.Contexts;
 using MediatR;
 
-namespace Application.Commands.Configuration.SetCommandPrefix;
+namespace Application.Commands.Configuration;
 
 public class SetCommandPrefixCommand : IRequest
 {

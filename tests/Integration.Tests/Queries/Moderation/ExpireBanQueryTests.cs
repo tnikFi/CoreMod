@@ -1,11 +1,11 @@
-﻿using Application.Queries.Moderation.ExpireBan;
+﻿using Application.Queries.Moderation;
 using Discord;
 using Domain.Enums;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 
-namespace Integration.Tests.Queries.Moderation.ExpireBan;
+namespace Integration.Tests.Queries.Moderation;
 
 [TestFixture]
 public class ExpireBanQueryTests : TestBase

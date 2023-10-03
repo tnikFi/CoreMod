@@ -1,8 +1,8 @@
-﻿using Application.Commands.Configuration.SetCommandPrefix;
+﻿using Application.Commands.Configuration;
 using Domain.Models;
 using FluentAssertions;
 
-namespace Integration.Tests.Commands.Configuration.SetCommandPrefix;
+namespace Integration.Tests.Commands.Configuration;
 
 [TestFixture]
 public class SetCommandPrefixCommandTests : TestBase

@@ -1,6 +1,6 @@
-﻿using Application.Commands.Moderation.ModerateUser;
+﻿using Application.Commands.Moderation;
 using Application.Interfaces;
-using Application.Queries.Moderation.GetModerations;
+using Application.Queries.Moderation;
 using Common.Utils;
 using Discord;
 using Discord.Commands;

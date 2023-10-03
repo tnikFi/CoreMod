@@ -6,7 +6,7 @@ using Domain.Enums;
 using Infrastructure.Data.Contexts;
 using MediatR;
 
-namespace Application.Commands.Moderation.ModerateUser;
+namespace Application.Commands.Moderation;
 
 public class ModerateUserCommand : IRequest<Domain.Models.Moderation>
 {

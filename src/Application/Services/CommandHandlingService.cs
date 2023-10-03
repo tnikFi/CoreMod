@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Application.Interfaces;
-using Application.Queries.Configuration.GetCommandPrefix;
-using Application.Queries.DiscordApiCalls.SendWelcomeMessage;
+using Application.Queries.Configuration;
+using Application.Queries.DiscordApiCalls;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;

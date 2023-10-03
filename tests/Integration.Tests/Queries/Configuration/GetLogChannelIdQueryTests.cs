@@ -1,8 +1,8 @@
-﻿using Application.Queries.Configuration.GetLogChannelId;
+﻿using Application.Queries.Configuration;
 using Domain.Models;
 using FluentAssertions;
 
-namespace Integration.Tests.Queries.Configuration.GetLogChannelId;
+namespace Integration.Tests.Queries.Configuration;
 
 [TestFixture]
 public class GetLogChannelIdQueryTests : TestBase

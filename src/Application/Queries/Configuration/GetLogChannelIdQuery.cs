@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Queries.Configuration.GetLogChannelId;
+namespace Application.Queries.Configuration;
 
 public class GetLogChannelIdQuery : IRequest<ulong?>
 {

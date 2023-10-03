@@ -1,12 +1,11 @@
-﻿using Application.Commands.Moderation.ModerateUser;
-using Common.Utils;
+﻿using Common.Utils;
 using Discord;
 using Domain.Attributes;
 using Domain.Enums;
 using Infrastructure.Data.Contexts;
 using MediatR;
 
-namespace Application.Commands.Moderation.PardonModeration;
+namespace Application.Commands.Moderation;
 
 /// <summary>
 ///     Pardon a moderation. The request will return the new moderation instance that was created to pardon the original

@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Commands.Configuration.SetLogChannelId;
+namespace Application.Commands.Configuration;
 
 public class SetLogChannelIdCommand : IRequest
 {

@@ -3,7 +3,7 @@ using Infrastructure.Data.Contexts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Queries.Configuration.GetCommandPrefix;
+namespace Application.Queries.Configuration;
 
 public class GetCommandPrefixQuery : IRequest<string>
 {

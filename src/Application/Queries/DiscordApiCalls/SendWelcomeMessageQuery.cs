@@ -1,9 +1,9 @@
 ﻿using Application.Extensions;
-using Application.Queries.Configuration.GetWelcomeMessage;
+using Application.Queries.Configuration;
 using Discord;
 using MediatR;
 
-namespace Application.Queries.DiscordApiCalls.SendWelcomeMessage;
+namespace Application.Queries.DiscordApiCalls;
 
 public class SendWelcomeMessageQuery : IRequest
 {

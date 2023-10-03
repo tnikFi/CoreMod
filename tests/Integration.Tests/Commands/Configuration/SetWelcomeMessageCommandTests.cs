@@ -1,8 +1,8 @@
-﻿using Application.Commands.Configuration.SetWelcomeMessage;
+﻿using Application.Commands.Configuration;
 using Domain.Models;
 using FluentAssertions;
 
-namespace Integration.Tests.Commands.Configuration.SetWelcomeMessage;
+namespace Integration.Tests.Commands.Configuration;
 
 [TestFixture]
 public class SetWelcomeMessageTests : TestBase

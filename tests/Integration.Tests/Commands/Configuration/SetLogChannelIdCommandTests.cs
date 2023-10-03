@@ -1,8 +1,8 @@
-﻿using Application.Commands.Configuration.SetLogChannelId;
+﻿using Application.Commands.Configuration;
 using Domain.Models;
 using FluentAssertions;
 
-namespace Integration.Tests.Commands.Configuration.SetLogChannelId;
+namespace Integration.Tests.Commands.Configuration;
 
 [TestFixture]
 public class SetLogChannelIdCommandTests : TestBase
