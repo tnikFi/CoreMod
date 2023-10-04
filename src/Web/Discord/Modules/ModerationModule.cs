@@ -38,14 +38,12 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
         if (Context.User is not IGuildUser guildUser)
             return;
 
-        var moderation = await _mediator.Send(new ModerateUserCommand
+        var moderation = await _mediator.Send(new WarnUserCommand
         {
             Guild = Context.Guild,
             User = user,
             Moderator = guildUser,
-            Reason = reason,
-            Type = ModerationType.Warning,
-            SendModerationMessage = false // We need to know if the DM was sent or not so we'll do it manually
+            Reason = reason
         });
 
         var sentDm = await _moderationMessageService.SendModerationMessageAsync(moderation);
@@ -69,13 +67,12 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
         if (Context.User is not IGuildUser guildUser)
             return;
 
-        var moderation = await _mediator.Send(new ModerateUserCommand
+        var moderation = await _mediator.Send(new MuteUserCommand
         {
             Guild = Context.Guild,
             User = user,
             Moderator = guildUser,
             Reason = reason,
-            Type = ModerationType.Mute,
             Duration = duration
         });
 
@@ -94,13 +91,12 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
         if (Context.User is not IGuildUser guildUser)
             return;
 
-        await _mediator.Send(new ModerateUserCommand
+        await _mediator.Send(new BanUserCommand
         {
             Guild = Context.Guild,
             User = user,
             Moderator = guildUser,
-            Reason = reason,
-            Type = ModerationType.Ban
+            Reason = reason
         });
 
         await ReplyAsync("User has been banned.");
@@ -119,13 +115,12 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
         if (Context.User is not IGuildUser guildUser)
             return;
 
-        var moderation = await _mediator.Send(new ModerateUserCommand
+        var moderation = await _mediator.Send(new BanUserCommand
         {
             Guild = Context.Guild,
             User = user,
             Moderator = guildUser,
             Reason = reason,
-            Type = ModerationType.Ban,
             Duration = duration
         });
 
