@@ -1,7 +1,7 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Layout from './pages/Layout';
-import Home from './pages/Home';
-import NotFound from './pages/NotFound';
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import Layout from './pages/Layout'
+import Home from './pages/Home'
+import NotFound from './pages/NotFound'
 
 const App = () => {
   return (
@@ -13,7 +13,7 @@ const App = () => {
         </Route>
       </Routes>
     </BrowserRouter>
-  );
-};
+  )
+}
 
-export default App;
+export default App
