@@ -9,6 +9,10 @@ const authConfig: TAuthConfig = {
   authorizationEndpoint: import.meta.env.VITE_AUTHORIZATION_ENDPOINT as string,
   tokenEndpoint: import.meta.env.VITE_TOKEN_ENDPOINT as string,
   redirectUri: import.meta.env.VITE_REDIRECT_URI as string,
+  decodeToken: false,
+  autoLogin: false,
+  scope: 'identify',
+  clearURL: true,
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

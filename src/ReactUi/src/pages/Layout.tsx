@@ -14,6 +14,9 @@ import {
 import React from 'react'
 import MenuIcon from '@mui/icons-material/Menu'
 import { Outlet, useNavigate } from 'react-router-dom'
+import { AuthContext } from 'react-oauth2-code-pkce'
+import AuthenticatedComponent from '../components/authentication/AuthenticatedComponent'
+import UnauthenticatedComponent from '../components/authentication/UnauthenticatedComponent'
 
 const pages = [
   {
@@ -26,6 +29,7 @@ const Layout = () => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const navigate = useNavigate()
+  const { login, logOut } = React.useContext(AuthContext)
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget)
@@ -99,32 +103,45 @@ const Layout = () => {
                 </Button>
               ))}
             </Box>
-
-            <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="User settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt="" src="" />
-                </IconButton>
-              </Tooltip>
-              <Menu
-                sx={{ mt: '45px' }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-              >
-                <MenuItem onClick={handleCloseUserMenu}>Logout</MenuItem>
-              </Menu>
-            </Box>
+            <UnauthenticatedComponent>
+              <Button color="inherit" onClick={() => login()}>
+                Login
+              </Button>
+            </UnauthenticatedComponent>
+            <AuthenticatedComponent>
+              <Box sx={{ flexGrow: 0 }}>
+                <Tooltip title="User settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar alt="" src="" />
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: '45px' }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleCloseUserMenu()
+                      logOut()
+                    }}
+                  >
+                    Logout
+                  </MenuItem>
+                </Menu>
+              </Box>
+            </AuthenticatedComponent>
           </Toolbar>
         </Container>
       </AppBar>
