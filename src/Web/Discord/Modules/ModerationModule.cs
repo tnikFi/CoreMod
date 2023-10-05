@@ -60,7 +60,7 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
     [Alias("timeout")]
     public async Task MuteAsync(
         [Summary("The user to mute.")] IGuildUser user,
-        [Summary("The duration of the mute.")] TimeSpan duration,
+        [Summary("The duration of the mute.")] TimeSpan? duration,
         [Summary("The reason for the mute.")] [Remainder]
         string? reason = null)
     {
@@ -77,6 +77,51 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
         });
 
         await ReplyAsync("User has been muted.");
+    }
+    
+    [Command("unmute")]
+    [Summary("Unmutes a user.")]
+    [RequireUserPermission(GuildPermission.MuteMembers)]
+    [Alias("untimeout", "removetimeout")]
+    public async Task UnmuteAsync(
+        [Summary("The user to unmute.")] IGuildUser user,
+        [Summary("The reason for the unmute.")] [Remainder]
+        string? reason = null)
+    {
+        if (Context.User is not IGuildUser guildUser)
+            return;
+
+        var moderation = await _mediator.Send(new UnmuteUserCommand
+        {
+            Guild = Context.Guild,
+            User = user,
+            Moderator = guildUser,
+            Reason = reason
+        });
+
+        await ReplyAsync("User has been unmuted.");
+    }
+    
+    [Command("kick")]
+    [Summary("Kicks a user.")]
+    [RequireUserPermission(GuildPermission.KickMembers)]
+    public async Task KickAsync(
+        [Summary("The user to kick.")] IGuildUser user,
+        [Summary("The reason for the kick.")] [Remainder]
+        string? reason = null)
+    {
+        if (Context.User is not IGuildUser guildUser)
+            return;
+
+        var moderation = await _mediator.Send(new KickUserCommand
+        {
+            Guild = Context.Guild,
+            User = user,
+            Moderator = guildUser,
+            Reason = reason
+        });
+
+        await ReplyAsync("User has been kicked.");
     }
 
     [Command("ban")]
