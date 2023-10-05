@@ -1,5 +1,6 @@
 import {
   AppBar,
+  Avatar,
   Box,
   Button,
   Container,
@@ -7,33 +8,43 @@ import {
   Menu,
   MenuItem,
   Toolbar,
+  Tooltip,
   Typography,
-} from '@mui/material';
-import React from 'react';
-import MenuIcon from '@mui/icons-material/Menu';
-import { Outlet, useNavigate } from 'react-router-dom';
+} from '@mui/material'
+import React from 'react'
+import MenuIcon from '@mui/icons-material/Menu'
+import { Outlet, useNavigate } from 'react-router-dom'
 
 const pages = [
   {
     name: 'Home',
     path: '/',
   },
-];
+]
 
 const Layout = () => {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const navigate = useNavigate();
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
+  const navigate = useNavigate()
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
+    setAnchorElNav(event.currentTarget)
+  }
 
   const handleCloseNavMenu = (path?: string) => {
-    setAnchorElNav(null);
+    setAnchorElNav(null)
     if (path) {
-      navigate(path);
+      navigate(path)
     }
-  };
+  }
+
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget)
+  }
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null)
+  }
 
   return (
     <>
@@ -88,12 +99,38 @@ const Layout = () => {
                 </Button>
               ))}
             </Box>
+
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="User settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt="" src="" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: '45px' }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                <MenuItem onClick={handleCloseUserMenu}>Logout</MenuItem>
+              </Menu>
+            </Box>
           </Toolbar>
         </Container>
       </AppBar>
       <Outlet />
     </>
-  );
-};
+  )
+}
 
-export default Layout;
+export default Layout
