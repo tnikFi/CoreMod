@@ -31,25 +31,24 @@ public class WarnUserCommand : IRequest<Domain.Models.Moderation>
 public class WarnUserCommandHandler : IRequestHandler<WarnUserCommand, Domain.Models.Moderation>
 {
     private readonly ApplicationDbContext _dbContext;
-    public WarnUserCommandHandler(ApplicationDbContext dbContext)
+    private readonly IMediator _mediator;
+
+    public WarnUserCommandHandler(ApplicationDbContext dbContext, IMediator mediator)
     {
         _dbContext = dbContext;
+        _mediator = mediator;
     }
 
     public async Task<Domain.Models.Moderation> Handle(WarnUserCommand request, CancellationToken cancellationToken)
     {
-        var moderation = new Domain.Models.Moderation
+        var moderation = await _mediator.Send(new AddModerationCommand
         {
-            GuildId = request.Guild.Id,
-            UserId = request.User.Id,
-            ModeratorId = request.Moderator.Id,
+            Guild = request.Guild,
+            User = request.User,
+            Moderator = request.Moderator,
             Reason = string.IsNullOrWhiteSpace(request.Reason) ? null : request.Reason,
             Type = ModerationType.Warning
-        };
-
-        // Add the moderation to the database
-        _dbContext.Moderations.Add(moderation);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
 
         return moderation;
     }

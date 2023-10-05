@@ -1,9 +1,6 @@
 ﻿using Application.Interfaces;
-using Common.Utils;
 using Discord;
-using Domain.Attributes;
 using Domain.Enums;
-using Infrastructure.Data.Contexts;
 using MediatR;
 
 namespace Application.Commands.Moderation;
@@ -33,34 +30,29 @@ public class KickUserCommand : IRequest<Domain.Models.Moderation>
 
 public class KickUserCommandHandler : IRequestHandler<KickUserCommand, Domain.Models.Moderation>
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IMediator _mediator;
     private readonly IModerationMessageService _moderationMessageService;
 
-    public KickUserCommandHandler(ApplicationDbContext dbContext,
-        IModerationMessageService moderationMessageService)
+    public KickUserCommandHandler(IModerationMessageService moderationMessageService, IMediator mediator)
     {
-        _dbContext = dbContext;
         _moderationMessageService = moderationMessageService;
+        _mediator = mediator;
     }
 
     public async Task<Domain.Models.Moderation> Handle(KickUserCommand request, CancellationToken cancellationToken)
     {
-        var moderation = new Domain.Models.Moderation
+        var moderation = await _mediator.Send(new AddModerationCommand
         {
-            GuildId = request.Guild.Id,
-            UserId = request.User.Id,
-            ModeratorId = request.Moderator.Id,
-            Reason = string.IsNullOrWhiteSpace(request.Reason) ? null : request.Reason,
+            Guild = request.Guild,
+            User = request.User,
+            Moderator = request.Moderator,
+            Reason = request.Reason,
             Type = ModerationType.Kick
-        };
+        }, cancellationToken);
 
         // Send the moderation message before kicking the user to make sure it can be delivered
         await _moderationMessageService.SendModerationMessageAsync(moderation, false);
         await request.User.KickAsync(request.Reason);
-
-        // Add the moderation to the database
-        _dbContext.Moderations.Add(moderation);
-        await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Send the moderation message
         await _moderationMessageService.SendModerationMessageAsync(moderation);

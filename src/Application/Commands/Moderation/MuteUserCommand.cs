@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces;
 using Discord;
 using Domain.Enums;
-using Infrastructure.Data.Contexts;
 using MediatR;
 
 namespace Application.Commands.Moderation;
@@ -31,40 +30,36 @@ public class MuteUserCommand : IRequest<Domain.Models.Moderation>
     /// <summary>
     ///     Duration of the mute. If not provided, the mute will be permanent.
     /// </summary>
-    public TimeSpan Duration { get; set; } = TimeSpan.MaxValue;
+    public TimeSpan? Duration { get; set; }
 }
 
 public class MuteUserCommandHandler : IRequestHandler<MuteUserCommand, Domain.Models.Moderation>
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IMediator _mediator;
     private readonly IModerationMessageService _moderationMessageService;
 
-    public MuteUserCommandHandler(ApplicationDbContext dbContext,
-        IModerationMessageService moderationMessageService)
+    public MuteUserCommandHandler(IModerationMessageService moderationMessageService, IMediator mediator)
     {
-        _dbContext = dbContext;
         _moderationMessageService = moderationMessageService;
+        _mediator = mediator;
     }
 
     public async Task<Domain.Models.Moderation> Handle(MuteUserCommand request, CancellationToken cancellationToken)
     {
-        var moderation = new Domain.Models.Moderation
+        var moderation = await _mediator.Send(new AddModerationCommand
         {
-            GuildId = request.Guild.Id,
-            UserId = request.User.Id,
-            ModeratorId = request.Moderator.Id,
+            Guild = request.Guild,
+            User = request.User,
+            Moderator = request.Moderator,
             Reason = string.IsNullOrWhiteSpace(request.Reason) ? null : request.Reason,
-            Type = ModerationType.Mute
-        };
+            Type = ModerationType.Mute,
+            Duration = request.Duration
+        }, cancellationToken);
 
-        await request.User.SetTimeOutAsync(request.Duration, new RequestOptions
+        await request.User.SetTimeOutAsync(request.Duration ?? TimeSpan.MaxValue, new RequestOptions
         {
             AuditLogReason = request.Reason
         });
-
-        // Add the moderation to the database
-        _dbContext.Moderations.Add(moderation);
-        await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Log the moderation
         await _moderationMessageService.SendModerationMessageAsync(moderation);

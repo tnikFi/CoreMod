@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces;
 using Discord;
 using Domain.Enums;
-using Infrastructure.Data.Contexts;
 using MediatR;
 
 namespace Application.Commands.Moderation;
@@ -41,40 +40,33 @@ public class BanUserCommand : IRequest<Domain.Models.Moderation>
 
 public class BanUserCommandHandler : IRequestHandler<BanUserCommand, Domain.Models.Moderation>
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IMediator _mediator;
     private readonly IModerationMessageService _moderationMessageService;
     private readonly IUnbanSchedulingService _unbanSchedulingService;
 
-    public BanUserCommandHandler(ApplicationDbContext dbContext, IModerationMessageService moderationMessageService,
-        IUnbanSchedulingService unbanSchedulingService)
+    public BanUserCommandHandler(IModerationMessageService moderationMessageService,
+        IUnbanSchedulingService unbanSchedulingService, IMediator mediator)
     {
-        _dbContext = dbContext;
         _moderationMessageService = moderationMessageService;
         _unbanSchedulingService = unbanSchedulingService;
+        _mediator = mediator;
     }
 
     public async Task<Domain.Models.Moderation> Handle(BanUserCommand request, CancellationToken cancellationToken)
     {
-        var moderation = new Domain.Models.Moderation
+        var moderation = await _mediator.Send(new AddModerationCommand
         {
-            GuildId = request.Guild.Id,
-            UserId = request.User.Id,
-            ModeratorId = request.Moderator.Id,
+            Guild = request.Guild,
+            User = request.User,
+            Moderator = request.Moderator,
             Reason = string.IsNullOrWhiteSpace(request.Reason) ? null : request.Reason,
-            Type = ModerationType.Ban
-        };
-
-        // Set the expiration date if a duration was provided
-        if (request.Duration.HasValue)
-            moderation.ExpiresAt = DateTime.UtcNow + request.Duration.Value;
+            Type = ModerationType.Ban,
+            Duration = request.Duration
+        }, cancellationToken);
 
         // Message the user before banning them to make sure the message can be delivered
         await _moderationMessageService.SendModerationMessageAsync(moderation, false);
         await request.Guild.AddBanAsync(request.User, request.PruneDays, request.Reason);
-
-        // Add the moderation to the database
-        _dbContext.Moderations.Add(moderation);
-        await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Schedule the unban if the moderation is a temporary ban
         if (moderation is {ExpiresAt: not null})

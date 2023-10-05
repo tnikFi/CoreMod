@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces;
 using Discord;
 using Domain.Enums;
-using Infrastructure.Data.Contexts;
 using MediatR;
 
 namespace Application.Commands.Moderation;
@@ -31,35 +30,30 @@ public class UnmuteUserCommand : IRequest<Domain.Models.Moderation>
 
 public class UnmuteUserCommandHandler : IRequestHandler<UnmuteUserCommand, Domain.Models.Moderation>
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IMediator _mediator;
     private readonly IModerationMessageService _moderationMessageService;
 
-    public UnmuteUserCommandHandler(ApplicationDbContext dbContext,
-        IModerationMessageService moderationMessageService)
+    public UnmuteUserCommandHandler(IModerationMessageService moderationMessageService, IMediator mediator)
     {
-        _dbContext = dbContext;
         _moderationMessageService = moderationMessageService;
+        _mediator = mediator;
     }
 
     public async Task<Domain.Models.Moderation> Handle(UnmuteUserCommand request, CancellationToken cancellationToken)
     {
-        var moderation = new Domain.Models.Moderation
+        var moderation = await _mediator.Send(new AddModerationCommand
         {
-            GuildId = request.Guild.Id,
-            UserId = request.User.Id,
-            ModeratorId = request.Moderator.Id,
+            Guild = request.Guild,
+            User = request.User,
+            Moderator = request.Moderator,
             Reason = string.IsNullOrWhiteSpace(request.Reason) ? null : request.Reason,
             Type = ModerationType.Unmute
-        };
+        }, cancellationToken);
 
         await request.User.RemoveTimeOutAsync(new RequestOptions
         {
             AuditLogReason = request.Reason
         });
-
-        // Add the moderation to the database
-        _dbContext.Moderations.Add(moderation);
-        await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Log the moderation
         await _moderationMessageService.SendModerationMessageAsync(moderation);
