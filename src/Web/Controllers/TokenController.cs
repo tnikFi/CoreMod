@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
-using Discord.Rest;
+using Discord;
 using Infrastructure.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -16,11 +16,13 @@ namespace Web.Controllers;
 public class TokenController : ControllerBase
 {
     private readonly AuthConfiguration _authConfiguration;
+    private readonly IDiscordClient _discordClient;
     private readonly HttpClient _httpClient;
 
-    public TokenController(AuthConfiguration authConfiguration)
+    public TokenController(AuthConfiguration authConfiguration, IDiscordClient discordClient)
     {
         _authConfiguration = authConfiguration;
+        _discordClient = discordClient;
         _httpClient = new HttpClient();
     }
 
@@ -45,16 +47,20 @@ public class TokenController : ControllerBase
         });
 
         var response = await _httpClient.PostAsync(_authConfiguration.Oauth.Endpoints.Token, request);
+        response.EnsureSuccessStatusCode();
 
         // Deserialize the response content into a PkceResponse object.
-        var responseContent = await response.Content.ReadFromJsonAsync<PkceResponse>();
+        var responseContent = await response.Content.ReadFromJsonAsync<PkceResponse>() ??
+                              throw new Exception("Failed to deserialize response.");
 
         // Request user information from the OAuth2 provider.
         var userRequest = new HttpRequestMessage(HttpMethod.Get, _authConfiguration.Oauth.Endpoints.UserInfo);
         userRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", responseContent.AccessToken);
         var userResponse = await _httpClient.SendAsync(userRequest);
         userResponse.EnsureSuccessStatusCode();
-        var user = await userResponse.Content.ReadFromJsonAsync<RestUser>() ?? throw new Exception("User not found.");
+        var userInfo = await userResponse.Content.ReadFromJsonAsync<UserInfoResponse>() ??
+                       throw new Exception("User not found.");
+        var user = await _discordClient.GetUserAsync(userInfo.Id);
 
         // Add claims for the jwt token.
         var permClaims = new List<Claim>();
