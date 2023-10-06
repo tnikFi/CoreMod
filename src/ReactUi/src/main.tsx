@@ -13,6 +13,16 @@ const authConfig: TAuthConfig = {
   autoLogin: false,
   scope: 'identify',
   clearURL: true,
+  preLogin: () => {
+    sessionStorage.setItem('redirect', window.location.pathname)
+  },
+  postLogin: () => {
+    const redirect = sessionStorage.getItem('redirect')
+    if (redirect) {
+      window.location.replace(redirect)
+    }
+    sessionStorage.removeItem('redirect')
+  },
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
