@@ -118,6 +118,17 @@ app.UseHangfireDashboard();
 
 app.UseHttpsRedirection();
 
+app.UseCors(corsPolicyBuilder => corsPolicyBuilder
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+);
+
+app.UseCookiePolicy(new CookiePolicyOptions()
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax
+});
+
 app.UseAuthorization();
 
 app.MapControllers();
