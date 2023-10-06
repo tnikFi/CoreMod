@@ -25,11 +25,20 @@ const pages = [
   },
 ]
 
+export interface JwtClaims {
+  userId: string
+  userName: string
+  avatar: string
+  exp: number
+  iss: string
+  aud: string
+}
+
 const Layout = () => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const navigate = useNavigate()
-  const { login, logOut } = React.useContext(AuthContext)
+  const { login, logOut, idTokenData } = React.useContext(AuthContext)
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget)
@@ -49,6 +58,10 @@ const Layout = () => {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null)
   }
+
+  const claims = idTokenData as JwtClaims
+  const avatar = claims?.avatar
+  const userName = claims?.userName
 
   return (
     <>
@@ -112,7 +125,7 @@ const Layout = () => {
               <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="User settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt="" src="" />
+                    <Avatar alt={userName} src={avatar ?? ''} />
                   </IconButton>
                 </Tooltip>
                 <Menu
