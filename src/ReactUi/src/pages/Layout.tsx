@@ -17,6 +17,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { AuthContext } from 'react-oauth2-code-pkce'
 import AuthenticatedComponent from '../components/authentication/AuthenticatedComponent'
 import UnauthenticatedComponent from '../components/authentication/UnauthenticatedComponent'
+import { OpenAPI } from '../api'
 
 const pages = [
   {
@@ -38,7 +39,11 @@ const Layout = () => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const navigate = useNavigate()
-  const { login, logOut, idTokenData } = React.useContext(AuthContext)
+  const { login, logOut, idToken, idTokenData } = React.useContext(AuthContext)
+
+  React.useEffect(() => {
+    OpenAPI.TOKEN = idToken
+  }, [idToken])
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget)
