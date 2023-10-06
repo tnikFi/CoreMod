@@ -1,3 +1,4 @@
+using System.Text;
 using Application;
 using Application.Interfaces;
 using Application.Services;
@@ -7,7 +8,10 @@ using Discord.WebSocket;
 using Hangfire;
 using Infrastructure.Configuration;
 using Infrastructure.Data.Contexts;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +33,28 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Authentication
+var authConfig = builder.Configuration.GetRequiredSection("Authentication").Get<AuthConfiguration>()
+                 ?? throw new InvalidOperationException("Authentication configuration is missing");
+builder.Services.AddSingleton(authConfig);
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
+    .AddCookie()
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authConfig.Jwt.SigningKey)),
+            ValidAudience = authConfig.Jwt.Audience,
+            ValidIssuer = authConfig.Jwt.Issuer,
+        };
+    });
 
 // Hangfire
 builder.Services.AddHangfire(x => x.UseSqlServerStorage(connectionString));
