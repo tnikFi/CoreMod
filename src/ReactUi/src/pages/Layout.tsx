@@ -23,6 +23,12 @@ const pages = [
   {
     name: 'Home',
     path: '/',
+    requireAuth: false,
+  },
+  {
+    name: 'Panel',
+    path: '/panel',
+    requireAuth: true,
   },
 ]
 
@@ -102,24 +108,30 @@ const Layout = () => {
                   display: { xs: 'block', md: 'none' },
                 }}
               >
-                {pages.map((page) => (
-                  <MenuItem key={page.name} onClick={() => handleCloseNavMenu(page.path)}>
-                    <Typography textAlign="center">{page.name}</Typography>
-                  </MenuItem>
-                ))}
+                {pages.map(
+                  (page) =>
+                    (page.requireAuth === false || idToken) && (
+                      <MenuItem key={page.name} onClick={() => handleCloseNavMenu(page.path)}>
+                        <Typography textAlign="center">{page.name}</Typography>
+                      </MenuItem>
+                    )
+                )}
               </Menu>
             </Box>
 
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-              {pages.map((page) => (
-                <Button
-                  key={page.name}
-                  onClick={() => handleCloseNavMenu(page.path)}
-                  sx={{ my: 2, color: 'white', display: 'block' }}
-                >
-                  {page.name}
-                </Button>
-              ))}
+              {pages.map(
+                (page) =>
+                  (page.requireAuth === false || idToken) && (
+                    <Button
+                      key={page.name}
+                      onClick={() => handleCloseNavMenu(page.path)}
+                      sx={{ my: 2, color: 'white', display: 'block' }}
+                    >
+                      {page.name}
+                    </Button>
+                  )
+              )}
             </Box>
             <UnauthenticatedComponent>
               <Button color="inherit" onClick={() => login()}>
