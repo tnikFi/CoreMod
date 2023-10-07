@@ -5,13 +5,14 @@ interface GuildProps {
   onClick?: () => void
   name: string
   icon?: string | null
+  selected?: boolean
 }
 
-const Guild: React.FC<GuildProps> = ({ onClick, name, icon }) => {
+const Guild: React.FC<GuildProps> = ({ onClick, name, icon, selected }) => {
   return (
     <ListItem disablePadding>
       <Tooltip title={name} placement="right">
-        <ListItemButton onClick={onClick}>
+        <ListItemButton onClick={onClick} selected={selected}>
           <ListItemIcon sx={{ width: 40, height: 40 }}>
             {icon ? (
               <img src={icon ?? undefined} style={{ borderRadius: '50%' }} alt={name} />

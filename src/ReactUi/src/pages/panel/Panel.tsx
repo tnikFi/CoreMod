@@ -149,6 +149,7 @@ const Panel = () => {
               name={guild.name ?? ''}
               onClick={() => setSelectedGuild(guild)}
               icon={guild.icon}
+              selected={guild.id === selectedGuild?.id}
             />
           ))}
         </List>
