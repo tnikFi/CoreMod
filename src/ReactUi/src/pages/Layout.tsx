@@ -9,7 +9,6 @@ import {
   MenuItem,
   Toolbar,
   Tooltip,
-  Typography,
 } from '@mui/material'
 import React from 'react'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -18,8 +17,9 @@ import { AuthContext } from 'react-oauth2-code-pkce'
 import AuthenticatedComponent from '../components/authentication/AuthenticatedComponent'
 import UnauthenticatedComponent from '../components/authentication/UnauthenticatedComponent'
 import { OpenAPI } from '../api'
+import { NavDrawer, Page } from '../components/navigation/NavDrawer'
 
-const pages = [
+const pages: Page[] = [
   {
     name: 'Home',
     path: '/',
@@ -42,25 +42,14 @@ export interface JwtClaims {
 }
 
 const Layout = () => {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
+  const [navOpen, setNavOpen] = React.useState(false)
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
-  const navigate = useNavigate()
   const { login, logOut, idToken, idTokenData } = React.useContext(AuthContext)
+  const navigate = useNavigate()
 
   React.useEffect(() => {
     OpenAPI.TOKEN = idToken
   }, [idToken])
-
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget)
-  }
-
-  const handleCloseNavMenu = (path?: string) => {
-    setAnchorElNav(null)
-    if (path) {
-      navigate(path)
-    }
-  }
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget)
@@ -85,38 +74,11 @@ const Layout = () => {
                 aria-label="nav menu"
                 aria-controls="menu-appbar"
                 aria-haspopup="true"
-                onClick={handleOpenNavMenu}
+                onClick={() => setNavOpen(true)}
                 color="inherit"
               >
                 <MenuIcon />
               </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorElNav}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left',
-                }}
-                open={Boolean(anchorElNav)}
-                onClose={() => handleCloseNavMenu()}
-                sx={{
-                  display: { xs: 'block', md: 'none' },
-                }}
-              >
-                {pages.map(
-                  (page) =>
-                    (page.requireAuth === false || idToken) && (
-                      <MenuItem key={page.name} onClick={() => handleCloseNavMenu(page.path)}>
-                        <Typography textAlign="center">{page.name}</Typography>
-                      </MenuItem>
-                    )
-                )}
-              </Menu>
             </Box>
 
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
@@ -125,7 +87,7 @@ const Layout = () => {
                   (page.requireAuth === false || idToken) && (
                     <Button
                       key={page.name}
-                      onClick={() => handleCloseNavMenu(page.path)}
+                      onClick={() => navigate(page.path)}
                       sx={{ my: 2, color: 'white', display: 'block' }}
                     >
                       {page.name}
@@ -175,6 +137,15 @@ const Layout = () => {
           </Toolbar>
         </Container>
       </AppBar>
+
+      <NavDrawer
+        pages={pages}
+        open={navOpen}
+        onClose={() => setNavOpen(false)}
+        onOpen={() => setNavOpen(true)}
+        sx={{ display: { xs: 'block', md: 'none' } }}
+      />
+
       <Outlet />
     </>
   )
