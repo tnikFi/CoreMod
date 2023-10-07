@@ -96,149 +96,154 @@ const Panel = () => {
 
   return (
     <RequireAuthenticated>
-      <AppBar position="static" sx={{ display: { xs: 'block', md: 'none' } }}>
-        <Container maxWidth={false}>
-          <Toolbar disableGutters>
-            <Box
-              sx={{
-                flexGrow: 1,
-                display: { xs: 'flex', md: 'none' },
-              }}
-            >
-              <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="menu"
-                onClick={() => setNavOpen(true)}
+      <Box sx={{ display: { xs: 'block', md: 'flex' } }}>
+        <AppBar position="static" sx={{ display: { xs: 'block', md: 'none' } }}>
+          <Container maxWidth={false}>
+            <Toolbar disableGutters>
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  display: { xs: 'flex', md: 'none' },
+                }}
               >
-                <MenuIcon />
-              </IconButton>
-            </Box>
-            <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-              {pages.map((page) => (
-                <Button
-                  key={page.name}
-                  sx={{ my: 2, color: 'white', display: 'block' }}
-                  onClick={() => navigate(page.path)}
+                <IconButton
+                  size="large"
+                  edge="start"
+                  color="inherit"
+                  aria-label="menu"
+                  onClick={() => setNavOpen(true)}
                 >
-                  <Typography textAlign="center" variant="button">
-                    {page.name}
-                  </Typography>
-                </Button>
-              ))}
-            </Box>
-            <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="User settings">
-                <IconButton sx={{ p: 0 }} onClick={() => setUserMenuOpen(true)}>
-                  <Avatar alt={userName} src={avatar ?? ''} />
+                  <MenuIcon />
                 </IconButton>
-              </Tooltip>
-            </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
+              </Box>
+              <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+                {pages.map((page) => (
+                  <Button
+                    key={page.name}
+                    sx={{ my: 2, color: 'white', display: 'block' }}
+                    onClick={() => navigate(page.path)}
+                  >
+                    <Typography textAlign="center" variant="button">
+                      {page.name}
+                    </Typography>
+                  </Button>
+                ))}
+              </Box>
+              <Box sx={{ flexGrow: 0 }}>
+                <Tooltip title="User settings">
+                  <IconButton sx={{ p: 0 }} onClick={() => setUserMenuOpen(true)}>
+                    <Avatar alt={userName} src={avatar ?? ''} />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Toolbar>
+          </Container>
+        </AppBar>
 
-      <AppBar
-        position="fixed"
-        sx={{ display: { xs: 'none', md: 'block' }, zIndex: (theme) => theme.zIndex.drawer + 1 }}
-      >
-        <Container maxWidth={false}>
-          <Toolbar disableGutters>
-            <Box
-              sx={{
-                flexGrow: 1,
-                display: { xs: 'flex', md: 'none' },
-              }}
-            >
-              <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="menu"
-                onClick={() => setNavOpen(true)}
+        <AppBar
+          position="fixed"
+          sx={{ display: { xs: 'none', md: 'block' }, zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        >
+          <Container maxWidth={false}>
+            <Toolbar disableGutters>
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  display: { xs: 'flex', md: 'none' },
+                }}
               >
-                <MenuIcon />
-              </IconButton>
-            </Box>
-            <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-              {pages.map((page) => (
-                <Button
-                  key={page.name}
-                  sx={{ my: 2, color: 'white', display: 'block' }}
-                  onClick={() => navigate(page.path)}
+                <IconButton
+                  size="large"
+                  edge="start"
+                  color="inherit"
+                  aria-label="menu"
+                  onClick={() => setNavOpen(true)}
                 >
-                  <Typography textAlign="center" variant="button">
-                    {page.name}
-                  </Typography>
-                </Button>
-              ))}
-            </Box>
-            <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="User settings">
-                <IconButton sx={{ p: 0 }} onClick={() => setUserMenuOpen(true)}>
-                  <Avatar alt={userName} src={avatar ?? ''} />
+                  <MenuIcon />
                 </IconButton>
-              </Tooltip>
-            </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
+              </Box>
+              <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+                {pages.map((page) => (
+                  <Button
+                    key={page.name}
+                    sx={{ my: 2, color: 'white', display: 'block' }}
+                    onClick={() => navigate(page.path)}
+                  >
+                    <Typography textAlign="center" variant="button">
+                      {page.name}
+                    </Typography>
+                  </Button>
+                ))}
+              </Box>
+              <Box sx={{ flexGrow: 0 }}>
+                <Tooltip title="User settings">
+                  <IconButton sx={{ p: 0 }} onClick={() => setUserMenuOpen(true)}>
+                    <Avatar alt={userName} src={avatar ?? ''} />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Toolbar>
+          </Container>
+        </AppBar>
 
-      <UserDrawer
-        open={userMenuOpen}
-        onClose={() => setUserMenuOpen(false)}
-        onOpen={() => setUserMenuOpen(true)}
-      />
+        <UserDrawer
+          open={userMenuOpen}
+          onClose={() => setUserMenuOpen(false)}
+          onOpen={() => setUserMenuOpen(true)}
+        />
 
-      <NavDrawer
-        pages={pages}
-        open={navOpen}
-        onClose={() => setNavOpen(false)}
-        onOpen={() => setNavOpen(true)}
-        sx={{ display: { xs: 'block', md: 'none' } }}
-        basePath="/panel"
-      >
-        <Divider />
-        <List>
-          {guilds.map((guild) => (
-            <Guild
-              key={guild.id}
-              name={guild.name ?? ''}
-              onClick={() => setSelectedGuild(guild)}
-              icon={guild.icon}
-              selected={guild.id === selectedGuild?.id}
-            />
-          ))}
-        </List>
-      </NavDrawer>
+        <NavDrawer
+          pages={pages}
+          open={navOpen}
+          onClose={() => setNavOpen(false)}
+          onOpen={() => setNavOpen(true)}
+          sx={{ display: { xs: 'block', md: 'none' } }}
+          basePath="/panel"
+        >
+          <Divider />
+          <List>
+            {guilds.map((guild) => (
+              <Guild
+                key={guild.id}
+                name={guild.name ?? ''}
+                onClick={() => setSelectedGuild(guild)}
+                icon={guild.icon}
+                selected={guild.id === selectedGuild?.id}
+              />
+            ))}
+          </List>
+        </NavDrawer>
 
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: 250,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: 250, boxSizing: 'border-box' },
-          display: { xs: 'none', md: 'block' },
-        }}
-      >
-        <Toolbar />
-        <List>
-          {guilds.map((guild) => (
-            <Guild
-              key={guild.id}
-              name={guild.name ?? ''}
-              onClick={() => setSelectedGuild(guild)}
-              icon={guild.icon}
-              selected={guild.id === selectedGuild?.id}
-            />
-          ))}
-        </List>
-      </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            width: 250,
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: { width: 250, boxSizing: 'border-box' },
+            display: { xs: 'none', md: 'block' },
+          }}
+        >
+          <Toolbar />
+          <List>
+            {guilds.map((guild) => (
+              <Guild
+                key={guild.id}
+                name={guild.name ?? ''}
+                onClick={() => setSelectedGuild(guild)}
+                icon={guild.icon}
+                selected={guild.id === selectedGuild?.id}
+              />
+            ))}
+          </List>
+        </Drawer>
 
-      <SelectedGuildContext.Provider value={{ selectedGuild: selectedGuild }}>
-        <Outlet />
-      </SelectedGuildContext.Provider>
+        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+          <Toolbar sx={{ display: { xs: 'none', md: 'block' } }} />
+          <SelectedGuildContext.Provider value={{ selectedGuild: selectedGuild }}>
+            <Outlet />
+          </SelectedGuildContext.Provider>
+        </Box>
+      </Box>
     </RequireAuthenticated>
   )
 }
