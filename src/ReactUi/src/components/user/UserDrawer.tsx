@@ -34,7 +34,13 @@ const UserDrawer = ({ open, onClose, onOpen }: UserMenuProps) => {
 
   return (
     <>
-      <SwipeableDrawer open={open} anchor="right" onClose={onClose} onOpen={onOpen}>
+      <SwipeableDrawer
+        open={open}
+        anchor="right"
+        onClose={onClose}
+        onOpen={onOpen}
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
         <Box sx={{ width: 250 }} role="presentation" onClick={onClose} onKeyDown={onClose}>
           <List>
             <ListItem>
