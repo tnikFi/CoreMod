@@ -42,7 +42,7 @@ const NavListItem: React.FC<NavListItemProps> = ({ currentPath, navigate, page }
         onClick={() => navigate(page.path)}
         selected={'/panel' + page.path === currentPath || '/panel/' + page.path === currentPath}
       >
-        <ListItemIcon>{page.icon}</ListItemIcon>
+        {page.icon && <ListItemIcon>{page.icon}</ListItemIcon>}
         <ListItemText primary={page.name} />
       </ListItemButton>
     </ListItem>
