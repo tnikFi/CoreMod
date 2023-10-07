@@ -35,7 +35,7 @@ public class UserController : ControllerBase
 
         var guildDtos = mutualGuilds.Select(g => new GuildDto
         {
-            Id = g.Id,
+            Id = g.Id.ToString(),
             Name = g.Name,
             Icon = g.IconUrl
         }).ToArray();
@@ -49,11 +49,13 @@ public class UserController : ControllerBase
     /// <param name="guildId"></param>
     /// <returns></returns>
     [HttpGet("moderations")]
-    public async Task<ActionResult<ModerationDto[]>> GetModerations(ulong guildId)
+    public async Task<ActionResult<ModerationDto[]>> GetModerations(string guildId)
     {
+        // Try to parse the guild ID and return bad request if it's invalid.
+        if (!ulong.TryParse(guildId, out var guildIdParsed)) return BadRequest();
         var userId = ulong.Parse(User.Claims.First(c => c.Type == "userId").Value);
         var user = await _discordClient.Rest.GetUserAsync(userId);
-        var guild = _discordClient.GetGuild(guildId);
+        var guild = _discordClient.GetGuild(guildIdParsed);
 
         if (guild is null) return NotFound();
 

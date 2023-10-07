@@ -4,7 +4,7 @@
 /* eslint-disable */
 
 export type GuildDto = {
-    id?: number;
+    id?: string | null;
     name?: string | null;
     icon?: string | null;
 };

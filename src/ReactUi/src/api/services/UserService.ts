@@ -28,7 +28,7 @@ export class UserService {
      * @throws ApiError
      */
     public static getApiUserModerations(
-guildId?: number,
+guildId?: string,
 ): CancelablePromise<Array<ModerationDto>> {
         return __request(OpenAPI, {
             method: 'GET',
