@@ -1,6 +1,6 @@
 import React from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { GuildDto, UserService } from '../../api'
+import { GuildDto, OpenAPI, UserService } from '../../api'
 import {
   AppBar,
   Avatar,
@@ -53,8 +53,13 @@ const Panel = () => {
   const [userMenuOpen, setUserMenuOpen] = React.useState(false)
   const [guilds, setGuilds] = React.useState<GuildDto[]>([])
   const [selectedGuild, setSelectedGuild] = React.useState<GuildDto | null>(null)
-  const { idTokenData } = React.useContext(AuthContext)
+  const { idToken, idTokenData } = React.useContext(AuthContext)
   const navigate = useNavigate()
+
+  // Update the OpenAPI token when the idToken changes
+  React.useEffect(() => {
+    OpenAPI.TOKEN = idToken
+  }, [idToken])
 
   // Get the user's mutual guilds with the bot when the component mounts
   React.useEffect(() => {
