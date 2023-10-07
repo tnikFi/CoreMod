@@ -67,7 +67,8 @@ public class TokenController : ControllerBase
         permClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
         permClaims.Add(new Claim("userId", user.Id.ToString()));
         permClaims.Add(new Claim("userName", user.GlobalName));
-        permClaims.Add(new Claim("avatar", user.GetAvatarUrl()));
+        if (user.AvatarId != null)
+            permClaims.Add(new Claim("avatar", user.GetAvatarUrl()));
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authConfiguration.Jwt.SigningKey));
         var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
