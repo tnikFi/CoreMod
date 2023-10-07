@@ -24,6 +24,7 @@ import UserDrawer from '../../components/user/UserDrawer'
 import RequireAuthenticated from '../../components/authentication/RequireAuthenticated'
 import { NavDrawer, Page } from '../../components/navigation/NavDrawer'
 import Guild from '../../components/navigation/Guild'
+import { SelectedGuildContext } from '../../contexts/SelectedGuildContext'
 
 const pages: Page[] = [
   {
@@ -159,7 +160,9 @@ const Panel = () => {
           ))}
         </List>
       </NavDrawer>
-      <Outlet />
+      <SelectedGuildContext.Provider value={{ selectedGuild: selectedGuild }}>
+        <Outlet />
+      </SelectedGuildContext.Provider>
     </RequireAuthenticated>
   )
 }
