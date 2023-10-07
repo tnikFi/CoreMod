@@ -6,10 +6,13 @@ import { ModerationDto, UserService } from '../../api'
 import { DataGrid, GridColDef, GridValueFormatterParams } from '@mui/x-data-grid'
 
 /**
- * Formats a date time string to a human readable format using the system locale.
+ * Formats a date time string to a human readable format using the system locale and timezone.
+ * The date string is expected to be in UTC.
  */
 const dateTimeFormatter = (params: GridValueFormatterParams) => {
-  const date = new Date(params.value)
+  // Parse the date and apply the system timezone offset
+  const date = new Date(params.value as string)
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset())
   return date.toLocaleString()
 }
 
