@@ -1,5 +1,6 @@
-﻿using Discord.WebSocket;
-using Infrastructure.Configuration;
+﻿using Application.Queries.Moderation;
+using Discord.WebSocket;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Models;
@@ -11,15 +12,13 @@ namespace Web.Controllers;
 [Authorize]
 public class UserController : ControllerBase
 {
-    private readonly AuthConfiguration _authConfiguration;
     private readonly DiscordSocketClient _discordClient;
-    private readonly HttpClient _httpClient;
+    private readonly IMediator _mediator;
 
-    public UserController(AuthConfiguration authConfiguration, DiscordSocketClient discordClient)
+    public UserController(DiscordSocketClient discordClient, IMediator mediator)
     {
-        _authConfiguration = authConfiguration;
         _discordClient = discordClient;
-        _httpClient = new HttpClient();
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -42,5 +41,36 @@ public class UserController : ControllerBase
         }).ToArray();
 
         return Ok(guildDtos);
+    }
+
+    /// <summary>
+    ///     Get the moderation history of the user.
+    /// </summary>
+    /// <param name="guildId"></param>
+    /// <returns></returns>
+    [HttpGet("moderations")]
+    public async Task<ActionResult<ModerationDto[]>> GetModerations(ulong guildId)
+    {
+        var userId = ulong.Parse(User.Claims.First(c => c.Type == "userId").Value);
+        var user = await _discordClient.Rest.GetUserAsync(userId);
+        var guild = _discordClient.GetGuild(guildId);
+
+        if (guild is null) return NotFound();
+
+        var moderations = await _mediator.Send(new GetModerationsQuery
+        {
+            Guild = guild,
+            User = user
+        });
+
+        return Ok(moderations.Select(m => new ModerationDto
+        {
+            Id = m.Id,
+            Type = m.Type.ToString(),
+            CreatedAt = m.Timestamp,
+            UserId = m.UserId,
+            Reason = m.Reason,
+            ExpiresAt = m.ExpiresAt
+        }));
     }
 }
