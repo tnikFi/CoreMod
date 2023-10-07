@@ -7,7 +7,9 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   IconButton,
+  List,
   Toolbar,
   Tooltip,
   Typography,
@@ -21,6 +23,7 @@ import { AuthContext } from 'react-oauth2-code-pkce'
 import UserDrawer from '../../components/user/UserDrawer'
 import RequireAuthenticated from '../../components/authentication/RequireAuthenticated'
 import { NavDrawer, Page } from '../../components/navigation/NavDrawer'
+import Guild from '../../components/navigation/Guild'
 
 const pages: Page[] = [
   {
@@ -137,7 +140,19 @@ const Panel = () => {
         onOpen={() => setNavOpen(true)}
         sx={{ display: { xs: 'block', md: 'none' } }}
         basePath="/panel"
-      />
+      >
+        <Divider />
+        <List>
+          {guilds.map((guild) => (
+            <Guild
+              key={guild.id}
+              name={guild.name ?? ''}
+              onClick={() => setSelectedGuild(guild)}
+              icon={guild.icon}
+            />
+          ))}
+        </List>
+      </NavDrawer>
       <Outlet />
     </RequireAuthenticated>
   )
