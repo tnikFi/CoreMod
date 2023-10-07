@@ -3,13 +3,26 @@ import { SelectedGuildContext } from '../../contexts/SelectedGuildContext'
 import PageView from '../../components/PageView'
 import { Container, Paper, Typography } from '@mui/material'
 import { ModerationDto, UserService } from '../../api'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { DataGrid, GridColDef, GridValueFormatterParams } from '@mui/x-data-grid'
+
+/**
+ * Formats a date time string to a human readable format using the system locale.
+ */
+const dateTimeFormatter = (params: GridValueFormatterParams) => {
+  const date = new Date(params.value)
+  return date.toLocaleString()
+}
 
 const moderationColumns: GridColDef[] = [
-  { field: 'createdAt', headerName: 'Created At', width: 200 },
+  { field: 'createdAt', headerName: 'Created At', width: 200, valueFormatter: dateTimeFormatter },
   { field: 'type', headerName: 'Type', width: 200 },
   { field: 'reason', headerName: 'Reason', width: 200 },
-  { field: 'expiresAt', headerName: 'Expires At', width: 200 },
+  {
+    field: 'expiresAt',
+    headerName: 'Expires At',
+    width: 200,
+    valueFormatter: (params) => (params.value ? dateTimeFormatter(params) : 'Never'),
+  },
 ]
 
 const Overview = () => {
