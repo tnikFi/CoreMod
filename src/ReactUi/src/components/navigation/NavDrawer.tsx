@@ -24,23 +24,32 @@ interface NavMenuProps extends SwipeableDrawerProps {
   open: boolean
   onClose: () => void
   onOpen: () => void
+
+  /**
+   * The base path of the pages. Used to determine if a page is selected.
+   */
+  basePath?: string
 }
 
 interface NavListItemProps {
   page: Page
   currentPath: string
   navigate: (path: string) => void
+  basePath?: string
 }
 
 /**
  * A nav list item that is always rendered.
  */
-const NavListItem: React.FC<NavListItemProps> = ({ currentPath, navigate, page }) => {
+const NavListItem: React.FC<NavListItemProps> = ({ currentPath, navigate, page, basePath }) => {
   return (
     <ListItem key={page.name} disablePadding>
       <ListItemButton
         onClick={() => navigate(page.path)}
-        selected={'/panel' + page.path === currentPath || '/panel/' + page.path === currentPath}
+        selected={
+          currentPath === `${basePath ?? ''}${page.path}` ||
+          currentPath === `${basePath ?? ''}/${page.path}`
+        }
       >
         {page.icon && <ListItemIcon>{page.icon}</ListItemIcon>}
         <ListItemText primary={page.name} />
@@ -52,13 +61,18 @@ const NavListItem: React.FC<NavListItemProps> = ({ currentPath, navigate, page }
 /**
  * A nav list item that is only rendered if the user is authenticated if the page requires authentication.
  */
-const AuthenticatedNavListItem: React.FC<NavListItemProps> = ({ currentPath, navigate, page }) => {
+const AuthenticatedNavListItem: React.FC<NavListItemProps> = ({
+  currentPath,
+  navigate,
+  page,
+  basePath,
+}) => {
   return page.requireAuth ? (
     <AuthenticatedComponent>
-      <NavListItem currentPath={currentPath} navigate={navigate} page={page} />
+      <NavListItem currentPath={currentPath} navigate={navigate} page={page} basePath={basePath} />
     </AuthenticatedComponent>
   ) : (
-    <NavListItem currentPath={currentPath} navigate={navigate} page={page} />
+    <NavListItem currentPath={currentPath} navigate={navigate} page={page} basePath={basePath} />
   )
 }
 
@@ -71,6 +85,7 @@ export const NavDrawer: React.FC<React.PropsWithChildren<NavMenuProps>> = ({
   onClose,
   onOpen,
   children,
+  basePath,
   ...props
 }) => {
   const currentPath = useLocation().pathname
@@ -86,6 +101,7 @@ export const NavDrawer: React.FC<React.PropsWithChildren<NavMenuProps>> = ({
               currentPath={currentPath}
               navigate={navigate}
               page={page}
+              basePath={basePath}
             />
           ))}
         </List>

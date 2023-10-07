@@ -136,6 +136,7 @@ const Panel = () => {
         onClose={() => setNavOpen(false)}
         onOpen={() => setNavOpen(true)}
         sx={{ display: { xs: 'block', md: 'none' } }}
+        basePath="/panel"
       />
       <Outlet />
     </RequireAuthenticated>
