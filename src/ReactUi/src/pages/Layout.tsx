@@ -11,6 +11,8 @@ import {
   Tooltip,
 } from '@mui/material'
 import React from 'react'
+import HomeIcon from '@mui/icons-material/Home'
+import ViewComfyIcon from '@mui/icons-material/ViewComfy'
 import MenuIcon from '@mui/icons-material/Menu'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { AuthContext } from 'react-oauth2-code-pkce'
@@ -23,11 +25,13 @@ const pages: Page[] = [
   {
     name: 'Home',
     path: '/',
+    icon: <HomeIcon />,
     requireAuth: false,
   },
   {
-    name: 'Panel',
+    name: 'Control Panel',
     path: '/panel',
+    icon: <ViewComfyIcon />,
     requireAuth: true,
   },
 ]
