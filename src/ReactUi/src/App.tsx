@@ -4,24 +4,14 @@ import Home from './pages/Home'
 import NotFound from './pages/NotFound'
 import Panel from './pages/panel/Panel'
 import Overview from './pages/panel/Overview'
-import { CssBaseline, PaletteMode, ThemeProvider, createTheme, useMediaQuery } from '@mui/material'
+import { CssBaseline, ThemeProvider, createTheme, useMediaQuery } from '@mui/material'
 import React from 'react'
 import { ColorScheme, ColorSchemeContext } from './contexts/ColorSchemeContext'
+import { useLocalStorage } from 'usehooks-ts'
 
 const App = () => {
-  const [colorScheme, setColorScheme] = React.useState<ColorScheme | undefined>(undefined)
+  const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>('colorScheme', 'system')
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
-
-  // Load color scheme from local storage on mount
-  React.useEffect(() => {
-    const colorScheme = localStorage.getItem('colorScheme') as PaletteMode
-    setColorScheme(colorScheme ?? 'system')
-  }, [])
-
-  // Save color scheme to local storage
-  React.useEffect(() => {
-    if (colorScheme) localStorage.setItem('colorScheme', colorScheme)
-  }, [colorScheme])
 
   const theme = React.useMemo(
     () =>
