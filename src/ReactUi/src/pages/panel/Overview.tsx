@@ -19,7 +19,7 @@ const dateTimeFormatter = (params: GridValueFormatterParams) => {
 const moderationColumns: GridColDef[] = [
   { field: 'createdAt', headerName: 'Created At', width: 200, valueFormatter: dateTimeFormatter },
   { field: 'type', headerName: 'Type', width: 200 },
-  { field: 'reason', headerName: 'Reason', width: 200 },
+  { field: 'reason', headerName: 'Reason', minWidth: 200, flex: 1 },
   {
     field: 'expiresAt',
     headerName: 'Expires At',
