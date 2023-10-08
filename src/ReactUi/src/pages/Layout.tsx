@@ -20,6 +20,7 @@ import AuthenticatedComponent from '../components/authentication/AuthenticatedCo
 import UnauthenticatedComponent from '../components/authentication/UnauthenticatedComponent'
 import { OpenAPI } from '../api'
 import { NavDrawer, Page } from '../components/navigation/NavDrawer'
+import ThemeSelector from '../components/themes/ThemeSelector'
 
 const pages: Page[] = [
   {
@@ -99,13 +100,14 @@ const Layout = () => {
                   )
               )}
             </Box>
-            <UnauthenticatedComponent>
-              <Button color="inherit" onClick={() => login()}>
-                Login
-              </Button>
-            </UnauthenticatedComponent>
-            <AuthenticatedComponent>
-              <Box sx={{ flexGrow: 0 }}>
+            <Box sx={{ flexGrow: 0, gap: 2, display: 'flex' }}>
+              <ThemeSelector />
+              <UnauthenticatedComponent>
+                <Button color="inherit" onClick={() => login()}>
+                  Login
+                </Button>
+              </UnauthenticatedComponent>
+              <AuthenticatedComponent>
                 <Tooltip title="User settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar alt={userName} src={avatar ?? ''} />
@@ -136,8 +138,8 @@ const Layout = () => {
                     Logout
                   </MenuItem>
                 </Menu>
-              </Box>
-            </AuthenticatedComponent>
+              </AuthenticatedComponent>
+            </Box>
           </Toolbar>
         </Container>
       </AppBar>

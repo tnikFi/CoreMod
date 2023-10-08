@@ -26,6 +26,7 @@ import RequireAuthenticated from '../../components/authentication/RequireAuthent
 import { NavDrawer, Page } from '../../components/navigation/NavDrawer'
 import Guild from '../../components/navigation/Guild'
 import { SelectedGuildContext } from '../../contexts/SelectedGuildContext'
+import ThemeSelector from '../../components/themes/ThemeSelector'
 
 const pages: Page[] = [
   {
@@ -129,7 +130,8 @@ const Panel = () => {
                   </Button>
                 ))}
               </Box>
-              <Box sx={{ flexGrow: 0 }}>
+              <Box sx={{ flexGrow: 0, gap: 2, display: 'flex' }}>
+                <ThemeSelector />
                 <Tooltip title="User settings">
                   <IconButton sx={{ p: 0 }} onClick={() => setUserMenuOpen(true)}>
                     <Avatar alt={userName} src={avatar ?? ''} />
@@ -175,7 +177,8 @@ const Panel = () => {
                   </Button>
                 ))}
               </Box>
-              <Box sx={{ flexGrow: 0 }}>
+              <Box sx={{ flexGrow: 0, gap: 2, display: 'flex' }}>
+                <ThemeSelector />
                 <Tooltip title="User settings">
                   <IconButton sx={{ p: 0 }} onClick={() => setUserMenuOpen(true)}>
                     <Avatar alt={userName} src={avatar ?? ''} />
