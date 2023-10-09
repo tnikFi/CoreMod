@@ -1,6 +1,5 @@
 import React from 'react'
-import PageView from '../components/PageView'
-import { Button } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 
 const messages = [
   'The page you are looking for is in another castle.',
@@ -20,11 +19,23 @@ const NotFound = () => {
   }, [])
 
   return (
-    <PageView>
-      <h1>404</h1>
-      <p style={{ fontSize: 24 }}>{messages[Math.floor(Math.random() * messages.length)]}</p>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        height: '60vh',
+      }}
+    >
+      <Typography variant="h1" color="GrayText">
+        404
+      </Typography>
+      <Typography variant="h5" sx={{ my: 2 }}>
+        {messages[Math.floor(Math.random() * messages.length)]}
+      </Typography>
       <Button onClick={() => window.history.back()}>Go Back</Button>
-    </PageView>
+    </Box>
   )
 }
 
