@@ -65,14 +65,6 @@ public class UserController : ControllerBase
             User = user
         });
 
-        return Ok(moderations.Select(m => new ModerationDto
-        {
-            Id = m.Id,
-            Type = m.Type.ToString(),
-            CreatedAt = m.Timestamp,
-            UserId = m.UserId,
-            Reason = m.Reason,
-            ExpiresAt = m.ExpiresAt
-        }));
+        return moderations.Select(x => ModerationDto.FromDomainModel(x, false)).ToArray();
     }
 }
