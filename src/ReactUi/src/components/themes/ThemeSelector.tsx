@@ -14,10 +14,10 @@ const ThemeSelector = () => {
 
   return (
     <Tooltip title="Toggle theme">
-      <IconButton>
-        {colorScheme === 'system' && <BrightnessAutoIcon onClick={setNextColorScheme} />}
-        {colorScheme === 'light' && <LightModeIcon onClick={setNextColorScheme} />}
-        {colorScheme === 'dark' && <DarkModeIcon onClick={setNextColorScheme} />}
+      <IconButton onClick={setNextColorScheme}>
+        {colorScheme === 'system' && <BrightnessAutoIcon />}
+        {colorScheme === 'light' && <LightModeIcon />}
+        {colorScheme === 'dark' && <DarkModeIcon />}
       </IconButton>
     </Tooltip>
   )
