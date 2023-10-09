@@ -55,12 +55,11 @@ const App = () => {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
-              <Route path="*" element={<NotFound />} />
             </Route>
             <Route path="panel" element={<Panel />}>
               <Route path="" element={<Overview />} />
-              <Route path="*" element={<NotFound />} />
             </Route>
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
