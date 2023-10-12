@@ -15,51 +15,70 @@ on:
       - .gitignore
       - README.md
 
-  workflow_call: 
+  workflow_call:
     inputs:
       build-artifacts:
         type: boolean
         default: false
         required: true
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-      name: Checkout code
-    
-    - name: Cache NuGet packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
+      - uses: actions/checkout@v3
+        name: Checkout code
 
-    - name: Install .NET
-      uses: actions/setup-dotnet@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: "npm"
+          cache-dependency-path: src/ReactUi/package-lock.json
 
-    - name: Restore solution
-      run: dotnet restore
+      - name: Install dependencies
+        run: npm ci
+        working-directory: src/ReactUi
 
-    - name: Build solution
-      run: dotnet build --no-restore --configuration Release
-      
-    - name: Test solution
-      run: dotnet test --no-build --configuration Release
+      - name: ESLint
+        run: npm run lint
+        working-directory: src/ReactUi
 
-    - name: Publish application
-      run: |
-        dotnet publish --configuration Release --runtime win-x86 --self-contained --output ./publish
-        cd publish
-        zip -r ./publish.zip .
-      working-directory: ./src/Web/
+      - name: Build React application
+        run: npm run build
+        working-directory: src/ReactUi
 
-    - name: Publish artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: publish
-        path: ./src/Web/publish/publish.zip
-        if-no-files-found: error
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v3
+
+      - name: Restore solution
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test solution
+        run: dotnet test --no-build --configuration Release
+
+      - name: Publish application
+        run: |
+          dotnet publish --configuration Release --runtime win-x86 --self-contained --output ./publish
+          cd publish
+          zip -r ./publish.zip .
+        working-directory: ./src/Web/
+
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: publish
+          path: ./src/Web/publish/publish.zip
+          if-no-files-found: error
