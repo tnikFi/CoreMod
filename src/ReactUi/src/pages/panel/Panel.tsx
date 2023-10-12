@@ -98,7 +98,7 @@ const Panel = () => {
   return (
     <RequireAuthenticated>
       <Box sx={{ display: { xs: 'block', md: 'flex', maxWidth: '100vw' } }}>
-        <AppBar position="static" sx={{ display: { xs: 'block', md: 'none' } }}>
+        <AppBar position="fixed" sx={{ display: { xs: 'block', md: 'none' } }}>
           <Container maxWidth={false}>
             <Toolbar disableGutters>
               <Box
@@ -116,19 +116,6 @@ const Panel = () => {
                 >
                   <MenuIcon />
                 </IconButton>
-              </Box>
-              <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                {pages.map((page) => (
-                  <Button
-                    key={page.name}
-                    sx={{ my: 2, color: 'white', display: 'block' }}
-                    onClick={() => navigate(page.path)}
-                  >
-                    <Typography textAlign="center" variant="button">
-                      {page.name}
-                    </Typography>
-                  </Button>
-                ))}
               </Box>
               <Box sx={{ flexGrow: 0, gap: 2, display: 'flex' }}>
                 <ThemeSelector />
@@ -241,7 +228,7 @@ const Panel = () => {
         </Drawer>
 
         <Box component="main" sx={{ flexGrow: 1, p: 3, minWidth: 0 }}>
-          <Toolbar sx={{ display: { xs: 'none', md: 'block' } }} />
+          <Toolbar />
           <SelectedGuildContext.Provider value={{ selectedGuild: selectedGuild }}>
             <Outlet />
           </SelectedGuildContext.Provider>
