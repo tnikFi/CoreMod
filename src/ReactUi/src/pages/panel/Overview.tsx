@@ -53,7 +53,7 @@ const Overview = () => {
   return (
     <PageView>
       <Container>
-        <Paper sx={{ p: 2, maxWidth: '100%' }}>
+        <Paper sx={{ p: 2, height: 500, display: 'flex', flexDirection: 'column' }}>
           <Typography variant="h6" sx={{ marginBottom: 2 }}>
             My Moderations
           </Typography>
