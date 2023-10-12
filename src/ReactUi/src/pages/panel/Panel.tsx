@@ -97,7 +97,7 @@ const Panel = () => {
 
   return (
     <RequireAuthenticated>
-      <Box sx={{ display: { xs: 'block', md: 'flex' } }}>
+      <Box sx={{ display: { xs: 'block', md: 'flex', maxWidth: '100vw' } }}>
         <AppBar position="static" sx={{ display: { xs: 'block', md: 'none' } }}>
           <Container maxWidth={false}>
             <Toolbar disableGutters>
@@ -240,7 +240,7 @@ const Panel = () => {
           </List>
         </Drawer>
 
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Box component="main" sx={{ flexGrow: 1, p: 3, minWidth: 0 }}>
           <Toolbar sx={{ display: { xs: 'none', md: 'block' } }} />
           <SelectedGuildContext.Provider value={{ selectedGuild: selectedGuild }}>
             <Outlet />
