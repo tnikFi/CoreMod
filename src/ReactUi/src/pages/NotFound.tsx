@@ -26,12 +26,13 @@ const NotFound = () => {
         justifyContent: 'center',
         flexDirection: 'column',
         height: '60vh',
+        px: 5,
       }}
     >
-      <Typography variant="h1" color="GrayText">
+      <Typography variant="h1" color="GrayText" textAlign={'center'}>
         404
       </Typography>
-      <Typography variant="h5" sx={{ my: 2 }}>
+      <Typography variant="h5" sx={{ my: 2, textAlign: 'center' }}>
         {messages[Math.floor(Math.random() * messages.length)]}
       </Typography>
       <Button onClick={() => window.history.back()}>Go Back</Button>
