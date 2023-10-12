@@ -1,7 +1,7 @@
 import React from 'react'
 import { SelectedGuildContext } from '../../contexts/SelectedGuildContext'
 import PageView from '../../components/PageView'
-import { Container, Paper, Typography } from '@mui/material'
+import { Box, Button, Container, Paper, Typography } from '@mui/material'
 import { ModerationDto, UserService } from '../../api'
 import { DataGrid, GridColDef, GridValueFormatterParams } from '@mui/x-data-grid'
 
@@ -33,20 +33,24 @@ const Overview = () => {
   const [moderations, setModerations] = React.useState<ModerationDto[]>([])
   const [moderationsLoading, setModerationsLoading] = React.useState(false)
 
-  React.useEffect(() => {
-    const getModerations = async () => {
-      setModerations([])
-      if (!selectedGuild?.id) return
-      setModerationsLoading(true)
-      try {
-        const moderations = await UserService.getApiUserModerations(selectedGuild.id)
-        setModerations(moderations)
-      } finally {
-        setModerationsLoading(false)
-      }
+  /**
+   * Fetches the user's moderations for the selected guild.
+   */
+  const getModerations = React.useCallback(async () => {
+    setModerations([])
+    if (!selectedGuild?.id) return
+    setModerationsLoading(true)
+    try {
+      const moderations = await UserService.getApiUserModerations(selectedGuild.id)
+      setModerations(moderations)
+    } finally {
+      setModerationsLoading(false)
     }
-    getModerations()
   }, [selectedGuild])
+
+  React.useEffect(() => {
+    getModerations()
+  }, [getModerations])
 
   if (!selectedGuild) return null
 
@@ -54,9 +58,19 @@ const Overview = () => {
     <PageView>
       <Container>
         <Paper sx={{ p: 2, height: 500, display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="h6" sx={{ marginBottom: 2 }}>
-            My Moderations
-          </Typography>
+          <Box
+            sx={{
+              marginBottom: 2,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Typography variant="h6">My Moderations</Typography>
+            <Button variant="outlined" disabled={moderationsLoading} onClick={getModerations}>
+              Refresh
+            </Button>
+          </Box>
           <DataGrid
             columns={moderationColumns}
             rows={moderations}
