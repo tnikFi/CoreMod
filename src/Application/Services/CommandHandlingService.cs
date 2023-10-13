@@ -4,9 +4,12 @@ using Application.Queries.Configuration;
 using Application.Queries.DiscordApiCalls;
 using Discord;
 using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
+using Infrastructure.Configuration;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using IResult = Discord.Commands.IResult;
 
 namespace Application.Services;
 
@@ -14,12 +17,16 @@ public class CommandHandlingService : ICommandHandlingService
 {
     private readonly DiscordSocketClient _client;
     private readonly CommandService _commands;
+    private readonly DiscordConfiguration _discordConfig;
+    private readonly InteractionService _interactionService;
     private readonly IServiceProvider _services;
 
     public CommandHandlingService(IServiceProvider services, DiscordSocketClient client, CommandService commands,
-        ILoggingService loggingService)
+        ILoggingService loggingService, InteractionService interactionService, DiscordConfiguration discordConfig)
     {
         _commands = commands;
+        _interactionService = interactionService;
+        _discordConfig = discordConfig;
         _client = client;
         _services = services;
         _commands.CommandExecuted += CommandExecutedAsync;
@@ -28,11 +35,19 @@ public class CommandHandlingService : ICommandHandlingService
         _client.MessageDeleted += loggingService.LogMessageDelete;
         _client.MessagesBulkDeleted += loggingService.LogBulkMessageDelete;
         _client.UserJoined += HandleJoinAsync;
+        _client.InteractionCreated += InteractionCreatedAsync;
     }
 
     public async Task InitializeAsync()
     {
         await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+        await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+#if DEBUG
+        if (_discordConfig.DebugGuildId.HasValue)
+            await _interactionService.RegisterCommandsToGuildAsync(_discordConfig.DebugGuildId.Value);
+#else
+        await _interactionService.RegisterCommandsGloballyAsync();
+#endif
     }
 
     private async Task MessageReceivedAsync(SocketMessage rawMessage)
@@ -66,6 +81,15 @@ public class CommandHandlingService : ICommandHandlingService
         {
             await _commands.ExecuteAsync(context, argPos, commandScope.ServiceProvider);
         }
+    }
+
+    private async Task InteractionCreatedAsync(SocketInteraction interaction)
+    {
+        var context = new SocketInteractionContext(_client, interaction);
+        var scope = _services.CreateScope();
+        var result = await _interactionService.ExecuteCommandAsync(context, scope.ServiceProvider);
+        if (!result.IsSuccess)
+            await context.Channel.SendMessageAsync($"Error: {result}");
     }
 
     private static async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context,

@@ -4,6 +4,7 @@ using Application.Interfaces;
 using Application.Services;
 using Discord;
 using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Hangfire;
 using Infrastructure.Configuration;
@@ -72,6 +73,7 @@ builder.Services.AddSingleton(discordConfig.SocketConfig);
 builder.Services.AddSingleton<DiscordSocketClient>();
 builder.Services.AddSingleton<IDiscordClient>(x => x.GetRequiredService<DiscordSocketClient>());
 builder.Services.AddSingleton<CommandService>();
+builder.Services.AddSingleton<InteractionService>();
 
 builder.Services.AddSingleton<ILoggingService, LoggingService>();
 builder.Services.AddSingleton<IModerationMessageService, ModerationMessageService>();
@@ -95,8 +97,11 @@ await discordClient.SetStatusAsync(UserStatus.DoNotDisturb);
 
 // Initialize the command handler for each scope
 var commandHandlingService = app.Services.GetRequiredService<ICommandHandlingService>();
-await commandHandlingService.InitializeAsync();
-await discordClient.SetStatusAsync(UserStatus.Online);
+discordClient.Ready += async () =>
+{
+    await commandHandlingService.InitializeAsync();
+    await discordClient.SetStatusAsync(UserStatus.Online);
+};
 
 // Make sure the bot logs out instantly when the app stops
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();

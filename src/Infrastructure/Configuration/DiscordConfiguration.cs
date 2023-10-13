@@ -11,4 +11,5 @@ public class DiscordConfiguration
     public string DefaultPrefix { get; set; } = "!";
     public int MaxPrefixLength { get; set; } = 5;
     public DiscordSocketConfig SocketConfig { get; set; } = new();
+    public ulong? DebugGuildId { get; set; }
 }
