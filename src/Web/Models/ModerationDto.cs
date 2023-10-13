@@ -9,8 +9,8 @@ public class ModerationDto
     public string? Reason { get; set; }
     public required ulong UserId { get; set; }
     public ulong? ModeratorId { get; set; }
-    public required DateTime CreatedAt { get; set; }
-    public DateTime? ExpiresAt { get; set; }
+    public required DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? ExpiresAt { get; set; }
 
     /// <summary>
     ///     Map a <see cref="Moderation" /> to a <see cref="ModerationDto" />.
@@ -29,8 +29,10 @@ public class ModerationDto
             Reason = moderation.Reason,
             UserId = moderation.UserId,
             ModeratorId = includeModerator ? moderation.ModeratorId : null,
-            CreatedAt = moderation.Timestamp,
-            ExpiresAt = moderation.ExpiresAt
+            CreatedAt = new DateTimeOffset(moderation.Timestamp, TimeSpan.Zero),
+            ExpiresAt = moderation.ExpiresAt.HasValue
+                ? new DateTimeOffset(moderation.ExpiresAt.Value, TimeSpan.Zero)
+                : null
         };
     }
 }
