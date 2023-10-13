@@ -1,7 +1,14 @@
-import { Paper, Box, Typography, Button } from '@mui/material'
-import { DataGrid, GridColDef, GridValueFormatterParams } from '@mui/x-data-grid'
+import { Paper, Box, Typography, Button, styled } from '@mui/material'
+import {
+  DataGrid,
+  GridColDef,
+  GridRowClassNameParams,
+  GridValueFormatterParams,
+  gridClasses,
+} from '@mui/x-data-grid'
 import React from 'react'
 import { ModerationDto } from '../../api'
+import CheckIcon from '@mui/icons-material/Check'
 
 export interface MyModerationsProps {
   /**
@@ -26,10 +33,18 @@ export interface MyModerationsProps {
  * The date string is expected to be in UTC.
  */
 const dateTimeFormatter = (params: GridValueFormatterParams) => {
-  // Parse the date and apply the system timezone offset
   const date = new Date(params.value as string)
-  date.setMinutes(date.getMinutes() - date.getTimezoneOffset())
   return date.toLocaleString()
+}
+
+/**
+ * Checks whether the expiration date time has passed.
+ * @param expiresAt Expiration date time string.
+ * @returns Boolean indicating whether the expiration date time has passed. Returns false if the expiration date time is undefined.
+ */
+const isExpired = (expiresAt: string | undefined) => {
+  if (!expiresAt) return false
+  return new Date(expiresAt) < new Date()
 }
 
 /**
@@ -45,13 +60,43 @@ const moderationColumns: GridColDef[] = [
     width: 200,
     valueFormatter: (params) => (params.value ? dateTimeFormatter(params) : 'Never'),
   },
+  {
+    field: 'expired',
+    headerName: 'Expired',
+    width: 100,
+    valueGetter: (params) => {
+      const expiresAt = params.row.expiresAt as string | undefined
+      if (!expiresAt) return undefined
+      return params.value ? true : expiresAt ? isExpired(expiresAt) : false
+    },
+    renderCell: (params) => {
+      return params.value ? <CheckIcon /> : undefined
+    },
+  },
 ]
+
+/**
+ * Data grid for displaying the user's moderations.
+ * Expired moderations are displayed in a different color.
+ */
+const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
+  [`& .${gridClasses.row}.expired`]: {
+    color: theme.palette.text.secondary,
+  },
+}))
 
 const MyModerations: React.FC<MyModerationsProps> = ({
   moderations,
   loading: moderationsLoading,
   onRefresh: getModerations,
 }) => {
+  const getRowClassName = React.useCallback((params: GridRowClassNameParams) => {
+    if (isExpired(params.row.expiresAt as string | undefined)) {
+      return 'expired'
+    }
+    return ''
+  }, [])
+
   return (
     <Paper sx={{ p: 2, height: 500, display: 'flex', flexDirection: 'column' }}>
       <Box
@@ -67,11 +112,12 @@ const MyModerations: React.FC<MyModerationsProps> = ({
           Refresh
         </Button>
       </Box>
-      <DataGrid
+      <StyledDataGrid
         columns={moderationColumns}
         rows={moderations}
-        autoHeight={true}
+        autoHeight={false}
         loading={moderationsLoading}
+        getRowClassName={getRowClassName}
       />
     </Paper>
   )
