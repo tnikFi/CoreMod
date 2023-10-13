@@ -50,11 +50,10 @@ builder.Services.AddAuthentication(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authConfig.Jwt.SigningKey)),
             ValidateIssuerSigningKey = true,
             ValidAudience = authConfig.Jwt.Audience,
-            ValidIssuer = authConfig.Jwt.Issuer,
+            ValidIssuer = authConfig.Jwt.Issuer
         };
     });
 
@@ -129,7 +128,7 @@ app.UseCors(corsPolicyBuilder => corsPolicyBuilder
     .AllowAnyHeader()
 );
 
-app.UseCookiePolicy(new CookiePolicyOptions()
+app.UseCookiePolicy(new CookiePolicyOptions
 {
     MinimumSameSitePolicy = SameSiteMode.Lax
 });
