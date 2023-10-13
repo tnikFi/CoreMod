@@ -81,4 +81,22 @@ public class ConfigurationModule : ModuleBase<SocketCommandContext>
         else
             await ReplyAsync($"Set the welcome message to:\n{message}");
     }
+
+    [Command("reportchannel")]
+    [Summary("Sets the user report channel.")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    [Remarks("Leave empty to disable reporting.")]
+    public async Task SetReportChannelAsync(
+        [Summary("The new report channel.")] SocketTextChannel? channel = null)
+    {
+        await _mediator.Send(new SetReportChannelIdCommand
+        {
+            GuildId = Context.Guild.Id,
+            ReportChannelId = channel?.Id
+        });
+        if (channel is null)
+            await ReplyAsync("Reporting disabled.");
+        else
+            await ReplyAsync($"Set the report channel to {channel.Mention}.");
+    }
 }
