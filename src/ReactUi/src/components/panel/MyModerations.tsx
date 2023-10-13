@@ -4,8 +4,20 @@ import React from 'react'
 import { ModerationDto } from '../../api'
 
 export interface MyModerationsProps {
+  /**
+   * Moderations to display in the data grid.
+   */
   moderations: ModerationDto[]
+
+  /**
+   * Whether the moderations are currently being loaded. Disables the refresh button.
+   * @default false
+   */
   loading: boolean
+
+  /**
+   * Callback to refresh the moderations. Called when the refresh button is clicked.
+   */
   onRefresh: () => void
 }
 
