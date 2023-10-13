@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { GuildDto } from '../models/GuildDto';
 import type { ModerationDto } from '../models/ModerationDto';
+import type { RoleDto } from '../models/RoleDto';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -33,6 +34,23 @@ guildId?: string,
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/User/moderations',
+            query: {
+                'guildId': guildId,
+            },
+        });
+    }
+
+    /**
+     * @param guildId 
+     * @returns RoleDto Success
+     * @throws ApiError
+     */
+    public static getApiUserRoles(
+guildId?: string,
+): CancelablePromise<Array<RoleDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/User/roles',
             query: {
                 'guildId': guildId,
             },

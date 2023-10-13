@@ -9,6 +9,8 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { GuildDto } from './models/GuildDto';
 export type { ModerationDto } from './models/ModerationDto';
+export type { RoleDto } from './models/RoleDto';
 
+export { GuildsService } from './services/GuildsService';
 export { TokenService } from './services/TokenService';
 export { UserService } from './services/UserService';

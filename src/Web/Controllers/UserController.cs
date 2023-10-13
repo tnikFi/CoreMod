@@ -67,4 +67,25 @@ public class UserController : ControllerBase
 
         return moderations.Select(x => ModerationDto.FromDomainModel(x, false)).ToArray();
     }
+
+    /// <summary>
+    ///     Get the roles of the user in a guild.
+    /// </summary>
+    /// <param name="guildId"></param>
+    /// <returns></returns>
+    [HttpGet("roles")]
+    public async Task<ActionResult<RoleDto[]>> GetRolesAsync(string guildId)
+    {
+        // Try to parse the guild ID and return bad request if it's invalid.
+        if (!ulong.TryParse(guildId, out var guildIdParsed)) return BadRequest();
+        var userId = ulong.Parse(User.Claims.First(c => c.Type == "userId").Value);
+        var guildUser = await _discordClient.Rest.GetGuildUserAsync(guildIdParsed, userId);
+        var guild = _discordClient.GetGuild(guildIdParsed);
+        var roles = guild.Roles.Where(r => guildUser.RoleIds.Contains(r.Id))
+            .Where(r => !r.IsEveryone)
+            .Select(RoleDto.FromSocketRole)
+            .ToArray();
+
+        return Ok(roles);
+    }
 }
