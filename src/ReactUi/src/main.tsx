@@ -7,6 +7,7 @@ const authConfig: TAuthConfig = {
   clientId: import.meta.env.VITE_CLIENT_ID as string,
   authorizationEndpoint: import.meta.env.VITE_AUTHORIZATION_ENDPOINT as string,
   tokenEndpoint: import.meta.env.VITE_TOKEN_ENDPOINT as string,
+  logoutEndpoint: import.meta.env.VITE_LOGOUT_ENDPOINT as string,
   redirectUri: import.meta.env.VITE_REDIRECT_URI as string,
   decodeToken: false,
   autoLogin: false,

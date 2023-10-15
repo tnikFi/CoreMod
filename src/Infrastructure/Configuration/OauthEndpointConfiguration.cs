@@ -11,4 +11,9 @@ public class OauthEndpointConfiguration
     ///     Endpoint used for getting the user info of the authenticated user.
     /// </summary>
     public required string UserInfo { get; init; }
+
+    /// <summary>
+    ///     Endpoint used for revoking access tokens.
+    /// </summary>
+    public required string Revoke { get; init; }
 }

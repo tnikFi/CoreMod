@@ -12,5 +12,6 @@ export type { ModerationDto } from './models/ModerationDto';
 export type { RoleDto } from './models/RoleDto';
 
 export { GuildsService } from './services/GuildsService';
+export { LogoutService } from './services/LogoutService';
 export { TokenService } from './services/TokenService';
 export { UserService } from './services/UserService';
