@@ -8,7 +8,7 @@ public static class UserExtensions
     /// <summary>Tries to send a message via DM.</summary>
     /// <param name="user">The user to send the DM to.</param>
     /// <param name="text">The message to be sent.</param>
-    /// <param name="isTTS">Whether the message should be read aloud by Discord or not.</param>
+    /// <param name="isTts">Whether the message should be read aloud by Discord or not.</param>
     /// <param name="embed">The <see cref="F:Discord.EmbedType.Rich" /> <see cref="T:Discord.Embed" /> to be sent.</param>
     /// <param name="options">The options to be used when sending the request.</param>
     /// <param name="allowedMentions">
@@ -23,23 +23,21 @@ public static class UserExtensions
     /// </returns>
     public static async Task<IUserMessage?> TrySendMessageAsync(
         this IUser user,
-        string text = null,
-        bool isTTS = false,
-        Embed embed = null,
-        RequestOptions options = null,
-        AllowedMentions allowedMentions = null,
-        MessageComponent components = null,
-        Embed[] embeds = null)
+        string? text = null,
+        bool isTts = false,
+        Embed? embed = null,
+        RequestOptions? options = null,
+        AllowedMentions? allowedMentions = null,
+        MessageComponent? components = null,
+        Embed[]? embeds = null)
     {
         try
         {
-            return await user.SendMessageAsync(text, isTTS, embed, options, allowedMentions, components, embeds);
+            return await user.SendMessageAsync(text, isTts, embed, options, allowedMentions, components, embeds);
         }
         catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.CannotSendMessageToUser)
         {
             return null;
         }
-
-        return null;
     } 
 }

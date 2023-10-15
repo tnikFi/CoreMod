@@ -7,7 +7,7 @@ namespace Application.Queries.DiscordApiCalls;
 
 public class SendWelcomeMessageQuery : IRequest
 {
-    public IGuildUser User { get; set; }
+    public required IGuildUser User { get; set; }
 }
 
 public class SendWelcomeMessageQueryHandler : IRequestHandler<SendWelcomeMessageQuery>
