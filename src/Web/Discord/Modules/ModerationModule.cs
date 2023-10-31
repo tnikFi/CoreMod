@@ -78,7 +78,7 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
 
         await ReplyAsync("User has been muted.");
     }
-    
+
     [Command("unmute")]
     [Summary("Unmutes a user.")]
     [RequireUserPermission(GuildPermission.MuteMembers)]
@@ -101,7 +101,7 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
 
         await ReplyAsync("User has been unmuted.");
     }
-    
+
     [Command("kick")]
     [Summary("Kicks a user.")]
     [RequireUserPermission(GuildPermission.KickMembers)]
@@ -189,13 +189,13 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
     {
         var messages = await Context.Channel.GetMessagesAsync(count + 1).FlattenAsync();
         var messageArray = messages.ToArray();
-        await ((ITextChannel) Context.Channel).DeleteMessagesAsync(messageArray);
+        await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messageArray);
         await ReplyAsync($"Deleted {messageArray.Length - 1} messages.");
         await _loggingService.SendLogAsync(Context.Guild.Id, embed: new EmbedBuilder()
             .WithAuthor(Context.User)
             .WithTitle($"Purged {messageArray.Length - 1} messages")
             .WithDescription(
-                $"Purged {messageArray.Length - 1} messages in {((ITextChannel) Context.Channel).Mention}.")
+                $"Purged {messageArray.Length - 1} messages in {((ITextChannel)Context.Channel).Mention}.")
             .WithColor(Color.Red)
             .WithCurrentTimestamp()
             .Build());
@@ -257,5 +257,38 @@ public class ModerationModule : ModuleBase<SocketCommandContext>
         {
             await ReplyAsync("No moderation logs found.");
         }
+    }
+
+    [Command("case")]
+    [Summary("Gets information about a moderation case.")]
+    [RequireUserPermission(GuildPermission.ManageMessages)]
+    public async Task GetCaseAsync(
+        [Summary("Case number.")] int caseNumber)
+    {
+        var moderation = await _mediator.Send(new GetModerationQuery
+        {
+            Guild = Context.Guild,
+            Id = caseNumber
+        });
+
+        if (moderation is null)
+        {
+            await ReplyAsync("No moderation case found with that number.");
+            return;
+        }
+
+        var typeLabel = moderation.Type.ToString();
+        var embed = new EmbedBuilder()
+            .WithAuthor(Context.Guild.GetUser(moderation.ModeratorId))
+            .WithTitle(typeLabel)
+            .WithDescription(moderation.Reason ?? "No reason provided.")
+            .AddField("User", Context.Guild.GetUser(moderation.UserId).Mention)
+            .AddField("Moderator", Context.Guild.GetUser(moderation.ModeratorId).Mention)
+            .WithTimestamp(moderation.Timestamp.ToLocalTime())
+            .WithFooter($"Case #{moderation.Id}")
+            .WithColor(EnumUtils.GetAttributeValue<EmbedColorAttribute>(moderation.Type)?.Color ?? Color.Default)
+            .Build();
+
+        await ReplyAsync(embed: embed);
     }
 }
