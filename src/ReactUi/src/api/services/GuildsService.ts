@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ChannelDto } from '../models/ChannelDto';
+
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -19,6 +21,23 @@ guildId: string,
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/Guilds/{guildId}/member-count',
+            path: {
+                'guildId': guildId,
+            },
+        });
+    }
+
+    /**
+     * @param guildId 
+     * @returns ChannelDto Success
+     * @throws ApiError
+     */
+    public static getApiGuildsChannels(
+guildId: string,
+): CancelablePromise<Array<ChannelDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/Guilds/{guildId}/channels',
             path: {
                 'guildId': guildId,
             },
