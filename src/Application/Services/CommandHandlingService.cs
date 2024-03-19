@@ -66,9 +66,20 @@ public class CommandHandlingService : ICommandHandlingService
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var prefix = await mediator.Send(new GetCommandPrefixQuery {GuildId = guild?.Id});
+            
+            // If the message only contained a mention of the bot, reply with the current prefix.
+            if (message.Content == $"<@{_client.CurrentUser.Id}>")
+            {
+                await message.ReplyAsync(
+                    $"The current prefix for this server is `{prefix}`");
+                return;
+            }
+
             if (!message.HasStringPrefix(prefix, ref argPos)
                 && !message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+            {
                 return;
+            }
         }
 
         // Create the websocket context
