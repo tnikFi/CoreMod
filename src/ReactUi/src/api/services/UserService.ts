@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { GuildDto } from '../models/GuildDto';
+import type { GuildPermissions } from '../models/GuildPermissions';
 import type { ModerationDto } from '../models/ModerationDto';
 import type { RoleDto } from '../models/RoleDto';
 
@@ -51,6 +52,23 @@ guildId?: string,
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/User/roles',
+            query: {
+                'guildId': guildId,
+            },
+        });
+    }
+
+    /**
+     * @param guildId 
+     * @returns GuildPermissions Success
+     * @throws ApiError
+     */
+    public static getApiUserPermissions(
+guildId?: string,
+): CancelablePromise<GuildPermissions> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/User/permissions',
             query: {
                 'guildId': guildId,
             },

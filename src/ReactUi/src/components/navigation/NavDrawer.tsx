@@ -11,12 +11,22 @@ import {
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import AuthenticatedComponent from '../authentication/AuthenticatedComponent'
+import { GuildPermissions } from '../../api'
 
 export interface Page {
   name: string
   path: string
   requireAuth?: boolean
   icon?: React.ReactNode
+
+  /**
+   * A callback that determines if the user has permission to view the page.
+   * 
+   * Actions performed in the restricted page should still be validated on the server to prevent unauthorized access.
+   * @param permissions The permissions the user has in the current guild. `undefined` if no guild is selected or if permissions have not been fetched.
+   * @returns Boolean indicating if the user has permission to view the page.
+   */
+  permissionCallback?: (permissions?: GuildPermissions) => boolean
 }
 
 interface NavMenuProps extends SwipeableDrawerProps {
@@ -29,6 +39,13 @@ interface NavMenuProps extends SwipeableDrawerProps {
    * The base path of the pages. Used to determine if a page is selected.
    */
   basePath?: string
+
+  /**
+   * The permissions the user has in the current guild. Used to determine if certain nav items should be disabled.
+   * 
+   * Only used if the page has a `permissionCallback` property and `requireAuth` is true.
+   */
+  guildPermissions?: GuildPermissions
 }
 
 interface NavListItemProps {
@@ -36,12 +53,13 @@ interface NavListItemProps {
   currentPath: string
   navigate: (path: string) => void
   basePath?: string
+  disabled?: boolean
 }
 
 /**
  * A nav list item that is always rendered.
  */
-const NavListItem: React.FC<NavListItemProps> = ({ currentPath, navigate, page, basePath }) => {
+const NavListItem: React.FC<NavListItemProps> = ({ currentPath, navigate, page, basePath, disabled }) => {
   return (
     <ListItem key={page.name} disablePadding>
       <ListItemButton
@@ -50,6 +68,7 @@ const NavListItem: React.FC<NavListItemProps> = ({ currentPath, navigate, page, 
           currentPath === `${basePath ?? ''}${page.path}` ||
           currentPath === `${basePath ?? ''}/${page.path}`
         }
+        disabled={disabled}
       >
         {page.icon && <ListItemIcon>{page.icon}</ListItemIcon>}
         <ListItemText primary={page.name} />
@@ -66,13 +85,14 @@ const AuthenticatedNavListItem: React.FC<NavListItemProps> = ({
   navigate,
   page,
   basePath,
+  disabled,
 }) => {
   return page.requireAuth ? (
     <AuthenticatedComponent>
-      <NavListItem currentPath={currentPath} navigate={navigate} page={page} basePath={basePath} />
+      <NavListItem currentPath={currentPath} navigate={navigate} page={page} basePath={basePath} disabled={disabled} />
     </AuthenticatedComponent>
   ) : (
-    <NavListItem currentPath={currentPath} navigate={navigate} page={page} basePath={basePath} />
+    <NavListItem currentPath={currentPath} navigate={navigate} page={page} basePath={basePath} disabled={disabled} />
   )
 }
 
@@ -86,6 +106,7 @@ export const NavDrawer: React.FC<React.PropsWithChildren<NavMenuProps>> = ({
   onOpen,
   children,
   basePath,
+  guildPermissions,
   ...props
 }) => {
   const currentPath = useLocation().pathname
@@ -102,6 +123,11 @@ export const NavDrawer: React.FC<React.PropsWithChildren<NavMenuProps>> = ({
               navigate={navigate}
               page={page}
               basePath={basePath}
+              disabled={
+                page.requireAuth && page.permissionCallback
+                  ? !page.permissionCallback(guildPermissions)
+                  : false
+              }
             />
           ))}
         </List>

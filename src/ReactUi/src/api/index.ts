@@ -10,6 +10,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 export type { ChannelDto } from './models/ChannelDto';
 export { ChannelTypeEnum } from './models/ChannelTypeEnum';
 export type { GuildDto } from './models/GuildDto';
+export type { GuildPermissions } from './models/GuildPermissions';
 export type { ModerationDto } from './models/ModerationDto';
 export type { RoleDto } from './models/RoleDto';
 

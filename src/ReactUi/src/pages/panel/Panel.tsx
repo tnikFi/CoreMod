@@ -1,6 +1,6 @@
 import React from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { GuildDto, OpenAPI, UserService } from '../../api'
+import { GuildDto, GuildPermissions, OpenAPI, UserService } from '../../api'
 import {
   AppBar,
   Avatar,
@@ -38,16 +38,31 @@ const pages: Page[] = [
     name: 'Overview',
     path: '',
     icon: <ViewComfyIcon />,
+    requireAuth: true,
   },
   {
     name: 'Moderation',
     path: 'moderation',
     icon: <ShieldIcon />,
+    requireAuth: true,
+    permissionCallback(permissions) {
+      if (!permissions) return false
+      return (
+        permissions.administrator ||
+        permissions.banMembers ||
+        permissions.kickMembers ||
+        permissions.moderateMembers ||
+        permissions.manageRoles ||
+        permissions.viewAuditLog
+      ) ?? false
+    },
   },
   {
     name: 'Settings',
     path: 'settings',
     icon: <SettingsIcon />,
+    requireAuth: true,
+    permissionCallback: (permissions) => permissions?.manageGuild ?? false,
   },
 ]
 
@@ -56,6 +71,7 @@ const Panel = () => {
   const [userMenuOpen, setUserMenuOpen] = React.useState(false)
   const [guilds, setGuilds] = React.useState<GuildDto[]>([])
   const [selectedGuild, setSelectedGuild] = React.useState<GuildDto | null>(null)
+  const [guildPermissions, setGuildPermissions] = React.useState<GuildPermissions | undefined>(undefined)
   const { idToken, idTokenData } = React.useContext(AuthContext)
   const navigate = useNavigate()
 
@@ -90,6 +106,17 @@ const Panel = () => {
     } else {
       localStorage.removeItem('selectedGuild')
     }
+  }, [selectedGuild])
+
+  // Get the guild permissions when the selected guild changes
+  React.useEffect(() => {
+    async function getGuildPermissions() {
+      if (selectedGuild?.id) {
+        const permissions = await UserService.getApiUserPermissions(selectedGuild.id)
+        setGuildPermissions(permissions)
+      }
+    }
+    getGuildPermissions()
   }, [selectedGuild])
 
   const userName = idTokenData?.userName
@@ -157,6 +184,11 @@ const Panel = () => {
                     key={page.name}
                     sx={{ my: 2, color: 'white', display: 'block' }}
                     onClick={() => navigate(page.path)}
+                    disabled={
+                      page.requireAuth && page.permissionCallback
+                        ? !page.permissionCallback(guildPermissions)
+                        : false
+                    }
                   >
                     <Typography textAlign="center" variant="button">
                       {page.name}

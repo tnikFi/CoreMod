@@ -1,4 +1,5 @@
 ﻿using Application.Queries.Moderation;
+using Discord;
 using Discord.WebSocket;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -87,5 +88,20 @@ public class UserController : ControllerBase
             .ToArray();
 
         return Ok(roles);
+    }
+
+    /// <summary>
+    ///     Get the permissions of the user in a guild.
+    /// </summary>
+    /// <param name="guildId"></param>
+    /// <returns></returns>
+    [HttpGet("permissions")]
+    public async Task<ActionResult<GuildPermissions>> GetGuildPermissionsAsync(string guildId)
+    {
+        // Try to parse the guild ID and return bad request if it's invalid.
+        if (!ulong.TryParse(guildId, out var guildIdParsed)) return BadRequest();
+        var userId = ulong.Parse(User.Claims.First(c => c.Type == "userId").Value);
+        var guildUser = await _discordClient.Rest.GetGuildUserAsync(guildIdParsed, userId);
+        return Ok(guildUser.GuildPermissions);
     }
 }
