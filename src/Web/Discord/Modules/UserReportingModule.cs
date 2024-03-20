@@ -28,8 +28,6 @@ public class UserReportingModule : InteractionModuleBase<SocketInteractionContex
             return;
         }
 
-        //await RespondWithModalAsync<ReportMessageModal>(ReportMessageModal.Id);
-
         var reportChannelId = await _mediator.Send(new GetReportChannelIdQuery
         {
             GuildId = Context.Guild.Id
@@ -48,10 +46,14 @@ public class UserReportingModule : InteractionModuleBase<SocketInteractionContex
         }
         
         var embed = new EmbedBuilder()
+            .WithTitle("Message reported by user")
             .WithAuthor(message.Author)
             .WithDescription(message.Content)
             .WithFooter($"Reported by {Context.User}")
             .WithTimestamp(DateTimeOffset.UtcNow)
+            .AddField("Jump to message", $"[Click here]({message.GetJumpUrl()})")
+            .AddField("Channel", MentionUtils.MentionChannel(message.Channel.Id))
+            .AddField("Message ID", message.Id)
             .Build();
         await reportChannel.SendMessageAsync(embed: embed);
         

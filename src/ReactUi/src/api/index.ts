@@ -7,6 +7,8 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { ChannelDto } from './models/ChannelDto';
+export { ChannelTypeEnum } from './models/ChannelTypeEnum';
 export type { GuildDto } from './models/GuildDto';
 export type { ModerationDto } from './models/ModerationDto';
 export type { RoleDto } from './models/RoleDto';
