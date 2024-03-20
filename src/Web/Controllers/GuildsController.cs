@@ -10,21 +10,16 @@ namespace Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class GuildsController : ControllerBase
+public class GuildsController : BaseController
 {
-    private readonly DiscordSocketClient _discordClient;
-
-    public GuildsController(DiscordSocketClient discordClient)
-    {
-        _discordClient = discordClient;
-    }
-
+    public GuildsController(DiscordSocketClient discordClient) : base(discordClient) { }
+    
     [HttpGet("{guildId}/member-count")]
     public Task<ActionResult<int>> GetGuildMemberCountAsync(string guildId)
     {
         // Try to parse the guild ID and return bad request if it's invalid.
         if (!ulong.TryParse(guildId, out var guildIdParsed)) return Task.FromResult<ActionResult<int>>(BadRequest());
-        var guild = _discordClient.GetGuild(guildIdParsed);
+        var guild = DiscordClient.GetGuild(guildIdParsed);
 
         if (guild is null) return Task.FromResult<ActionResult<int>>(NotFound());
 
@@ -37,12 +32,17 @@ public class GuildsController : ControllerBase
     {
         // Try to parse the guild ID and return bad request if it's invalid.
         if (!ulong.TryParse(guildId, out var guildIdParsed)) return Task.FromResult<ActionResult<ChannelDto[]>>(BadRequest());
-        var guild = _discordClient.GetGuild(guildIdParsed);
+        var guild = DiscordClient.GetGuild(guildIdParsed);
 
         if (guild is null) return Task.FromResult<ActionResult<ChannelDto[]>>(NotFound());
 
+        var user = GetCurrentGuildUser(guildIdParsed);
+        
+        if (user is null) return Task.FromResult<ActionResult<ChannelDto[]>>(Forbid());
+        
         return Task.FromResult<ActionResult<ChannelDto[]>>(Ok(guild.Channels
-            .Where(x => x is ITextChannel and not IVoiceChannel)
+            .Where(channel => channel is ITextChannel and not IVoiceChannel)
+            .Where(channel => user.GetPermissions(channel).ViewChannel)
             .Select(ChannelDto.FromChannel)
             .ToArray()));
     }
