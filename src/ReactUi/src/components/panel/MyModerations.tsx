@@ -3,12 +3,12 @@ import {
   DataGrid,
   GridColDef,
   GridRowClassNameParams,
-  GridValueFormatterParams,
   gridClasses,
 } from '@mui/x-data-grid'
 import React from 'react'
 import { ModerationDto } from '../../api'
 import CheckIcon from '@mui/icons-material/Check'
+import { valueFormatters } from '../../utils/ValueFormatters'
 
 export interface MyModerationsProps {
   /**
@@ -29,15 +29,6 @@ export interface MyModerationsProps {
 }
 
 /**
- * Formats a date time string to a human readable format using the system locale and timezone.
- * The date string is expected to be in UTC.
- */
-const dateTimeFormatter = (params: GridValueFormatterParams) => {
-  const date = new Date(params.value as string)
-  return date.toLocaleString()
-}
-
-/**
  * Checks whether the expiration date time has passed.
  * @param expiresAt Expiration date time string.
  * @returns Boolean indicating whether the expiration date time has passed. Returns false if the expiration date time is undefined.
@@ -51,14 +42,14 @@ const isExpired = (expiresAt: string | undefined) => {
  * Columns for the moderation data grid.
  */
 const moderationColumns: GridColDef[] = [
-  { field: 'createdAt', headerName: 'Created At', width: 200, valueFormatter: dateTimeFormatter },
+  { field: 'createdAt', headerName: 'Created At', width: 200, valueFormatter: valueFormatters.dateTimeFormatter },
   { field: 'type', headerName: 'Type', width: 200 },
   { field: 'reason', headerName: 'Reason', minWidth: 200, flex: 1 },
   {
     field: 'expiresAt',
     headerName: 'Expires At',
     width: 200,
-    valueFormatter: (params) => (params.value ? dateTimeFormatter(params) : 'Never'),
+    valueFormatter: valueFormatters.expirationTimeFormatter,
   },
   {
     field: 'expired',
