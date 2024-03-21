@@ -3,7 +3,7 @@ import { DataGrid, GridColDef, gridClasses } from '@mui/x-data-grid'
 import React from 'react'
 import { ModerationDto } from '../../api'
 import CheckIcon from '@mui/icons-material/Check'
-import { valueFormatters } from '../../utils/ValueFormatters'
+import { dateTimeFormatter, expirationTimeFormatter } from '../../utils/ValueFormatters'
 import { getModerationRowClassName, isExpired } from '../../utils/ModerationGridUtils'
 
 export interface MyModerationsProps {
@@ -32,7 +32,7 @@ const moderationColumns: GridColDef[] = [
     field: 'createdAt',
     headerName: 'Created At',
     width: 200,
-    valueFormatter: valueFormatters.dateTimeFormatter,
+    valueFormatter: dateTimeFormatter,
   },
   { field: 'type', headerName: 'Type', width: 200 },
   { field: 'reason', headerName: 'Reason', minWidth: 200, flex: 1 },
@@ -40,7 +40,7 @@ const moderationColumns: GridColDef[] = [
     field: 'expiresAt',
     headerName: 'Expires At',
     width: 200,
-    valueFormatter: valueFormatters.expirationTimeFormatter,
+    valueFormatter: expirationTimeFormatter,
   },
   {
     field: 'expired',
