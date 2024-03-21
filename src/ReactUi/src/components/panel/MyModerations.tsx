@@ -1,14 +1,10 @@
 import { Paper, Box, Typography, Button, styled } from '@mui/material'
-import {
-  DataGrid,
-  GridColDef,
-  GridRowClassNameParams,
-  gridClasses,
-} from '@mui/x-data-grid'
+import { DataGrid, GridColDef, gridClasses } from '@mui/x-data-grid'
 import React from 'react'
 import { ModerationDto } from '../../api'
 import CheckIcon from '@mui/icons-material/Check'
 import { valueFormatters } from '../../utils/ValueFormatters'
+import { getModerationRowClassName, isExpired } from '../../utils/ModerationGridUtils'
 
 export interface MyModerationsProps {
   /**
@@ -29,20 +25,15 @@ export interface MyModerationsProps {
 }
 
 /**
- * Checks whether the expiration date time has passed.
- * @param expiresAt Expiration date time string.
- * @returns Boolean indicating whether the expiration date time has passed. Returns false if the expiration date time is undefined.
- */
-const isExpired = (expiresAt: string | undefined) => {
-  if (!expiresAt) return false
-  return new Date(expiresAt) < new Date()
-}
-
-/**
  * Columns for the moderation data grid.
  */
 const moderationColumns: GridColDef[] = [
-  { field: 'createdAt', headerName: 'Created At', width: 200, valueFormatter: valueFormatters.dateTimeFormatter },
+  {
+    field: 'createdAt',
+    headerName: 'Created At',
+    width: 200,
+    valueFormatter: valueFormatters.dateTimeFormatter,
+  },
   { field: 'type', headerName: 'Type', width: 200 },
   { field: 'reason', headerName: 'Reason', minWidth: 200, flex: 1 },
   {
@@ -81,13 +72,6 @@ const MyModerations: React.FC<MyModerationsProps> = ({
   loading: moderationsLoading,
   onRefresh: getModerations,
 }) => {
-  const getRowClassName = React.useCallback((params: GridRowClassNameParams) => {
-    if (isExpired(params.row.expiresAt as string | undefined)) {
-      return 'expired'
-    }
-    return ''
-  }, [])
-
   return (
     <Paper sx={{ p: 2, height: 500, display: 'flex', flexDirection: 'column' }}>
       <Box
@@ -108,7 +92,7 @@ const MyModerations: React.FC<MyModerationsProps> = ({
         rows={moderations}
         autoHeight={false}
         loading={moderationsLoading}
-        getRowClassName={getRowClassName}
+        getRowClassName={getModerationRowClassName}
       />
     </Paper>
   )
