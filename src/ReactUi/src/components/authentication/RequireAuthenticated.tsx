@@ -13,7 +13,7 @@ const RequireAuthenticated: React.FC<React.PropsWithChildren> = ({ children }) =
       <AuthenticatedComponent>{children}</AuthenticatedComponent>
       <UnauthenticatedComponent>
         <PageView>
-          <h1>Forbidden</h1>
+          <h1>Unauthorized</h1>
           <p style={{ fontSize: 24 }}>You are not logged in.</p>
           <Button onClick={() => login()}>Login</Button>
         </PageView>
