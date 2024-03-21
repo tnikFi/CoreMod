@@ -52,7 +52,7 @@ const moderationColumns: GridColDef[] = [
       return params.value ? true : expiresAt ? isExpired(expiresAt) : false
     },
     renderCell: (params) => {
-      return params.value ? <CheckIcon /> : undefined
+      return params.value ? <CheckIcon /> : null
     },
   },
 ]
