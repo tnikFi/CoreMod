@@ -12,6 +12,7 @@ import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import AuthenticatedComponent from '../authentication/AuthenticatedComponent'
 import { GuildPermissions } from '../../api'
+import { GuildPermissionCallback } from '../../utils/PermissionCallbacks'
 
 export interface Page {
   name: string
@@ -26,7 +27,7 @@ export interface Page {
    * @param permissions The permissions the user has in the current guild. `undefined` if no guild is selected or if permissions have not been fetched.
    * @returns Boolean indicating if the user has permission to view the page.
    */
-  permissionCallback?: (permissions?: GuildPermissions) => boolean
+  permissionCallback?: GuildPermissionCallback
 }
 
 interface NavMenuProps extends SwipeableDrawerProps {

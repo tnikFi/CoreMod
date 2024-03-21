@@ -27,6 +27,7 @@ import { NavDrawer, Page } from '../../components/navigation/NavDrawer'
 import Guild from '../../components/navigation/Guild'
 import { SelectedGuildContext } from '../../contexts/SelectedGuildContext'
 import ThemeSelector from '../../components/themes/ThemeSelector'
+import { permissionCallbacks } from '../../utils/PermissionCallbacks'
 
 const pages: Page[] = [
   {
@@ -45,24 +46,14 @@ const pages: Page[] = [
     path: 'moderation',
     icon: <ShieldIcon />,
     requireAuth: true,
-    permissionCallback(permissions) {
-      if (!permissions) return false
-      return (
-        permissions.administrator ||
-        permissions.banMembers ||
-        permissions.kickMembers ||
-        permissions.moderateMembers ||
-        permissions.manageRoles ||
-        permissions.viewAuditLog
-      ) ?? false
-    },
+    permissionCallback: permissionCallbacks.viewModerationPage,
   },
   {
     name: 'Settings',
     path: 'settings',
     icon: <SettingsIcon />,
     requireAuth: true,
-    permissionCallback: (permissions) => permissions?.manageGuild ?? false,
+    permissionCallback: permissionCallbacks.viewSettingsPage,
   },
 ]
 
@@ -71,7 +62,9 @@ const Panel = () => {
   const [userMenuOpen, setUserMenuOpen] = React.useState(false)
   const [guilds, setGuilds] = React.useState<GuildDto[]>([])
   const [selectedGuild, setSelectedGuild] = React.useState<GuildDto | null>(null)
-  const [guildPermissions, setGuildPermissions] = React.useState<GuildPermissions | undefined>(undefined)
+  const [guildPermissions, setGuildPermissions] = React.useState<GuildPermissions | undefined>(
+    undefined
+  )
   const { idToken, idTokenData } = React.useContext(AuthContext)
   const navigate = useNavigate()
 
@@ -111,6 +104,7 @@ const Panel = () => {
   // Get the guild permissions when the selected guild changes
   React.useEffect(() => {
     async function getGuildPermissions() {
+      setGuildPermissions(undefined)
       if (selectedGuild?.id) {
         const permissions = await UserService.getApiUserPermissions(selectedGuild.id)
         setGuildPermissions(permissions)
@@ -124,148 +118,153 @@ const Panel = () => {
 
   return (
     <RequireAuthenticated>
-      <Box sx={{ display: { xs: 'block', md: 'flex', maxWidth: '100vw' } }}>
-        <AppBar position="fixed" sx={{ display: { xs: 'block', md: 'none' } }}>
-          <Container maxWidth={false}>
-            <Toolbar disableGutters>
-              <Box
-                sx={{
-                  flexGrow: 1,
-                  display: { xs: 'flex', md: 'none' },
-                }}
-              >
-                <IconButton
-                  size="large"
-                  edge="start"
-                  color="inherit"
-                  aria-label="menu"
-                  onClick={() => setNavOpen(true)}
+      <SelectedGuildContext.Provider
+        value={{ selectedGuild: selectedGuild, guildPermissions: guildPermissions }}
+      >
+        <Box sx={{ display: { xs: 'block', md: 'flex', maxWidth: '100vw' } }}>
+          <AppBar position="fixed" sx={{ display: { xs: 'block', md: 'none' } }}>
+            <Container maxWidth={false}>
+              <Toolbar disableGutters>
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    display: { xs: 'flex', md: 'none' },
+                  }}
                 >
-                  <MenuIcon />
-                </IconButton>
-              </Box>
-              <Box sx={{ flexGrow: 0, gap: 2, display: 'flex' }}>
-                <ThemeSelector />
-                <Tooltip title="User settings">
-                  <IconButton sx={{ p: 0 }} onClick={() => setUserMenuOpen(true)}>
-                    <Avatar alt={userName} src={avatar ?? ''} />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Toolbar>
-          </Container>
-        </AppBar>
-
-        <AppBar
-          position="fixed"
-          sx={{ display: { xs: 'none', md: 'block' }, zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        >
-          <Container maxWidth={false}>
-            <Toolbar disableGutters>
-              <Box
-                sx={{
-                  flexGrow: 1,
-                  display: { xs: 'flex', md: 'none' },
-                }}
-              >
-                <IconButton
-                  size="large"
-                  edge="start"
-                  color="inherit"
-                  aria-label="menu"
-                  onClick={() => setNavOpen(true)}
-                >
-                  <MenuIcon />
-                </IconButton>
-              </Box>
-              <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                {pages.map((page) => (
-                  <Button
-                    key={page.name}
-                    sx={{ my: 2, color: 'white', display: 'block' }}
-                    onClick={() => navigate(page.path)}
-                    disabled={
-                      page.requireAuth && page.permissionCallback
-                        ? !page.permissionCallback(guildPermissions)
-                        : false
-                    }
+                  <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    onClick={() => setNavOpen(true)}
                   >
-                    <Typography textAlign="center" variant="button">
-                      {page.name}
-                    </Typography>
-                  </Button>
-                ))}
-              </Box>
-              <Box sx={{ flexGrow: 0, gap: 2, display: 'flex' }}>
-                <ThemeSelector />
-                <Tooltip title="User settings">
-                  <IconButton sx={{ p: 0 }} onClick={() => setUserMenuOpen(true)}>
-                    <Avatar alt={userName} src={avatar ?? ''} />
+                    <MenuIcon />
                   </IconButton>
-                </Tooltip>
-              </Box>
-            </Toolbar>
-          </Container>
-        </AppBar>
+                </Box>
+                <Box sx={{ flexGrow: 0, gap: 2, display: 'flex' }}>
+                  <ThemeSelector />
+                  <Tooltip title="User settings">
+                    <IconButton sx={{ p: 0 }} onClick={() => setUserMenuOpen(true)}>
+                      <Avatar alt={userName} src={avatar ?? ''} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Toolbar>
+            </Container>
+          </AppBar>
 
-        <UserDrawer
-          open={userMenuOpen}
-          onClose={() => setUserMenuOpen(false)}
-          onOpen={() => setUserMenuOpen(true)}
-        />
+          <AppBar
+            position="fixed"
+            sx={{
+              display: { xs: 'none', md: 'block' },
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+            }}
+          >
+            <Container maxWidth={false}>
+              <Toolbar disableGutters>
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    display: { xs: 'flex', md: 'none' },
+                  }}
+                >
+                  <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    onClick={() => setNavOpen(true)}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                </Box>
+                <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+                  {pages.map((page) => (
+                    <Button
+                      key={page.name}
+                      sx={{ my: 2, color: 'white', display: 'block' }}
+                      onClick={() => navigate(page.path)}
+                      disabled={
+                        page.requireAuth && page.permissionCallback
+                          ? !page.permissionCallback(guildPermissions)
+                          : false
+                      }
+                    >
+                      <Typography textAlign="center" variant="button">
+                        {page.name}
+                      </Typography>
+                    </Button>
+                  ))}
+                </Box>
+                <Box sx={{ flexGrow: 0, gap: 2, display: 'flex' }}>
+                  <ThemeSelector />
+                  <Tooltip title="User settings">
+                    <IconButton sx={{ p: 0 }} onClick={() => setUserMenuOpen(true)}>
+                      <Avatar alt={userName} src={avatar ?? ''} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Toolbar>
+            </Container>
+          </AppBar>
 
-        <NavDrawer
-          pages={pages}
-          open={navOpen}
-          onClose={() => setNavOpen(false)}
-          onOpen={() => setNavOpen(true)}
-          sx={{ display: { xs: 'block', md: 'none' } }}
-          basePath="/panel"
-        >
-          <Divider />
-          <List>
-            {guilds.map((guild) => (
-              <Guild
-                key={guild.id}
-                name={guild.name ?? ''}
-                onClick={() => setSelectedGuild(guild)}
-                icon={guild.icon}
-                selected={guild.id === selectedGuild?.id}
-              />
-            ))}
-          </List>
-        </NavDrawer>
+          <UserDrawer
+            open={userMenuOpen}
+            onClose={() => setUserMenuOpen(false)}
+            onOpen={() => setUserMenuOpen(true)}
+          />
 
-        <Drawer
-          variant="permanent"
-          sx={{
-            width: 250,
-            flexShrink: 0,
-            [`& .MuiDrawer-paper`]: { width: 250, boxSizing: 'border-box' },
-            display: { xs: 'none', md: 'block' },
-          }}
-        >
-          <Toolbar />
-          <List>
-            {guilds.map((guild) => (
-              <Guild
-                key={guild.id}
-                name={guild.name ?? ''}
-                onClick={() => setSelectedGuild(guild)}
-                icon={guild.icon}
-                selected={guild.id === selectedGuild?.id}
-              />
-            ))}
-          </List>
-        </Drawer>
+          <NavDrawer
+            pages={pages}
+            open={navOpen}
+            onClose={() => setNavOpen(false)}
+            onOpen={() => setNavOpen(true)}
+            sx={{ display: { xs: 'block', md: 'none' } }}
+            basePath="/panel"
+          >
+            <Divider />
+            <List>
+              {guilds.map((guild) => (
+                <Guild
+                  key={guild.id}
+                  name={guild.name ?? ''}
+                  onClick={() => setSelectedGuild(guild)}
+                  icon={guild.icon}
+                  selected={guild.id === selectedGuild?.id}
+                />
+              ))}
+            </List>
+          </NavDrawer>
 
-        <Box component="main" sx={{ flexGrow: 1, p: 3, minWidth: 0 }}>
-          <Toolbar />
-          <SelectedGuildContext.Provider value={{ selectedGuild: selectedGuild }}>
+          <Drawer
+            variant="permanent"
+            sx={{
+              width: 250,
+              flexShrink: 0,
+              [`& .MuiDrawer-paper`]: { width: 250, boxSizing: 'border-box' },
+              display: { xs: 'none', md: 'block' },
+            }}
+          >
+            <Toolbar />
+            <List>
+              {guilds.map((guild) => (
+                <Guild
+                  key={guild.id}
+                  name={guild.name ?? ''}
+                  onClick={() => setSelectedGuild(guild)}
+                  icon={guild.icon}
+                  selected={guild.id === selectedGuild?.id}
+                />
+              ))}
+            </List>
+          </Drawer>
+
+          <Box component="main" sx={{ flexGrow: 1, p: 3, minWidth: 0 }}>
+            <Toolbar />
             <Outlet />
-          </SelectedGuildContext.Provider>
+          </Box>
         </Box>
-      </Box>
+      </SelectedGuildContext.Provider>
     </RequireAuthenticated>
   )
 }
