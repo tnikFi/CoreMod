@@ -8,6 +8,7 @@ import { CssBaseline, ThemeProvider, createTheme, useMediaQuery } from '@mui/mat
 import React from 'react'
 import { ColorScheme, ColorSchemeContext } from './contexts/ColorSchemeContext'
 import { useLocalStorage } from 'usehooks-ts'
+import Moderation from './pages/panel/Moderation'
 
 const App = () => {
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>('colorScheme', 'system')
@@ -58,6 +59,7 @@ const App = () => {
             </Route>
             <Route path="panel" element={<Panel />}>
               <Route path="" element={<Overview />} />
+              <Route path="moderation" element={<Moderation />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

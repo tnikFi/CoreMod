@@ -12,7 +12,9 @@ export { ChannelTypeEnum } from './models/ChannelTypeEnum';
 export type { GuildDto } from './models/GuildDto';
 export type { GuildPermissions } from './models/GuildPermissions';
 export type { ModerationDto } from './models/ModerationDto';
+export type { ModerationDtoPaginatedResult } from './models/ModerationDtoPaginatedResult';
 export type { RoleDto } from './models/RoleDto';
+export type { UserDto } from './models/UserDto';
 
 export { GuildsService } from './services/GuildsService';
 export { LogoutService } from './services/LogoutService';

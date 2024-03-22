@@ -7,8 +7,8 @@ export type ModerationDto = {
     id?: number;
     type?: string | null;
     reason?: string | null;
-    userId?: number;
-    moderatorId?: number | null;
+    userId?: string | null;
+    moderatorId?: string | null;
     createdAt?: string;
     expiresAt?: string | null;
 };
