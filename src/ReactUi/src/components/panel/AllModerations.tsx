@@ -1,31 +1,13 @@
 import React from 'react'
-import { ApiError, GuildsService, ModerationDto } from '../../api'
+import { ApiError, GuildsService } from '../../api'
 import { getModerationRowClassName, isExpired } from '../../utils/ModerationGridUtils'
 import { Box, Button, Paper, Typography, styled } from '@mui/material'
 import { DataGrid, GridColDef, gridClasses } from '@mui/x-data-grid'
 import { dateTimeFormatter, expirationTimeFormatter } from '../../utils/ValueFormatters'
 import CheckIcon from '@mui/icons-material/Check'
-import ServerSideGrid, { ServerSideDataSourceParams } from '../grid/ServerSideGrid'
+import ServerSideGrid, { ServerSideDataSourceParams, ServerSideGridRef } from '../grid/ServerSideGrid'
 import { SelectedGuildContext } from '../../contexts/SelectedGuildContext'
 import { UserCellRenderer } from '../../utils/CellRenderers'
-
-export interface AllModerationsProps {
-  /**
-   * Moderations to display in the data grid.
-   */
-  moderations: ModerationDto[]
-
-  /**
-   * Whether the moderations are currently being loaded. Disables the refresh button.
-   * @default false
-   */
-  loading: boolean
-
-  /**
-   * Callback to refresh the moderations. Called when the refresh button is clicked.
-   */
-  onRefresh: () => void
-}
 
 /**
  * Columns for the moderation data grid.
@@ -72,8 +54,9 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   },
 }))
 
-const AllModerations: React.FC<AllModerationsProps> = ({ loading, onRefresh }) => {
+const AllModerations: React.FC = () => {
   const { selectedGuild } = React.useContext(SelectedGuildContext)
+  const gridRef = React.useRef<ServerSideGridRef | null>(null)
 
   const moderationsDataSource = React.useCallback(async (params: ServerSideDataSourceParams) => {
     try {
@@ -88,6 +71,10 @@ const AllModerations: React.FC<AllModerationsProps> = ({ loading, onRefresh }) =
     }
   }, [selectedGuild?.id])
 
+  const handleRefresh = React.useCallback(() => {
+    gridRef.current?.reset()
+  }, [])
+
   return (
     <Paper sx={{ p: 2, height: 500, display: 'flex', flexDirection: 'column' }}>
       <Box
@@ -99,7 +86,7 @@ const AllModerations: React.FC<AllModerationsProps> = ({ loading, onRefresh }) =
         }}
       >
         <Typography variant="h6">Moderations</Typography>
-        <Button variant="outlined" disabled={loading} onClick={onRefresh}>
+        <Button variant="outlined" disabled={gridRef.current?.loading} onClick={handleRefresh}>
           Refresh
         </Button>
       </Box>
@@ -107,9 +94,9 @@ const AllModerations: React.FC<AllModerationsProps> = ({ loading, onRefresh }) =
         component={StyledDataGrid}
         columns={moderationColumns}
         dataSource={moderationsDataSource}
-        useCache={false}
         getRowClassName={getModerationRowClassName}
         rowBuffer={100}
+        ref={gridRef}
       />
     </Paper>
   )

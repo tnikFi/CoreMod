@@ -60,9 +60,19 @@ export interface ServerSideGridRef {
   clearRows: (preserveCache?: boolean) => void
 
   /**
+   * Resets the grid to its initial state, causing cache to be invalidated, rows to be cleared, and the initial rows to be loaded again.
+   */
+  reset: () => void
+
+  /**
    * The data grid ref.
    */
   dataGridRef: React.RefObject<HTMLDivElement>
+
+  /**
+   * Whether the grid is currently loading data.
+   */
+  loading: boolean
 }
 
 const ServerSideGrid = React.forwardRef<ServerSideGridRef, ServerSideGridProps>(
@@ -152,7 +162,7 @@ const ServerSideGrid = React.forwardRef<ServerSideGridRef, ServerSideGridProps>(
     )
 
     // Expose the ref methods.
-    const dataGridRef = React.createRef<HTMLDivElement>()
+    const dataGridRef = React.useRef<HTMLDivElement>(null)
     React.useImperativeHandle(
       ref,
       () => ({
@@ -165,9 +175,17 @@ const ServerSideGrid = React.forwardRef<ServerSideGridRef, ServerSideGridProps>(
             invalidateCache()
           }
         },
+        reset: () => {
+          invalidateCache()
+          setRows([])
+          setRowCountState(0)
+          setPaginationModel({ pageSize: 25, page: 0 })
+          loadRows({ pageSize: 25, page: 0 })
+        },
         dataGridRef: dataGridRef,
+        loading,
       }),
-      [dataGridRef, invalidateCache, loadRows, paginationModel]
+      [invalidateCache, loadRows, loading, paginationModel]
     )
 
     const GridComponent = component ?? DataGrid
