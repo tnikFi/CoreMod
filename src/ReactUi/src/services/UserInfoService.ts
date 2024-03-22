@@ -19,22 +19,27 @@ class UserInfoService {
    * @param guildId ID of the guild the user is in
    * @param userId ID of the user to get information for
    * @returns Promise that resolves to the user information if successful
+   * @throws ApiError if the request fails
    */
   async getUserInfo(guildId: string, userId: string) {
+    // Invalidate cache and queue if the guild ID changes. (users of a different guild are not relevant to the current guild)
     if (this.guildId !== guildId) {
       this.guildId = guildId
       this.cache = {}
       this.queue = {}
     }
 
+    // Return cached user information if available
     if (this.cache[userId]) {
       return this.cache[userId]
     }
 
+    // Return the pending promise if the information for this user is already being fetched
     if (this.queue[userId] !== undefined) {
       return this.queue[userId]
     }
 
+    // Fetch user information from the API, add the promise to the queue, and cache the result
     this.queue[userId] = GuildsService.getApiGuildsUser(guildId, userId)
       .then((response) => {
         if (response.color && isDefaultRoleColor(response.color)) response.color = undefined
