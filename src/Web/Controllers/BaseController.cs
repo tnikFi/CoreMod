@@ -1,5 +1,6 @@
 ﻿using Common.Utils;
 using Discord.WebSocket;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers;
@@ -11,27 +12,29 @@ namespace Web.Controllers;
 public class BaseController : ControllerBase
 {
     protected readonly DiscordSocketClient DiscordClient;
-    
-    public BaseController(DiscordSocketClient discordClient)
+    protected readonly IMediator Mediator;
+
+    public BaseController(DiscordSocketClient discordClient, IMediator mediator)
     {
         DiscordClient = discordClient;
+        Mediator = mediator;
     }
-    
+
     /// <summary>
-    /// The Discord user ID of the current authenticated user.
+    ///     The Discord user ID of the current authenticated user.
     /// </summary>
     public ulong? DiscordUserId => ParseUtils.ParseUlong(User.Claims.First(c => c.Type == "userId").Value);
-    
+
     /// <summary>
-    /// The Discord user object of the current authenticated user.
+    ///     The Discord user object of the current authenticated user.
     /// </summary>
     public SocketUser? DiscordUser => DiscordUserId.HasValue ? DiscordClient.GetUser(DiscordUserId.Value) : null;
-    
+
     /// <summary>
-    /// Get the guild user object of the current authenticated user in the specified guild.
+    ///     Get the guild user object of the current authenticated user in the specified guild.
     /// </summary>
     /// <param name="guildId"></param>
-    /// <returns><see cref="SocketGuildUser"/> if the guild and user exist, otherwise null.</returns>
+    /// <returns><see cref="SocketGuildUser" /> if the guild and user exist, otherwise null.</returns>
     protected SocketGuildUser? GetCurrentGuildUser(ulong guildId)
     {
         var guild = DiscordClient.GetGuild(guildId);

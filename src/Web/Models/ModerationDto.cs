@@ -7,8 +7,8 @@ public class ModerationDto
     public required int Id { get; set; }
     public required string Type { get; set; }
     public string? Reason { get; set; }
-    public required ulong UserId { get; set; }
-    public ulong? ModeratorId { get; set; }
+    public required string UserId { get; set; }
+    public string? ModeratorId { get; set; }
     public required DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? ExpiresAt { get; set; }
 
@@ -27,8 +27,8 @@ public class ModerationDto
             Id = moderation.Id,
             Type = moderation.Type.ToString(),
             Reason = moderation.Reason,
-            UserId = moderation.UserId,
-            ModeratorId = includeModerator ? moderation.ModeratorId : null,
+            UserId = moderation.UserId.ToString(),
+            ModeratorId = includeModerator ? moderation.ModeratorId.ToString() : null,
             CreatedAt = new DateTimeOffset(moderation.Timestamp, TimeSpan.Zero),
             ExpiresAt = moderation.ExpiresAt.HasValue
                 ? new DateTimeOffset(moderation.ExpiresAt.Value, TimeSpan.Zero)
