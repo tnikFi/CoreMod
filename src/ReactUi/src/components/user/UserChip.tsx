@@ -17,7 +17,7 @@ const UserChip: React.FC<UserChipProps> = ({ userId, username, nickname, color, 
       component="div" // Add the missing component prop with the value of 'div'
       avatar={
         <Avatar alt={username} src={avatarUrl || undefined}>
-          {loading && username ? nickname ? nickname[0] : username[0] : null}
+          {!loading && username ? nickname ? nickname[0] : username[0] : null}
         </Avatar>
       }
       label={nickname || username || userId}
