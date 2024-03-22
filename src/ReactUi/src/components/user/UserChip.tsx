@@ -1,6 +1,7 @@
-import { Avatar, Chip, alpha } from '@mui/material'
+import { Avatar, Chip, Tooltip, alpha } from '@mui/material'
 import React from 'react'
 import styles from './UserChip.module.css'
+import UserContextMenu from './UserContextMenu'
 
 export interface UserChipProps {
   userId: string
@@ -11,30 +12,74 @@ export interface UserChipProps {
   loading?: boolean
 }
 
-const UserChip: React.FC<UserChipProps> = ({ userId, username, nickname, color, avatarUrl, loading }) => {
+interface ContextMenuPosition {
+  mouseX: number
+  mouseY: number
+}
+
+const UserChip: React.FC<UserChipProps> = ({
+  userId,
+  username,
+  nickname,
+  color,
+  avatarUrl,
+  loading,
+}) => {
+  const [contextMenu, setContextMenu] = React.useState<ContextMenuPosition | null>(null)
+
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setContextMenu(
+      contextMenu
+        ? null
+        : {
+            mouseX: event.clientX - 2,
+            mouseY: event.clientY - 4,
+          }
+    )
+  }
+
   return (
-    <Chip
-      component="div"
-      avatar={
-        <Avatar alt={username} src={avatarUrl || undefined}>
-          {!loading && username ? nickname ? nickname[0] : username[0] : null}
-        </Avatar>
-      }
-      label={nickname || username || userId}
-      variant="outlined"
-      disabled={loading}
-      sx={{
-        p: 0.5,
-        width: 'fit-content',
-        height: 'fit-content',
-        borderColor: color,
-        boxShadow: (theme) => theme.shadows[1],
-        ':hover': {
-          backgroundColor: color ? alpha(color, 0.1) : undefined,
-        },
-      }}
-      className={loading ? styles.loading : ''}
-    />
+    <div onContextMenu={handleContextMenu}>
+      <Tooltip title={username || userId} placement="bottom">
+        <Chip
+          component="div"
+          avatar={
+            <Avatar alt={username} src={avatarUrl || undefined}>
+              {!loading && username ? (nickname ? nickname[0] : username[0]) : null}
+            </Avatar>
+          }
+          label={nickname || username || userId}
+          variant="outlined"
+          disabled={loading}
+          sx={{
+            p: 0.5,
+            width: 'fit-content',
+            height: 'fit-content',
+            borderColor: color,
+            boxShadow: (theme) => theme.shadows[1],
+            ':hover': {
+              backgroundColor: color ? alpha(color, 0.1) : undefined,
+            },
+          }}
+          className={loading ? styles.loading : ''}
+        />
+      </Tooltip>
+      <UserContextMenu
+        open={contextMenu !== null}
+        onClose={() => setContextMenu(null)}
+        anchorReference='anchorPosition'
+        anchorPosition={
+          contextMenu
+            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+            : undefined
+        }
+        userId={userId}
+        username={username}
+        nickname={nickname}
+        avatarUrl={avatarUrl}
+      />
+    </div>
   )
 }
 
