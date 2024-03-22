@@ -109,7 +109,6 @@ const AllModerations: React.FC<AllModerationsProps> = ({ loading, onRefresh }) =
         dataSource={moderationsDataSource}
         useCache={false}
         getRowClassName={getModerationRowClassName}
-        pageSizeOptions={[5, 10, 25, 100]}
         rowBuffer={100}
       />
     </Paper>
