@@ -14,7 +14,7 @@ export interface UserChipProps {
 const UserChip: React.FC<UserChipProps> = ({ userId, username, nickname, color, avatarUrl, loading }) => {
   return (
     <Chip
-      component="div" // Add the missing component prop with the value of 'div'
+      component="div"
       avatar={
         <Avatar alt={username} src={avatarUrl || undefined}>
           {!loading && username ? nickname ? nickname[0] : username[0] : null}
