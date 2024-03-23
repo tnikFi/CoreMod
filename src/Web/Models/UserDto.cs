@@ -23,7 +23,9 @@ public class UserDto
         if (user is IGuildUser guildUser) dto.Nickname = guildUser.Nickname;
 
         if (user is SocketGuildUser socketGuildUser)
-            dto.Color = socketGuildUser.Roles.MaxBy(r => r.Position)?.Color.ToString();
+            dto.Color = socketGuildUser.Roles
+                .Where(r => r.Color.RawValue != 0)
+                .MaxBy(r => r.Position)?.Color.ToString();
 
         return dto;
     }

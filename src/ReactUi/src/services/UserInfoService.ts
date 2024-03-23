@@ -1,5 +1,4 @@
 import { GuildsService, UserDto } from '../api'
-import { isDefaultRoleColor } from '../utils/ColorUtils'
 
 interface UserCache<T> {
   [userId: string]: T
@@ -42,7 +41,6 @@ class UserInfoService {
     // Fetch user information from the API, add the promise to the queue, and cache the result
     this.queue[userId] = GuildsService.getApiGuildsUser(guildId, userId)
       .then((response) => {
-        if (response.color && isDefaultRoleColor(response.color)) response.color = undefined
         this.cache[userId] = response
         delete this.queue[userId]
         return response
