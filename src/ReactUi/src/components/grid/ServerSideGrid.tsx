@@ -94,7 +94,6 @@ const ServerSideGrid = React.forwardRef<ServerSideGridRef, ServerSideGridProps>(
       (data: ServerSideGridData) => {
         setRows(data.rows)
         setRowCountState(data.totalRows)
-        console.log(data.totalRows)
       },
       [setRows, setRowCountState]
     )
@@ -156,7 +155,6 @@ const ServerSideGrid = React.forwardRef<ServerSideGridRef, ServerSideGridProps>(
         await dataSource(dataSourceParams)
 
         setLoading(false)
-        console.log('Rows loaded')
       },
       [dataSource, fetchFailure, fetchSuccess, invalidateCache, rowCache, rowCountState, useCache]
     )
