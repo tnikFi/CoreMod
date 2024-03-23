@@ -5,14 +5,19 @@ import { Box, Button, Paper, Typography, styled } from '@mui/material'
 import { DataGrid, GridColDef, gridClasses } from '@mui/x-data-grid'
 import { dateTimeFormatter, expirationTimeFormatter } from '../../utils/ValueFormatters'
 import CheckIcon from '@mui/icons-material/Check'
-import ServerSideGrid, { ServerSideDataSourceParams, ServerSideGridRef } from '../grid/ServerSideGrid'
+import ServerSideGrid, {
+  ServerSideDataSourceParams,
+  ServerSideGridRef,
+} from '../grid/ServerSideGrid'
 import { SelectedGuildContext } from '../../contexts/SelectedGuildContext'
 import { UserCellRenderer } from '../../utils/CellRenderers'
+import { disableColumnSorting } from '../../utils/GridUtils'
 
 /**
  * Columns for the moderation data grid.
  */
-const moderationColumns: GridColDef[] = [
+const moderationColumns: GridColDef[] = disableColumnSorting([
+  { field: 'id', headerName: 'Case ID', width: 75 },
   { field: 'userId', headerName: 'User', width: 200, renderCell: UserCellRenderer },
   { field: 'type', headerName: 'Type', width: 125 },
   {
@@ -42,7 +47,7 @@ const moderationColumns: GridColDef[] = [
       return params.value ? <CheckIcon /> : null
     },
   },
-]
+])
 
 /**
  * Data grid for displaying the user's moderations.
@@ -58,18 +63,21 @@ const AllModerations: React.FC = () => {
   const { selectedGuild } = React.useContext(SelectedGuildContext)
   const gridRef = React.useRef<ServerSideGridRef | null>(null)
 
-  const moderationsDataSource = React.useCallback(async (params: ServerSideDataSourceParams) => {
-    try {
-      const data = await GuildsService.getApiGuildsModerations(
-        selectedGuild?.id ?? '',
-        params.paginationModel.page,
-        params.paginationModel.pageSize
-      )
-      params.success({ rows: data.data ?? [], totalRows: data.totalItems ?? 0 })
-    } catch (error) {
-      params.failure(error as ApiError)
-    }
-  }, [selectedGuild?.id])
+  const moderationsDataSource = React.useCallback(
+    async (params: ServerSideDataSourceParams) => {
+      try {
+        const data = await GuildsService.getApiGuildsModerations(
+          selectedGuild?.id ?? '',
+          params.paginationModel.page,
+          params.paginationModel.pageSize
+        )
+        params.success({ rows: data.data ?? [], totalRows: data.totalItems ?? 0 })
+      } catch (error) {
+        params.failure(error as ApiError)
+      }
+    },
+    [selectedGuild?.id]
+  )
 
   const handleRefresh = React.useCallback(() => {
     gridRef.current?.reset()
@@ -97,6 +105,7 @@ const AllModerations: React.FC = () => {
         getRowClassName={getModerationRowClassName}
         rowBuffer={100}
         ref={gridRef}
+        disableColumnFilter
       />
     </Paper>
   )
