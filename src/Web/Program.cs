@@ -7,6 +7,7 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Hangfire;
+using Hangfire.PostgreSql;
 using Infrastructure.Configuration;
 using Infrastructure.Data.Contexts;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -25,7 +26,8 @@ builder.Configuration.AddUserSecrets<Program>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSnakeCaseNamingConvention();
 });
 
 builder.Services.RegisterRequestHandlers();
@@ -58,7 +60,10 @@ builder.Services.AddAuthentication(options =>
     });
 
 // Hangfire
-builder.Services.AddHangfire(x => x.UseSqlServerStorage(connectionString));
+builder.Services.AddHangfire(x => x.UsePostgreSqlStorage(options =>
+{
+    options.UseNpgsqlConnection(connectionString);
+}));
 builder.Services.AddHangfireServer();
 
 // Configure Discord

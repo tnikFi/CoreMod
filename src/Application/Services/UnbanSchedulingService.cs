@@ -5,7 +5,6 @@ using Domain.Enums;
 using Domain.Models;
 using Hangfire;
 using MediatR;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Application.Services;
 
@@ -49,7 +48,7 @@ public class UnbanSchedulingService : IUnbanSchedulingService
             throw new InvalidOperationException("The moderation must have an expiration date.");
         if (!moderation.Active)
             throw new InvalidOperationException("The moderation must be active.");
-        if (moderation.JobId.IsNullOrEmpty())
+        if (string.IsNullOrEmpty(moderation.JobId))
             throw new InvalidOperationException("The moderation must have an associated scheduled unban job.");
         if (moderation.ExpiresAt.Value < DateTimeOffset.UtcNow)
             throw new InvalidOperationException("The new expiration time must be in the future.");
@@ -64,7 +63,7 @@ public class UnbanSchedulingService : IUnbanSchedulingService
             throw new InvalidOperationException("The moderation type must be a ban.");
         if (!moderation.Active)
             throw new InvalidOperationException("The moderation must be active.");
-        if (moderation.JobId.IsNullOrEmpty())
+        if (string.IsNullOrEmpty(moderation.JobId))
             throw new InvalidOperationException("The moderation must have an associated scheduled unban job.");
 
         return _backgroundJobClient.Delete(moderation.JobId);
