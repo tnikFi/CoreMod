@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Discord;
 using Discord.WebSocket;
+using Domain.Models;
 using Infrastructure.Configuration;
 using Infrastructure.Data.Contexts;
 using MediatR;
@@ -19,7 +20,9 @@ public class TestBase
     private IMediator _mediator;
     private IServiceProvider _serviceProvider;
     protected IDiscordClient DiscordClient => _serviceProvider.GetRequiredService<IDiscordClient>();
-    protected IUnbanSchedulingService UnbanSchedulingService => _serviceProvider.GetRequiredService<IUnbanSchedulingService>();
+
+    protected IUnbanSchedulingService UnbanSchedulingService =>
+        _serviceProvider.GetRequiredService<IUnbanSchedulingService>();
 
     protected ApplicationDbContext TestDbContext => _serviceProvider.GetRequiredService<ApplicationDbContext>();
 
@@ -49,7 +52,7 @@ public class TestBase
         services.AddSingleton(Substitute.For<ILoggingService>());
         services.AddSingleton(Substitute.For<IModerationMessageService>());
         services.AddSingleton(Substitute.For<IDiscordClient>());
-        services.AddSingleton(Substitute.For<IUnbanSchedulingService>());
+        services.AddSingleton(GetUnbanSchedulingService());
         _serviceProvider = services.BuildServiceProvider();
         _mediator = _serviceProvider.GetRequiredService<IMediator>();
     }
@@ -89,5 +92,19 @@ public class TestBase
     {
         TestDbContext.Add(entity);
         TestDbContext.SaveChanges();
+    }
+
+    /// <summary>
+    ///     Set up a mock for the unban scheduling service.
+    /// </summary>
+    /// <returns></returns>
+    private IUnbanSchedulingService GetUnbanSchedulingService()
+    {
+        var substitute = Substitute.For<IUnbanSchedulingService>();
+
+        // Make ScheduleBanExpiration return a sample GUID
+        substitute.ScheduleBanExpiration(Arg.Any<Moderation>()).Returns(Guid.Empty.ToString());
+
+        return substitute;
     }
 }

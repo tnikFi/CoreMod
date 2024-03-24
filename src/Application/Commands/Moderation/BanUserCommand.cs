@@ -70,7 +70,16 @@ public class BanUserCommandHandler : IRequestHandler<BanUserCommand, Domain.Mode
 
         // Schedule the unban if the moderation is a temporary ban
         if (moderation is {ExpiresAt: not null})
-            _unbanSchedulingService.ScheduleBanExpiration(moderation);
+        {
+            var jobId = _unbanSchedulingService.ScheduleBanExpiration(moderation);
+            // Register the job ID with the moderation so it can be modified later if needed
+            moderation.JobId = jobId;
+            await _mediator.Send(new UpdateModerationCommand
+            {
+                Moderation = moderation,
+                ForceAllowJobIdChange = true
+            }, cancellationToken);
+        }
 
         // Send the moderation message if requested
         await _moderationMessageService.SendModerationMessageAsync(moderation);

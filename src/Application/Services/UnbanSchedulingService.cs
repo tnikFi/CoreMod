@@ -5,6 +5,7 @@ using Domain.Enums;
 using Domain.Models;
 using Hangfire;
 using MediatR;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Application.Services;
 
@@ -26,7 +27,7 @@ public class UnbanSchedulingService : IUnbanSchedulingService
     }
 
     /// <inheritdoc />
-    public void ScheduleBanExpiration(Moderation moderation)
+    public string ScheduleBanExpiration(Moderation moderation)
     {
         if (moderation.Type != ModerationType.Ban)
             throw new InvalidOperationException("The moderation type must be a ban.");
@@ -35,7 +36,38 @@ public class UnbanSchedulingService : IUnbanSchedulingService
         if (!moderation.Active)
             throw new InvalidOperationException("The moderation must be active.");
 
-        _backgroundJobClient.Schedule(() => ExpireBan(moderation.GuildId, moderation.Id), moderation.ExpiresAt.Value);
+        return _backgroundJobClient.Schedule(() => ExpireBan(moderation.GuildId, moderation.Id),
+            moderation.ExpiresAt.Value);
+    }
+
+    /// <inheritdoc />
+    public bool UpdateBanExpiration(Moderation moderation)
+    {
+        if (moderation.Type != ModerationType.Ban)
+            throw new InvalidOperationException("The moderation type must be a ban.");
+        if (!moderation.ExpiresAt.HasValue)
+            throw new InvalidOperationException("The moderation must have an expiration date.");
+        if (!moderation.Active)
+            throw new InvalidOperationException("The moderation must be active.");
+        if (moderation.JobId.IsNullOrEmpty())
+            throw new InvalidOperationException("The moderation must have an associated scheduled unban job.");
+        if (moderation.ExpiresAt.Value < DateTimeOffset.UtcNow)
+            throw new InvalidOperationException("The new expiration time must be in the future.");
+
+        return _backgroundJobClient.Reschedule(moderation.JobId, moderation.ExpiresAt.Value);
+    }
+
+    /// <inheritdoc />
+    public bool CancelBanExpiration(Moderation moderation)
+    {
+        if (moderation.Type != ModerationType.Ban)
+            throw new InvalidOperationException("The moderation type must be a ban.");
+        if (!moderation.Active)
+            throw new InvalidOperationException("The moderation must be active.");
+        if (moderation.JobId.IsNullOrEmpty())
+            throw new InvalidOperationException("The moderation must have an associated scheduled unban job.");
+
+        return _backgroundJobClient.Delete(moderation.JobId);
     }
 
     /// <summary>

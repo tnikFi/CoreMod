@@ -28,7 +28,7 @@ public class BanUserCommandTests : TestBase
         TestDbContext.Moderations.FirstOrDefault(x => x.UserId == 1)?.Reason.Should().Be("test");
         TestDbContext.Moderations.FirstOrDefault(x => x.UserId == 1)?.Type.Should().Be(ModerationType.Ban);
     }
-    
+
     [Test]
     public async Task ShouldBanUser()
     {
@@ -98,5 +98,40 @@ public class BanUserCommandTests : TestBase
         };
         var result = await SendAsync(request);
         UnbanSchedulingService.DidNotReceive().ScheduleBanExpiration(result);
+    }
+
+    [Test]
+    public async Task ShouldSetJobIdForTemporaryBans()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new BanUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test",
+            Duration = TimeSpan.FromDays(7)
+        };
+        var result = await SendAsync(request);
+        result.JobId.Should().NotBeNullOrEmpty();
+    }
+
+    [Test]
+    public async Task ShouldNotSetJobIdForPermanentBans()
+    {
+        var user = DiscordTestUtils.CreateGuildUser(1);
+        var moderator = DiscordTestUtils.CreateGuildUser(2);
+        var guild = DiscordTestUtils.CreateGuild(10);
+        var request = new BanUserCommand
+        {
+            Guild = guild,
+            User = user,
+            Moderator = moderator,
+            Reason = "test"
+        };
+        var result = await SendAsync(request);
+        result.JobId.Should().BeNullOrEmpty();
     }
 }
