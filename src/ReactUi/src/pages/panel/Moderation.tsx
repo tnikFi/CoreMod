@@ -1,4 +1,3 @@
-import React from 'react'
 import RequireGuildPermissions from '../../components/authorization/RequireGuildPermissions'
 import { permissionCallbacks } from '../../utils/PermissionCallbacks'
 import PageView from '../../components/PageView'
