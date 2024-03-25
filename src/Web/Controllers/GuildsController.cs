@@ -1,4 +1,5 @@
-﻿using Application.Extensions;
+﻿using Application.Commands.Moderation;
+using Application.Extensions;
 using Application.Queries.Moderation;
 using Common.Permissions;
 using Discord;
@@ -128,5 +129,36 @@ public class GuildsController : BaseController
             Data = pageData.ToArray(),
             TotalItems = totalItems
         });
+    }
+    
+    [HttpPatch("{guildId}/moderations/{moderationId}")]
+    [RequireGuildPermission(nameof(guildId), GuildPermission.Administrator)]
+    public async Task<ActionResult<ModerationDto>> UpdateModerationAsync(string guildId, int moderationId,
+        [FromBody] ModerationDto request)
+    {
+        // Try to parse the guild ID and return bad request if it's invalid.
+        if (!ulong.TryParse(guildId, out var guildIdParsed))
+            return BadRequest();
+        var guild = DiscordClient.GetGuild(guildIdParsed);
+
+        if (guild is null) return NotFound();
+        
+        var moderation = await Mediator.Send(new GetModerationQuery
+        {
+            Guild = guild,
+            Id = moderationId
+        });
+
+        if (moderation is null) return NotFound();
+
+        moderation.Reason = request.Reason;
+        moderation.ExpiresAt = request.ExpiresAt?.UtcDateTime;
+
+        await Mediator.Send(new UpdateModerationCommand
+        {
+            Moderation = moderation
+        });
+
+        return Ok(ModerationDto.FromDomainModel(moderation, true));
     }
 }
