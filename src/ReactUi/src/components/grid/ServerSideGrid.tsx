@@ -1,5 +1,6 @@
 import React from 'react'
-import { DataGrid, DataGridProps, GridPaginationModel } from '@mui/x-data-grid'
+import { DataGrid, DataGridProps, GridPaginationModel, useGridApiRef } from '@mui/x-data-grid'
+import { GridApiCommunity } from '@mui/x-data-grid/internals'
 
 interface RowData {
   [key: string]: unknown
@@ -67,7 +68,7 @@ export interface ServerSideGridRef {
   /**
    * The data grid ref.
    */
-  dataGridRef: React.RefObject<HTMLDivElement>
+  dataGridRef: React.MutableRefObject<GridApiCommunity>
 
   /**
    * Whether the grid is currently loading data.
@@ -160,7 +161,7 @@ const ServerSideGrid = React.forwardRef<ServerSideGridRef, ServerSideGridProps>(
     )
 
     // Expose the ref methods.
-    const dataGridRef = React.useRef<HTMLDivElement>(null)
+    const dataGridRef = useGridApiRef()
     React.useImperativeHandle(
       ref,
       () => ({
@@ -183,7 +184,7 @@ const ServerSideGrid = React.forwardRef<ServerSideGridRef, ServerSideGridProps>(
         dataGridRef: dataGridRef,
         loading,
       }),
-      [invalidateCache, loadRows, loading, paginationModel]
+      [dataGridRef, invalidateCache, loadRows, loading, paginationModel]
     )
 
     const GridComponent = component ?? DataGrid
@@ -209,7 +210,7 @@ const ServerSideGrid = React.forwardRef<ServerSideGridRef, ServerSideGridProps>(
           setPaginationModel(model)
           loadRows(model)
         }}
-        ref={dataGridRef}
+        apiRef={dataGridRef}
         {...props}
       />
     )
