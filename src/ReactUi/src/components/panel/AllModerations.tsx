@@ -105,7 +105,7 @@ const AllModerations: React.FC = () => {
 
   const handleSaveFailed = React.useCallback(
     (error: ApiError) => {
-      enqueueSnackbar(`Failed to save moderation changes: ${error.status} ${error.message}`, {
+      enqueueSnackbar(`Failed to save moderation changes: ${error.message}`, {
         variant: 'error',
       })
     },
