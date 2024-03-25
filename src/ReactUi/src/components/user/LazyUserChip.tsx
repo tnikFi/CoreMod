@@ -9,7 +9,7 @@ interface LazyUserChipProps extends UserChipProps {
   defaultLabel?: string
 }
 
-const LazyUserChip: React.FC<LazyUserChipProps> = ({ userId, defaultLabel }) => {
+const LazyUserChip: React.FC<LazyUserChipProps> = ({ userId, defaultLabel, ...props }) => {
   const { selectedGuild } = React.useContext(SelectedGuildContext)
   const [user, setUser] = React.useState<UserDto | null>(null)
   const [loading, setLoading] = React.useState(true)
@@ -39,6 +39,7 @@ const LazyUserChip: React.FC<LazyUserChipProps> = ({ userId, defaultLabel }) => 
           nickname={user.nickname}
           avatarUrl={user.icon}
           color={user.color || undefined}
+          {...props}
         />
       ) : (
         <UserChip
@@ -46,6 +47,7 @@ const LazyUserChip: React.FC<LazyUserChipProps> = ({ userId, defaultLabel }) => 
           username={loading ? defaultLabel || 'Loading...' : `Unknown User ${userId}`}
           avatarUrl={null}
           loading={loading}
+          {...props}
         />
       )}
     </>

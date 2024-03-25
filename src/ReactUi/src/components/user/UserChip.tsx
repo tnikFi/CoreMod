@@ -1,9 +1,9 @@
-import { Avatar, Chip, Tooltip, alpha } from '@mui/material'
+import { Avatar, Chip, ChipProps, Tooltip, alpha } from '@mui/material'
 import React from 'react'
 import styles from './UserChip.module.css'
 import UserContextMenu from './UserContextMenu'
 
-export interface UserChipProps {
+export interface UserChipProps extends Omit<ChipProps, 'color'> {
   userId: string
   username?: string
   nickname?: string | null
@@ -24,6 +24,7 @@ const UserChip: React.FC<UserChipProps> = ({
   color,
   avatarUrl,
   loading,
+  ...props
 }) => {
   const [contextMenu, setContextMenu] = React.useState<ContextMenuPosition | null>(null)
 
@@ -40,7 +41,7 @@ const UserChip: React.FC<UserChipProps> = ({
   }
 
   return (
-    <div onContextMenu={handleContextMenu}>
+    <span onContextMenu={handleContextMenu}>
       <Tooltip title={username || userId} placement="bottom">
         <Chip
           component="div"
@@ -63,6 +64,7 @@ const UserChip: React.FC<UserChipProps> = ({
             },
           }}
           className={loading ? styles.loading : ''}
+          {...props}
         />
       </Tooltip>
       <UserContextMenu
@@ -79,7 +81,7 @@ const UserChip: React.FC<UserChipProps> = ({
         nickname={nickname}
         avatarUrl={avatarUrl}
       />
-    </div>
+    </span>
   )
 }
 
