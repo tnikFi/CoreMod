@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ChannelDto } from '../models/ChannelDto';
+import type { ModerationDto } from '../models/ModerationDto';
 import type { ModerationDtoPaginatedResult } from '../models/ModerationDtoPaginatedResult';
 import type { UserDto } from '../models/UserDto';
 
@@ -88,6 +89,30 @@ pageSize: number = 25,
                 'page': page,
                 'pageSize': pageSize,
             },
+        });
+    }
+
+    /**
+     * @param guildId 
+     * @param moderationId 
+     * @param requestBody 
+     * @returns ModerationDto Success
+     * @throws ApiError
+     */
+    public static patchApiGuildsModerations(
+guildId: string,
+moderationId: number,
+requestBody?: ModerationDto,
+): CancelablePromise<ModerationDto> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/Guilds/{guildId}/moderations/{moderationId}',
+            path: {
+                'guildId': guildId,
+                'moderationId': moderationId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 

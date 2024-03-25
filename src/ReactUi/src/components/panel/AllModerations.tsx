@@ -1,8 +1,8 @@
 import React from 'react'
-import { ApiError, GuildsService } from '../../api'
+import { ApiError, GuildsService, ModerationDto } from '../../api'
 import { getModerationRowClassName, isExpired } from '../../utils/ModerationGridUtils'
 import { Box, Button, Paper, Typography, styled } from '@mui/material'
-import { DataGrid, GridColDef, gridClasses } from '@mui/x-data-grid'
+import { DataGrid, GridColDef, GridEventListener, gridClasses } from '@mui/x-data-grid'
 import { dateTimeFormatter, expirationTimeFormatter } from '../../utils/ValueFormatters'
 import CheckIcon from '@mui/icons-material/Check'
 import ServerSideGrid, {
@@ -12,6 +12,8 @@ import ServerSideGrid, {
 import { SelectedGuildContext } from '../../contexts/SelectedGuildContext'
 import { UserCellRenderer } from '../../utils/CellRenderers'
 import { disableColumnSorting } from '../../utils/GridUtils'
+import ModerationEditor, { ModerationEditorRef } from './ModerationEditor'
+import { useSnackbar } from 'notistack'
 
 /**
  * Columns for the moderation data grid.
@@ -62,6 +64,8 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
 const AllModerations: React.FC = () => {
   const { selectedGuild } = React.useContext(SelectedGuildContext)
   const gridRef = React.useRef<ServerSideGridRef | null>(null)
+  const editorRef = React.useRef<ModerationEditorRef | null>(null)
+  const { enqueueSnackbar } = useSnackbar()
 
   const moderationsDataSource = React.useCallback(
     async (params: ServerSideDataSourceParams) => {
@@ -82,6 +86,31 @@ const AllModerations: React.FC = () => {
   const handleRefresh = React.useCallback(() => {
     gridRef.current?.reset()
   }, [])
+
+  const handleGridRowDoubleClick: GridEventListener<'rowDoubleClick'> = React.useCallback(
+    (params) => {
+      editorRef.current?.editModeration(params.row as ModerationDto)
+      console.log(editorRef.current)
+    },
+    [editorRef]
+  )
+
+  const handleChangesSaved = React.useCallback(
+    (newModeration: ModerationDto) => {
+      gridRef.current?.dataGridRef.current?.updateRows([newModeration])
+      enqueueSnackbar('Moderation changes saved.', { variant: 'success' })
+    },
+    [enqueueSnackbar, gridRef]
+  )
+
+  const handleSaveFailed = React.useCallback(
+    (error: ApiError) => {
+      enqueueSnackbar(`Failed to save moderation changes: ${error.status} ${error.message}`, {
+        variant: 'error',
+      })
+    },
+    [enqueueSnackbar]
+  )
 
   return (
     <Paper sx={{ p: 2, height: 500, display: 'flex', flexDirection: 'column' }}>
@@ -106,6 +135,12 @@ const AllModerations: React.FC = () => {
         rowBuffer={100}
         ref={gridRef}
         disableColumnFilter
+        onRowDoubleClick={handleGridRowDoubleClick}
+      />
+      <ModerationEditor
+        onChangesSaved={handleChangesSaved}
+        onSaveFailed={handleSaveFailed}
+        ref={editorRef}
       />
     </Paper>
   )

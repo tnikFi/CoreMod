@@ -9,6 +9,9 @@ import React from 'react'
 import { ColorScheme, ColorSchemeContext } from './contexts/ColorSchemeContext'
 import { useLocalStorage } from 'usehooks-ts'
 import Moderation from './pages/panel/Moderation'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { SnackbarProvider } from 'notistack'
 
 const App = () => {
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>('colorScheme', 'system')
@@ -49,23 +52,27 @@ const App = () => {
   )
 
   return (
-    <ColorSchemeContext.Provider value={{ colorScheme, setColorScheme }}>
-      <ThemeProvider theme={theme}>
-        <BrowserRouter>
-          <CssBaseline />
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Home />} />
-            </Route>
-            <Route path="panel" element={<Panel />}>
-              <Route path="" element={<Overview />} />
-              <Route path="moderation" element={<Moderation />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </ThemeProvider>
-    </ColorSchemeContext.Provider>
+    <SnackbarProvider>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <ColorSchemeContext.Provider value={{ colorScheme, setColorScheme }}>
+          <ThemeProvider theme={theme}>
+            <BrowserRouter>
+              <CssBaseline />
+              <Routes>
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Home />} />
+                </Route>
+                <Route path="panel" element={<Panel />}>
+                  <Route path="" element={<Overview />} />
+                  <Route path="moderation" element={<Moderation />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </ThemeProvider>
+        </ColorSchemeContext.Provider>
+      </LocalizationProvider>
+    </SnackbarProvider>
   )
 }
 
