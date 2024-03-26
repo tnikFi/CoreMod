@@ -55,6 +55,10 @@ public class UpdateModerationCommandHandler : IRequestHandler<UpdateModerationCo
         // Throw an exception if the moderation type has been changed.
         if (entityEntry.Property(x => x.Type).IsModified)
             throw new InvalidOperationException("The moderation type cannot be changed.");
+        
+        // Throw an exception if the guild ID has been changed.
+        if (entityEntry.Property(x => x.GuildId).IsModified)
+            throw new InvalidOperationException("The guild ID cannot be changed.");
 
         // Don't allow changing the scheduled JobId directly.
         if (entityEntry.Property(x => x.JobId).IsModified && request.ForceAllowJobIdChange is not true)

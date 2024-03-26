@@ -307,4 +307,23 @@ public class UpdateModerationCommandTests : TestBase
         await SendAsync(request);
         TestDbContext.Moderations.FirstOrDefault(x => x.UserId == 1)?.Reason.Should().Be("updated");
     }
+    
+    [Test]
+    public async Task ShouldThrowIfGuildIdIsChanged()
+    {
+        var moderation = new Domain.Models.Moderation
+        {
+            GuildId = _guild.Id,
+            UserId = _user.Id,
+            Type = ModerationType.Ban,
+            Reason = "test"
+        };
+        AddEntity(moderation);
+        moderation.GuildId = 100;
+        var request = new UpdateModerationCommand
+        {
+            Moderation = moderation
+        };
+        await FluentActions.Awaiting(() => SendAsync(request)).Should().ThrowAsync<InvalidOperationException>();
+    }
 }
