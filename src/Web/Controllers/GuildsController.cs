@@ -131,7 +131,7 @@ public class GuildsController : BaseController
         });
     }
     
-    [HttpPatch("{guildId}/moderations/{moderationId}")]
+    [HttpPatch("{guildId}/moderations/{moderationId:int}")]
     [RequireGuildPermission(nameof(guildId), GuildPermission.Administrator)]
     public async Task<ActionResult<ModerationDto>> UpdateModerationAsync(string guildId, int moderationId,
         [FromBody] ModerationDto request)
