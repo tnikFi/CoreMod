@@ -80,6 +80,15 @@ const ModerationEditor = React.forwardRef<ModerationEditorRef, ModerationEditorP
     const [deleting, setDeleting] = React.useState(false)
     const { selectedGuild, guildPermissions } = React.useContext(SelectedGuildContext)
 
+    const isEdited = React.useMemo(() => {
+      const expirationEdited =
+        moderationData?.expiresAt && expiresAt
+          ? new Date(moderationData.expiresAt).toISOString() !== new Date(expiresAt).toISOString()
+          : moderationData?.expiresAt !== expiresAt
+      const reasonEdited = moderationData?.reason !== reason
+      return expirationEdited || reasonEdited
+    }, [expiresAt, moderationData?.expiresAt, moderationData?.reason, reason])
+
     // Enable editing if the user is an administrator
     React.useEffect(() => {
       if (guildPermissions?.administrator) {
@@ -103,13 +112,8 @@ const ModerationEditor = React.forwardRef<ModerationEditorRef, ModerationEditorP
 
     const handleClose = () => {
       if (saving || deleting) return
-      if (editing) {
-        // Check if the moderation data has changed
-        if (reason !== moderationData?.reason || expiresAt !== moderationData?.expiresAt) {
-          setShowExitConfirmation(true)
-        } else {
-          close()
-        }
+      if (editing && isEdited) {
+        setShowExitConfirmation(true)
       } else {
         close()
       }
@@ -225,12 +229,7 @@ const ModerationEditor = React.forwardRef<ModerationEditorRef, ModerationEditorP
                         disabled={
                           // Disable the save button if the reason or expiration date has not changed
                           // or if a request is already in progress
-                          deleting ||
-                          saving ||
-                          !(
-                            reason !== moderationData.reason ||
-                            expiresAt !== moderationData.expiresAt
-                          )
+                          deleting || saving || !isEdited
                         }
                       >
                         {saving ? <CircularProgress size={24} /> : <SaveIcon />}
@@ -279,7 +278,7 @@ const ModerationEditor = React.forwardRef<ModerationEditorRef, ModerationEditorP
                 <DateTimePicker
                   value={expiresAt ? dayjs(expiresAt) : undefined}
                   onChange={(date) => setExpiresAt(date?.toISOString() || null)}
-                  readOnly={!(editing && moderationData.type === 'Ban')}
+                  readOnly={!editing}
                   disablePast
                   disabled={expiresAt !== null && isExpired(expiresAt)}
                   label={expiresAt !== null && isExpired(expiresAt) ? 'Expired' : 'Expires'}

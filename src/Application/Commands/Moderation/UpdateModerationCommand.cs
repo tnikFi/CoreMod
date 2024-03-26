@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Discord;
 using Domain.Enums;
 using Infrastructure.Data.Contexts;
 using MediatR;
@@ -28,12 +29,15 @@ public class UpdateModerationCommand : IRequest
 public class UpdateModerationCommandHandler : IRequestHandler<UpdateModerationCommand>
 {
     private readonly ApplicationDbContext _context;
+    private readonly IDiscordClient _discordClient;
     private readonly IUnbanSchedulingService _unbanSchedulingService;
 
-    public UpdateModerationCommandHandler(ApplicationDbContext context, IUnbanSchedulingService unbanSchedulingService)
+    public UpdateModerationCommandHandler(ApplicationDbContext context, IUnbanSchedulingService unbanSchedulingService,
+        IDiscordClient discordClient)
     {
         _context = context;
         _unbanSchedulingService = unbanSchedulingService;
+        _discordClient = discordClient;
     }
 
     public async Task Handle(UpdateModerationCommand request,
@@ -55,32 +59,53 @@ public class UpdateModerationCommandHandler : IRequestHandler<UpdateModerationCo
         // Don't allow changing the scheduled JobId directly.
         if (entityEntry.Property(x => x.JobId).IsModified && request.ForceAllowJobIdChange is not true)
             throw new InvalidOperationException("The scheduled job ID cannot be changed directly.");
-        
+
         // Don't allow changing the expiration time to a time in the past.
         var expiresAt = entityEntry.Property(x => x.ExpiresAt);
         if (expiresAt.IsModified && request.Moderation.ExpiresAt < DateTimeOffset.UtcNow)
             throw new InvalidOperationException("The expiration time cannot be in the past.");
 
-        // Temporary bans are handled by the bot, so if a ban has been rescheduled, the associated background job must
-        // be updated.
-        if (request.Moderation.Type == ModerationType.Ban && expiresAt.IsModified)
+        switch (request.Moderation.Type)
         {
-            // If the ban is now permanent, cancel the scheduled unban job.
-            if (request.Moderation.ExpiresAt is null)
+            // Temporary bans are handled by the bot, so if a ban has been rescheduled, the associated background job must
+            // be updated.
+            case ModerationType.Ban when expiresAt.IsModified:
             {
-                var removed = _unbanSchedulingService.CancelBanExpiration(request.Moderation);
-                if (removed)
-                    request.Moderation.JobId = null;
+                // If the ban is now permanent, cancel the scheduled unban job.
+                if (request.Moderation.ExpiresAt is null)
+                {
+                    var removed = _unbanSchedulingService.CancelBanExpiration(request.Moderation);
+                    if (removed)
+                        request.Moderation.JobId = null;
+                }
+                // If the ban didn't have a scheduled unban job, schedule one.
+                else if (expiresAt.OriginalValue is null)
+                {
+                    request.Moderation.JobId = _unbanSchedulingService.ScheduleBanExpiration(request.Moderation);
+                }
+                // Otherwise, a scheduled unban job exists so the ban expiration must be rescheduled.
+                else
+                {
+                    _unbanSchedulingService.UpdateBanExpiration(request.Moderation);
+                }
+
+                break;
             }
-            // If the ban didn't have a scheduled unban job, schedule one.
-            else if (expiresAt.OriginalValue is null)
+            // Update the mute duration if it has been modified.
+            case ModerationType.Mute when expiresAt.IsModified:
             {
-                request.Moderation.JobId = _unbanSchedulingService.ScheduleBanExpiration(request.Moderation);
-            }
-            // Otherwise, a scheduled unban job exists so the ban expiration must be rescheduled.
-            else
-            {
-                _unbanSchedulingService.UpdateBanExpiration(request.Moderation);
+                var guild = await _discordClient.GetGuildAsync(request.Moderation.GuildId);
+                if (guild is null) break;
+                var user = await guild.GetUserAsync(request.Moderation.UserId);
+                if (user is null) break;
+                var duration = request.Moderation.ExpiresAt is not null
+                    ? (TimeSpan) (request.Moderation.ExpiresAt - DateTimeOffset.UtcNow)
+                    : TimeSpan.MaxValue;
+                await user.SetTimeOutAsync(duration, new RequestOptions
+                {
+                    AuditLogReason = "Mute duration updated."
+                });
+                break;
             }
         }
 

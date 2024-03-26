@@ -16,6 +16,8 @@ public class UpdateModerationCommandTests : TestBase
     {
         _user = DiscordTestUtils.CreateGuildUser(1);
         _guild = DiscordTestUtils.CreateGuild(10);
+        DiscordTestUtils.LinkGuildUser(_guild, _user);
+        DiscordTestUtils.LinkGuild(DiscordClient, _guild);
     }
 
     [Test]
@@ -216,6 +218,52 @@ public class UpdateModerationCommandTests : TestBase
         };
         await SendAsync(request);
         moderation.ExpiresAt.Should().BeCloseTo(DateTime.UtcNow.AddHours(-1), TimeSpan.FromMinutes(1));
+    }
+
+    [Test]
+    public async Task ShouldUpdateTimeoutDurationForMutes()
+    {
+        var moderation = new Domain.Models.Moderation
+        {
+            GuildId = _guild.Id,
+            UserId = _user.Id,
+            Type = ModerationType.Mute,
+            Reason = "test",
+            ExpiresAt = DateTime.UtcNow.AddHours(1)
+        };
+        AddEntity(moderation);
+        moderation.ExpiresAt = DateTime.UtcNow.AddHours(2);
+        var request = new UpdateModerationCommand
+        {
+            Moderation = moderation
+        };
+        await SendAsync(request);
+        await DiscordClient.Received().GetGuildAsync(_guild.Id);
+        await _guild.Received().GetUserAsync(_user.Id);
+        await _user.Received().SetTimeOutAsync(Arg.Any<TimeSpan>(), Arg.Any<RequestOptions>());
+    }
+
+    [Test]
+    public async Task ShouldSetTimeoutToMaxValueWhenExpiresAtIsNull()
+    {
+        var moderation = new Domain.Models.Moderation
+        {
+            GuildId = _guild.Id,
+            UserId = _user.Id,
+            Type = ModerationType.Mute,
+            Reason = "test",
+            ExpiresAt = DateTime.UtcNow.AddHours(1)
+        };
+        AddEntity(moderation);
+        moderation.ExpiresAt = null;
+        var request = new UpdateModerationCommand
+        {
+            Moderation = moderation
+        };
+        await SendAsync(request);
+        await DiscordClient.Received().GetGuildAsync(_guild.Id);
+        await _guild.Received().GetUserAsync(_user.Id);
+        await _user.Received().SetTimeOutAsync(TimeSpan.MaxValue, Arg.Any<RequestOptions>());
     }
 
     [Test]

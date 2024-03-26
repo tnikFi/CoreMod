@@ -14,6 +14,17 @@ public static class DiscordTestUtils
         return user;
     }
 
+    public static void LinkGuildUser(IGuild guild, IGuildUser user)
+    {
+        user.Guild.Returns(guild);
+        guild.GetUserAsync(user.Id, Arg.Any<CacheMode>(), Arg.Any<RequestOptions>()).Returns(user);
+    }
+
+    public static void LinkGuild(IDiscordClient client, IGuild guild)
+    {
+        client.GetGuildAsync(guild.Id, Arg.Any<CacheMode>(), Arg.Any<RequestOptions>()).Returns(guild);
+    }
+
     public static IGuild CreateGuild(ulong id, string? name = null)
     {
         var guild = Substitute.For<IGuild>();
