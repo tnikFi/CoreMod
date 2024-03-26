@@ -120,7 +120,8 @@ public class GuildsController : BaseController
         });
 
         var totalItems = moderations.Count();
-        var pageData = moderations.Paginate(page, pageSize)
+        var pageData = moderations.OrderByDescending(x => x.Timestamp)
+            .Paginate(page, pageSize)
             .Select(x => ModerationDto.FromDomainModel(x, true))
             .ToArray();
 
@@ -130,7 +131,7 @@ public class GuildsController : BaseController
             TotalItems = totalItems
         });
     }
-    
+
     [HttpPatch("{guildId}/moderations/{moderationId:int}")]
     [RequireGuildPermission(nameof(guildId), GuildPermission.Administrator)]
     public async Task<ActionResult<ModerationDto>> UpdateModerationAsync(string guildId, int moderationId,
@@ -142,7 +143,7 @@ public class GuildsController : BaseController
         var guild = DiscordClient.GetGuild(guildIdParsed);
 
         if (guild is null) return NotFound();
-        
+
         var moderation = await Mediator.Send(new GetModerationQuery
         {
             Guild = guild,
