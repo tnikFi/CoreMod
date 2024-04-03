@@ -116,4 +116,24 @@ requestBody?: ModerationDto,
         });
     }
 
+    /**
+     * @param guildId 
+     * @param moderationId 
+     * @returns any Success
+     * @throws ApiError
+     */
+    public static deleteApiGuildsModerations(
+guildId: string,
+moderationId: number,
+): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/Guilds/{guildId}/moderations/{moderationId}',
+            path: {
+                'guildId': guildId,
+                'moderationId': moderationId,
+            },
+        });
+    }
+
 }

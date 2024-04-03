@@ -69,7 +69,7 @@ export interface ModerationEditorRef {
 }
 
 const ModerationEditor = React.forwardRef<ModerationEditorRef, ModerationEditorProps>(
-  ({ onChangesSaved, onSaveFailed }, ref) => {
+  ({ onChangesSaved, onSaveFailed, onDeleted, onDeleteFailed }, ref) => {
     const [moderationData, setModerationData] = React.useState<ModerationDto | null>(null)
     const [editing, setEditing] = React.useState(false)
     const [reason, setReason] = React.useState<string | null>(null)
@@ -144,14 +144,24 @@ const ModerationEditor = React.forwardRef<ModerationEditorRef, ModerationEditorP
 
     const deleteModeration = React.useCallback(() => {
       const deleteModeration = async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        if (!moderationData?.id || !selectedGuild?.id) return
+        try {
+          await GuildsService.deleteApiGuildsModerations(
+            selectedGuild.id,
+            moderationData.id
+          )
+          onDeleted?.(moderationData)
+        } catch (error) {
+          console.error('Failed to delete moderation', error)
+          onDeleteFailed?.(error as ApiError)
+        }
         setDeleting(false)
         close()
       }
       setShowDeleteConfirmation(false)
       setDeleting(true)
       deleteModeration()
-    }, [])
+    }, [moderationData, onDeleteFailed, onDeleted, selectedGuild])
 
     const getActionVerb = (moderation: ModerationDto) => {
       switch (moderation.type) {

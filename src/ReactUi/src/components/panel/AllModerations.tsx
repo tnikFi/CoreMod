@@ -112,6 +112,23 @@ const AllModerations: React.FC = () => {
     [enqueueSnackbar]
   )
 
+  const handleModerationDeleted = React.useCallback(
+    () => {
+      gridRef.current?.loadRows()
+      enqueueSnackbar('Moderation deleted.', { variant: 'success' })
+    },
+    [enqueueSnackbar, gridRef]
+  )
+
+  const handleModerationDeleteFailed = React.useCallback(
+    (error: ApiError) => {
+      enqueueSnackbar(`Failed to delete moderation: ${error.message}`, {
+        variant: 'error',
+      })
+    },
+    [enqueueSnackbar]
+  )
+
   return (
     <Paper sx={{ p: 2, height: 500, display: 'flex', flexDirection: 'column' }}>
       <Box
@@ -140,6 +157,8 @@ const AllModerations: React.FC = () => {
       <ModerationEditor
         onChangesSaved={handleChangesSaved}
         onSaveFailed={handleSaveFailed}
+        onDeleted={handleModerationDeleted}
+        onDeleteFailed={handleModerationDeleteFailed}
         ref={editorRef}
       />
     </Paper>

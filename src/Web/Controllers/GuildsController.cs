@@ -162,4 +162,26 @@ public class GuildsController : BaseController
 
         return Ok(ModerationDto.FromDomainModel(moderation, true));
     }
+    
+    [HttpDelete("{guildId}/moderations/{moderationId:int}")]
+    [RequireGuildPermission(nameof(guildId), GuildPermission.Administrator)]
+    public async Task<ActionResult> DeleteModerationAsync(string guildId, int moderationId)
+    {
+        // Try to parse the guild ID and return bad request if it's invalid.
+        if (!ulong.TryParse(guildId, out var guildIdParsed))
+            return BadRequest();
+        var guild = DiscordClient.GetGuild(guildIdParsed);
+
+        if (guild is null) return NotFound();
+
+        await Mediator.Send(new DeleteModerationCommand
+        {
+            GuildId = guildIdParsed,
+            CaseId = moderationId,
+            DeletedBy = GetCurrentGuildUser(guildIdParsed),
+            PardonModeration = true
+        });
+
+        return NoContent();
+    }
 }
