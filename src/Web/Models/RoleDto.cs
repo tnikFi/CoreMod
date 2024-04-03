@@ -14,7 +14,7 @@ public class RoleDto
         {
             Id = role.Id.ToString(),
             Name = role.Name,
-            Color = role.Color.ToString()
+            Color = role.Color.RawValue != 0 ? role.Color.ToString() : null
         };
     }
 }
