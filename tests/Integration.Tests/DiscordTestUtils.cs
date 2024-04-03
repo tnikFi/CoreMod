@@ -13,6 +13,13 @@ public static class DiscordTestUtils
         user.Mention.Returns($"<@{id}>");
         return user;
     }
+    
+    public static IGuildUser CreateGuildUser(IGuild guild, ulong id, string? name = null)
+    {
+        var user = CreateGuildUser(id, name);
+        LinkGuildUser(guild, user);
+        return user;
+    }
 
     public static void LinkGuildUser(IGuild guild, IGuildUser user)
     {

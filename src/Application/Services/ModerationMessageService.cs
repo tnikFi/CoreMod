@@ -138,6 +138,66 @@ public class ModerationMessageService : IModerationMessageService
         return sentDm != null;
     }
 
+    /// <inheritdoc />
+    public async Task<bool> SendModerationDeletedMessageAsync(Moderation moderation, IGuildUser? deletedBy, bool sendDirectMessage = true)
+    {
+        var user = await _client.GetUserAsync(moderation.UserId);
+        var moderator = await _client.GetUserAsync(moderation.ModeratorId);
+        var guild = _client.GetGuild(moderation.GuildId);
+
+        // These shouldn't be null, but if they are, we can't send the message
+        if (user is null || guild is null || moderator is null)
+            return false;
+
+        var dmEmbedBuilder = new EmbedBuilder()
+            .WithTitle(GetDmEmbedTitleForModerationRemoval(moderation.Type, guild, moderation.Id))
+            .WithTimestamp(DateTimeOffset.Now);
+
+        var logEmbedBuilder = new EmbedBuilder()
+            .WithAuthor(moderator)
+            .WithTitle(GetLogEmbedTitleForModerationRemoval(moderation.Type))
+            .AddField("User", user.Mention)
+            .AddField("Moderator", moderator.Mention)
+            .AddField("Reason", moderation.Reason ?? "No reason provided.")
+            .WithTimestamp(DateTimeOffset.Now)
+            .WithFooter($"Case #{moderation.Id}");
+        
+        // Add user who deleted the moderation
+        if (deletedBy != null)
+        {
+            const string title = "Deleted by";
+            logEmbedBuilder.AddField(title, deletedBy.Mention);
+        }
+
+        // Add expiration if it's set
+        if (moderation.ExpiresAt.HasValue)
+        {
+            const string title = "Expiration time";
+            var timestampTag = new TimestampTag(moderation.ExpiresAt.Value, TimestampTagStyles.LongDateTime);
+            logEmbedBuilder.AddField(title, timestampTag);
+        }
+
+        // Set the embed color
+        var color = Color.DarkerGrey;
+        dmEmbedBuilder.WithColor(color);
+        logEmbedBuilder.WithColor(color);
+
+        // Send the message to the user
+        IUserMessage? sentDm = null;
+        if (sendDirectMessage)
+        {
+            var dmEmbed = dmEmbedBuilder.Build();
+            sentDm = await user.TrySendMessageAsync(embed: dmEmbed);
+        }
+        
+
+        // Log the moderation in the audit log channel
+        var logEmbed = logEmbedBuilder.Build();
+        await _loggingService.SendLogAsync(moderation.GuildId, embed: logEmbed);
+
+        return sentDm != null;
+    }
+
     /// <summary>
     ///     Get the title for the moderation embed sent to the user
     /// </summary>
@@ -158,6 +218,28 @@ public class ModerationMessageService : IModerationMessageService
             _ => throw new ArgumentOutOfRangeException(nameof(moderationType), moderationType, null)
         };
     }
+    
+    /// <summary>
+    /// Get the title for the embed sent to the user when a moderation is removed
+    /// </summary>
+    /// <param name="moderationType">Type of moderation</param>
+    /// <param name="guild">Guild the moderation was in</param>
+    /// <param name="caseId">Case ID of the moderation</param>
+    /// <returns>Embed title</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if moderation type is invalid</exception>
+    private static string GetDmEmbedTitleForModerationRemoval(ModerationType moderationType, IGuild guild, int caseId)
+    {
+        return moderationType switch
+        {
+            ModerationType.Warning => $"Your warning (Case #{caseId}) was removed in {guild.Name}",
+            ModerationType.Mute => $"Your mute (Case #{caseId}) was removed in {guild.Name}",
+            ModerationType.Kick => $"Your kick (Case #{caseId}) was removed in {guild.Name}",
+            ModerationType.Ban => $"Your ban (Case #{caseId}) was removed in {guild.Name}",
+            ModerationType.Unmute => $"Your unmute (Case #{caseId}) was removed in {guild.Name}",
+            ModerationType.Unban => $"Your unban (Case #{caseId}) was removed in {guild.Name}",
+            _ => throw new ArgumentOutOfRangeException(nameof(moderationType), moderationType, null)
+        };
+    }
 
     /// <summary>
     ///     Get the title for the embed sent to the audit log channel
@@ -175,6 +257,26 @@ public class ModerationMessageService : IModerationMessageService
             ModerationType.Ban => "User banned",
             ModerationType.Unmute => "User unmuted",
             ModerationType.Unban => "User unbanned",
+            _ => throw new ArgumentOutOfRangeException(nameof(moderationType), moderationType, null)
+        };
+    }
+    
+    /// <summary>
+    /// Get the title for the embed sent to the audit log channel when a moderation is removed
+    /// </summary>
+    /// <param name="moderationType">Type of moderation</param>
+    /// <returns>Embed title</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if moderation type is invalid</exception>
+    private static string GetLogEmbedTitleForModerationRemoval(ModerationType moderationType)
+    {
+        return moderationType switch
+        {
+            ModerationType.Warning => "Warning removed",
+            ModerationType.Mute => "Mute removed",
+            ModerationType.Kick => "Kick removed",
+            ModerationType.Ban => "Ban removed",
+            ModerationType.Unmute => "Unmute removed",
+            ModerationType.Unban => "Unban removed",
             _ => throw new ArgumentOutOfRangeException(nameof(moderationType), moderationType, null)
         };
     }

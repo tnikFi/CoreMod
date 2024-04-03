@@ -25,6 +25,9 @@ public class TestBase
         _serviceProvider.GetRequiredService<IUnbanSchedulingService>();
 
     protected ApplicationDbContext TestDbContext => _serviceProvider.GetRequiredService<ApplicationDbContext>();
+    
+    protected IModerationMessageService ModerationMessageService =>
+        _serviceProvider.GetRequiredService<IModerationMessageService>();
 
     /// <summary>
     ///     Sets up the services for the integration tests.

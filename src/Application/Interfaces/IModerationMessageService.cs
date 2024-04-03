@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using Discord;
+using Domain.Models;
 
 namespace Application.Interfaces;
 
@@ -22,4 +23,13 @@ public interface IModerationMessageService
     /// <param name="sendLogMessage">Whether or not to send the moderation info to audit logs</param>
     /// <returns>True if the message was sent to the user successfully</returns>
     public Task<bool> SendBanExpirationMessageAsync(Moderation moderation, bool sendLogMessage = true);
+    
+    /// <summary>
+    ///     Send a message notifying that a moderation action has been deleted
+    /// </summary>
+    /// <param name="moderation">Deleted moderation</param>
+    /// <param name="deletedBy">User who deleted the moderation</param>
+    /// <param name="sendDirectMessage">Whether or not to notify the user directly</param>
+    /// <returns>True if the message was sent to the user successfully</returns>
+    public Task<bool> SendModerationDeletedMessageAsync(Moderation moderation, IGuildUser? deletedBy, bool sendDirectMessage = true);
 }
