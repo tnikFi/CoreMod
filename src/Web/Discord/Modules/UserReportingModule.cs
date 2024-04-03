@@ -1,8 +1,10 @@
-﻿using Application.Queries.Configuration;
+﻿using System.ComponentModel;
+using Application.Queries.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using MediatR;
+using Web.Discord.Preconditions;
 using ContextType = Discord.Interactions.ContextType;
 
 namespace Web.Discord.Modules;
@@ -19,6 +21,8 @@ public class UserReportingModule : InteractionModuleBase<SocketInteractionContex
     }
 
     [MessageCommand("Report")]
+    [Description("Report a message to the server's moderators.")]
+    [RequireUserReportRole]
     public async Task ReportMessageAsync(IMessage message)
     {
         await DeferAsync(true);

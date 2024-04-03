@@ -36,6 +36,7 @@ public class CommandHandlingService : ICommandHandlingService
         _client.MessagesBulkDeleted += loggingService.LogBulkMessageDelete;
         _client.UserJoined += HandleJoinAsync;
         _client.InteractionCreated += InteractionCreatedAsync;
+        _interactionService.ContextCommandExecuted += ContextCommandExecutedAsync;
     }
 
     public async Task InitializeAsync()
@@ -66,7 +67,7 @@ public class CommandHandlingService : ICommandHandlingService
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var prefix = await mediator.Send(new GetCommandPrefixQuery {GuildId = guild?.Id});
-            
+
             // If the message only contained a mention of the bot, reply with the current prefix.
             if (message.Content == $"<@{_client.CurrentUser.Id}>")
             {
@@ -77,9 +78,7 @@ public class CommandHandlingService : ICommandHandlingService
 
             if (!message.HasStringPrefix(prefix, ref argPos)
                 && !message.HasMentionPrefix(_client.CurrentUser, ref argPos))
-            {
                 return;
-            }
         }
 
         // Create the websocket context
@@ -112,6 +111,40 @@ public class CommandHandlingService : ICommandHandlingService
 
         // If a command failed, notify the user with the result
         await context.Channel.SendMessageAsync($"Error: {result}");
+    }
+
+    private static async Task ContextCommandExecutedAsync(ContextCommandInfo command, IInteractionContext context,
+        Discord.Interactions.IResult result)
+    {
+        // Do nothing if a command wasn't found or execution was successful
+        if (result.IsSuccess)
+            return;
+
+        // If a command failed, notify the user with the result
+        switch (result.Error)
+        {
+            case InteractionCommandError.UnknownCommand:
+                break;
+            case InteractionCommandError.ConvertFailed:
+                break;
+            case InteractionCommandError.BadArgs:
+                break;
+            case InteractionCommandError.Exception:
+                await context.Interaction.RespondAsync("An error occurred while executing the command.",
+                    ephemeral: true);
+                break;
+            case InteractionCommandError.Unsuccessful:
+                await context.Interaction.RespondAsync("The command was not successful.", ephemeral: true);
+                break;
+            case InteractionCommandError.UnmetPrecondition:
+                await context.Interaction.RespondAsync(result.ErrorReason ?? "This command cannot be executed here.",
+                    ephemeral: true);
+                break;
+            case InteractionCommandError.ParseFailed:
+                break;
+            case null:
+                break;
+        }
     }
 
     private async Task HandleJoinAsync(IGuildUser user)

@@ -99,4 +99,24 @@ public class ConfigurationModule : ModuleBase<SocketCommandContext>
         else
             await ReplyAsync($"Set the report channel to {channel.Mention}.");
     }
+
+    [Command("minreportrole")]
+    [Summary("Sets the minimum role required to report messages.")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    [Alias("minreport", "minimumreportrole", "reportrole")]
+    [Remarks("Leave empty to allow everyone to report messages.")]
+    public async Task SetMinimumReportRoleAsync(
+        [Summary("The new minimum report role.")]
+        SocketRole? role = null)
+    {
+        await _mediator.Send(new SetMinimumReportRoleCommand
+        {
+            GuildId = Context.Guild.Id,
+            RoleId = role?.Id
+        });
+        if (role is null)
+            await ReplyAsync("Everyone can now report messages.");
+        else
+            await ReplyAsync($"Set the minimum report role to {role.Name}.");
+    }
 }

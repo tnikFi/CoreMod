@@ -31,4 +31,9 @@ public class GuildSettings
     ///     Id of the channel to send user reports to. Null if disabled.
     /// </summary>
     public ulong? ReportChannelId { get; set; }
+
+    /// <summary>
+    ///     Lowest role that can use the report command. Null if everyone can use it.
+    /// </summary>
+    public ulong? MinimumReportRole { get; set; }
 }
