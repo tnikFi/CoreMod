@@ -20,23 +20,17 @@ public class CommandHandlingService : ICommandHandlingService
     private readonly DiscordConfiguration _discordConfig;
     private readonly InteractionService _interactionService;
     private readonly IServiceProvider _services;
+    private readonly ILoggingService _loggingService;
 
     public CommandHandlingService(IServiceProvider services, DiscordSocketClient client, CommandService commands,
         ILoggingService loggingService, InteractionService interactionService, DiscordConfiguration discordConfig)
     {
         _commands = commands;
+        _loggingService = loggingService;
         _interactionService = interactionService;
         _discordConfig = discordConfig;
         _client = client;
         _services = services;
-        _commands.CommandExecuted += CommandExecutedAsync;
-        _client.MessageReceived += MessageReceivedAsync;
-        _client.MessageUpdated += loggingService.LogMessageEdit;
-        _client.MessageDeleted += loggingService.LogMessageDelete;
-        _client.MessagesBulkDeleted += loggingService.LogBulkMessageDelete;
-        _client.UserJoined += HandleJoinAsync;
-        _client.InteractionCreated += InteractionCreatedAsync;
-        _interactionService.ContextCommandExecuted += ContextCommandExecutedAsync;
     }
 
     public async Task InitializeAsync()
@@ -49,6 +43,14 @@ public class CommandHandlingService : ICommandHandlingService
 #else
         await _interactionService.RegisterCommandsGloballyAsync();
 #endif
+        _commands.CommandExecuted += CommandExecutedAsync;
+        _client.MessageReceived += MessageReceivedAsync;
+        _client.MessageUpdated += _loggingService.LogMessageEdit;
+        _client.MessageDeleted += _loggingService.LogMessageDelete;
+        _client.MessagesBulkDeleted += _loggingService.LogBulkMessageDelete;
+        _client.UserJoined += HandleJoinAsync;
+        _client.InteractionCreated += InteractionCreatedAsync;
+        _interactionService.ContextCommandExecuted += ContextCommandExecutedAsync;
     }
 
     private async Task MessageReceivedAsync(SocketMessage rawMessage)
