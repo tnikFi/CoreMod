@@ -7,6 +7,7 @@ public class ApplicationDbContext : DbContext
 {
     public DbSet<GuildSettings> GuildSettings { get; set; }
     public DbSet<Moderation> Moderations { get; set; }
+    public DbSet<PublicRole> PublicRoles { get; set; }
     
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
