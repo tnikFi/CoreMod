@@ -81,7 +81,7 @@ public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
         // If no public roles are configured, let the user know.
         if (!publicRoleIds.Any())
         {
-            await ModifyOriginalResponseAsync(x => x.Content = "No public roles are configured on this server.");
+            await FollowupAsync("No public roles are configured on this server.", ephemeral: true);
             return;
         }
 
@@ -94,11 +94,7 @@ public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
             .WithSelectMenu(selectMenu)
             .Build();
 
-        await ModifyOriginalResponseAsync(x =>
-        {
-            x.Content = "Select your public roles.";
-            x.Components = components;
-        });
+        await FollowupAsync("Select your public roles.", ephemeral: true, components: components);
     }
 
     /// <summary>
