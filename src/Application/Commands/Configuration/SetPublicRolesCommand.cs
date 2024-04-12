@@ -32,6 +32,10 @@ public class SetPublicRolesCommandHandler : IRequestHandler<SetPublicRolesComman
 
     public async Task Handle(SetPublicRolesCommand request, CancellationToken cancellationToken)
     {
+        // Don't allow more than 25 public roles.
+        if (request.RoleIds?.Count() > 25)
+            throw new InvalidOperationException("Cannot have more than 25 public roles.");
+        
         var existingRoles = await _dbContext.PublicRoles
             .Where(x => x.GuildId == request.GuildId)
             .ToListAsync(cancellationToken);

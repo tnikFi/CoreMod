@@ -37,4 +37,11 @@ public class SetPublicRolesCommandTests : TestBase
         var publicRoles = TestDbContext.PublicRoles.Where(x => x.GuildId == 1).Select(x => x.RoleId).ToList();
         publicRoles.Should().BeEmpty();
     }
+
+    [Test]
+    public async Task ShouldNotAllowMoreThan25PublicRoles()
+    {
+        var request = new SetPublicRolesCommand {GuildId = 1, RoleIds = Enumerable.Range(1, 26).Select(x => (ulong) x)};
+        await FluentActions.Awaiting(() => SendAsync(request)).Should().ThrowAsync<InvalidOperationException>();
+    }
 }
