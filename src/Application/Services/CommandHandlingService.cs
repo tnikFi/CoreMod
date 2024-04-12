@@ -20,12 +20,13 @@ public class CommandHandlingService : ICommandHandlingService
     private readonly CommandService _commands;
     private readonly DiscordConfiguration _discordConfig;
     private readonly InteractionService _interactionService;
-    private readonly IServiceProvider _services;
-    private readonly ILoggingService _loggingService;
     private readonly ILogger<CommandHandlingService> _logger;
+    private readonly ILoggingService _loggingService;
+    private readonly IServiceProvider _services;
 
     public CommandHandlingService(IServiceProvider services, DiscordSocketClient client, CommandService commands,
-        ILoggingService loggingService, InteractionService interactionService, DiscordConfiguration discordConfig, ILogger<CommandHandlingService> logger)
+        ILoggingService loggingService, InteractionService interactionService, DiscordConfiguration discordConfig,
+        ILogger<CommandHandlingService> logger)
     {
         _commands = commands;
         _loggingService = loggingService;
@@ -63,6 +64,7 @@ public class CommandHandlingService : ICommandHandlingService
         _client.UserJoined += HandleJoinAsync;
         _client.InteractionCreated += InteractionCreatedAsync;
         _interactionService.ContextCommandExecuted += ContextCommandExecutedAsync;
+        _interactionService.InteractionExecuted += InteractionExecutedAsync;
     }
 
     private async Task MessageReceivedAsync(SocketMessage rawMessage)
@@ -116,12 +118,29 @@ public class CommandHandlingService : ICommandHandlingService
             await context.Channel.SendMessageAsync($"Error: {result}");
     }
 
-    private static async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context,
+    /// <summary>
+    ///     Log exceptions that occur during command handling.
+    /// </summary>
+    /// <param name="command"></param>
+    /// <param name="context"></param>
+    /// <param name="result"></param>
+    private async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context,
         IResult result)
     {
         // Do nothing if a command wasn't found or execution was successful
         if (!command.IsSpecified || result.IsSuccess)
             return;
+
+        var commandInfo = command.Value;
+
+        if (result.Error == CommandError.Exception)
+        {
+            var commandLocation =
+                $"Command \"{commandInfo.Name}\" handled by {commandInfo.Module.Name}";
+            _logger.LogError(
+                "Exception was thrown while executing command in message {MessageId}: {Error}\n\t{Location}",
+                context.Message.Id, result.ErrorReason, commandLocation);
+        }
 
         // If a command failed, notify the user with the result
         await context.Channel.SendMessageAsync($"Error: {result}");
@@ -155,6 +174,37 @@ public class CommandHandlingService : ICommandHandlingService
                     ephemeral: true);
                 break;
             case InteractionCommandError.ParseFailed:
+                break;
+            case null:
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Log exceptions that occur during interaction handling.
+    /// </summary>
+    /// <param name="commandInfo"></param>
+    /// <param name="context"></param>
+    /// <param name="result"></param>
+    private async Task InteractionExecutedAsync(ICommandInfo commandInfo, IInteractionContext context,
+        Discord.Interactions.IResult result)
+    {
+        // Do nothing if a command wasn't found or execution was successful
+        if (result.IsSuccess)
+            return;
+
+        // If a command failed, notify the user with the result
+        switch (result.Error)
+        {
+            case InteractionCommandError.Exception:
+                var commandLocation =
+                    $"Command \"{commandInfo.Name}\" handled by {commandInfo.Module.Name}.{commandInfo.MethodName}";
+                _logger.LogError(
+                    "Exception was thrown while executing interaction {Interaction}: {Error}\n\t{Location}",
+                    context.Interaction.Id, result.ErrorReason, commandLocation);
+                await context.Interaction.FollowupAsync(
+                    $"An error occurred while executing the command. (Interaction ID {context.Interaction.Id})",
+                    ephemeral: true);
                 break;
             case null:
                 break;
