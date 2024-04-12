@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using Discord;
+using Domain.Models;
 using Infrastructure.Data.Contexts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,10 +25,12 @@ public class SetPublicRolesCommand : IRequest
 public class SetPublicRolesCommandHandler : IRequestHandler<SetPublicRolesCommand>
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IDiscordClient _client;
 
-    public SetPublicRolesCommandHandler(ApplicationDbContext dbContext)
+    public SetPublicRolesCommandHandler(ApplicationDbContext dbContext, IDiscordClient client)
     {
         _dbContext = dbContext;
+        _client = client;
     }
 
     public async Task Handle(SetPublicRolesCommand request, CancellationToken cancellationToken)
@@ -35,6 +38,15 @@ public class SetPublicRolesCommandHandler : IRequestHandler<SetPublicRolesComman
         // Don't allow more than 25 public roles.
         if (request.RoleIds?.Count() > 25)
             throw new InvalidOperationException("Cannot have more than 25 public roles.");
+        
+        // Get the corresponding public roles for the guild.
+        var guild = await _client.GetGuildAsync(request.GuildId);
+        if (guild is null)
+            return;
+        
+        // Throw an exception if any of the roles is not found or is managed.
+        if (request.RoleIds is not null && request.RoleIds.Any(x => guild.GetRole(x) is null or { IsManaged: true }))
+            throw new InvalidOperationException("One or more roles are invalid.");
         
         var existingRoles = await _dbContext.PublicRoles
             .Where(x => x.GuildId == request.GuildId)

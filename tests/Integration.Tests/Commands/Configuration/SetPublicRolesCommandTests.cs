@@ -1,6 +1,8 @@
 ﻿using Application.Commands.Configuration;
+using Discord;
 using Domain.Models;
 using FluentAssertions;
+using NSubstitute;
 
 namespace Integration.Tests.Commands.Configuration;
 
@@ -42,6 +44,33 @@ public class SetPublicRolesCommandTests : TestBase
     public async Task ShouldNotAllowMoreThan25PublicRoles()
     {
         var request = new SetPublicRolesCommand {GuildId = 1, RoleIds = Enumerable.Range(1, 26).Select(x => (ulong) x)};
-        await FluentActions.Awaiting(() => SendAsync(request)).Should().ThrowAsync<InvalidOperationException>();
+        await FluentActions.Awaiting(() => SendAsync(request)).Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("Cannot have more than 25 public roles.");
+    }
+
+    [Test]
+    public async Task ShouldThrowIfAnyRoleDoesNotExist()
+    {
+        AddEntity(new PublicRole {GuildId = 1, RoleId = 1});
+        var request = new SetPublicRolesCommand {GuildId = 1, RoleIds = new ulong[] {1, 2}};
+        var guild = DiscordTestUtils.CreateGuild(1);
+        DiscordTestUtils.LinkGuild(DiscordClient, guild);
+        guild.GetRole(2).Returns((IRole) null!);
+        await FluentActions.Awaiting(() => SendAsync(request)).Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("One or more roles are invalid.");
+    }
+    
+    [Test]
+    public async Task ShouldThrowIfAnyRoleIsManaged()
+    {
+        AddEntity(new PublicRole {GuildId = 1, RoleId = 1});
+        var request = new SetPublicRolesCommand {GuildId = 1, RoleIds = new ulong[] {1, 2}};
+        var guild = DiscordTestUtils.CreateGuild(1);
+        DiscordTestUtils.LinkGuild(DiscordClient, guild);
+        var role = Substitute.For<IRole>();
+        role.IsManaged.Returns(true);
+        guild.GetRole(2).Returns(role);
+        await FluentActions.Awaiting(() => SendAsync(request)).Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("One or more roles are invalid.");
     }
 }
