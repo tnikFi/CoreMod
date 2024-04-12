@@ -108,12 +108,17 @@ public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
 
         var selectedPublicRoles = publicRoles.Intersect(GetUserPublicRoles((IGuildUser) Context.User, publicRoleIds))
             .ToArray();
-        var otherPublicRoles = publicRoles.Except(selectedPublicRoles);
+        var otherPublicRoles = publicRoles.Except(selectedPublicRoles).ToArray();
 
         var embed = new EmbedBuilder()
             .WithTitle("Public Roles")
-            .AddField("Your Public Roles", string.Join('\n', selectedPublicRoles.Select(x => x.Mention)), true)
-            .AddField("Other Public Roles", string.Join('\n', otherPublicRoles.Select(x => x.Mention)), true)
+            .AddField("Your Public Roles",
+                selectedPublicRoles.Length > 0
+                    ? string.Join('\n', selectedPublicRoles.Select(x => x.Mention))
+                    : "No roles", true)
+            .AddField("Other Public Roles",
+                otherPublicRoles.Length > 0 ? string.Join('\n', otherPublicRoles.Select(x => x.Mention)) : "No roles",
+                true)
             .WithColor(Color.Blue)
             .Build();
 
