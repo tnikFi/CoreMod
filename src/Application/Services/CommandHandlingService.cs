@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using Infrastructure.Configuration;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using IResult = Discord.Commands.IResult;
 
 namespace Application.Services;
@@ -21,14 +22,16 @@ public class CommandHandlingService : ICommandHandlingService
     private readonly InteractionService _interactionService;
     private readonly IServiceProvider _services;
     private readonly ILoggingService _loggingService;
+    private readonly ILogger<CommandHandlingService> _logger;
 
     public CommandHandlingService(IServiceProvider services, DiscordSocketClient client, CommandService commands,
-        ILoggingService loggingService, InteractionService interactionService, DiscordConfiguration discordConfig)
+        ILoggingService loggingService, InteractionService interactionService, DiscordConfiguration discordConfig, ILogger<CommandHandlingService> logger)
     {
         _commands = commands;
         _loggingService = loggingService;
         _interactionService = interactionService;
         _discordConfig = discordConfig;
+        _logger = logger;
         _client = client;
         _services = services;
     }
@@ -39,9 +42,18 @@ public class CommandHandlingService : ICommandHandlingService
         await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 #if DEBUG
         if (_discordConfig.DebugGuildId.HasValue)
+        {
+            await _interactionService.RemoveModulesFromGuildAsync(_discordConfig.DebugGuildId.Value);
             await _interactionService.RegisterCommandsToGuildAsync(_discordConfig.DebugGuildId.Value);
+            _logger.LogInformation("Registered commands to debug guild.");
+        }
+        else
+        {
+            _logger.LogWarning("Debug guild ID is not set. Interaction commands will be unavailable.");
+        }
 #else
         await _interactionService.RegisterCommandsGloballyAsync();
+        _logger.LogInformation("Registered commands globally.");
 #endif
         _commands.CommandExecuted += CommandExecutedAsync;
         _client.MessageReceived += MessageReceivedAsync;

@@ -21,6 +21,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", false, true);
 builder.Configuration.AddUserSecrets<Program>();
 
+// Add logger.
+builder.Services.AddLogging();
+
 // Add services to the container.
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
