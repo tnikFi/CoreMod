@@ -13,7 +13,7 @@ public class JwtConfiguration
     public required string Audience { get; init; }
 
     /// <summary>
-    ///     Issuer used by the JWT middleware.f
+    ///     Issuer used by the JWT middleware.
     /// </summary>
     public required string Issuer { get; init; }
 }
