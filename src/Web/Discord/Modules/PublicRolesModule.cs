@@ -2,18 +2,16 @@
 using Application.Queries.Configuration;
 using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using MediatR;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Web.Discord.Modules;
 
+[EnabledInDm(false)]
 [RequireContext(ContextType.Guild)]
+[Group("roles", "Manage public roles.")]
 public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
 {
-    private const string EditMyPublicRolesId = "edit_my_public_roles";
-    private const string SaveMyRolesId = "save_my_public_roles";
-    private const string ConfigurePublicRolesId = "configure_public_roles";
-    private const string SavePublicRolesId = "save_public_roles";
     private readonly IMediator _mediator;
 
     public PublicRolesModule(IMediator mediator)
@@ -22,163 +20,125 @@ public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
     }
 
     /// <summary>
-    ///     Entry point for the /roles command.
+    ///     Add a public role to the current user.
     /// </summary>
-    [SlashCommand("roles", "Manage public roles.")]
-    public async Task RolesAsync()
-    {
-        if (Context.User is not IGuildUser user) return;
-
-        // If the user has the Manage Roles permission, they can manage public roles.
-        // Show a dialog with options to configure public roles or to edit their own public roles.
-        if (user.GuildPermissions.ManageRoles)
-        {
-            var configButton = new ButtonBuilder()
-                .WithLabel("Configure Public Roles")
-                .WithEmote(Emoji.Parse(":gear:"))
-                .WithStyle(ButtonStyle.Primary)
-                .WithCustomId(ConfigurePublicRolesId);
-
-            var editButton = new ButtonBuilder()
-                .WithLabel("Edit Your Public Roles")
-                .WithEmote(Emoji.Parse(":pencil:"))
-                .WithStyle(ButtonStyle.Secondary)
-                .WithCustomId(EditMyPublicRolesId);
-
-            var components = new ComponentBuilder()
-                .WithButton(configButton)
-                .WithButton(editButton)
-                .Build();
-
-            await RespondAsync("Select an option to manage public roles.", ephemeral: true, components: components);
-            return;
-        }
-
-        await EditMyPublicRolesAsync();
-    }
-
-    /// <summary>
-    ///     Edit the public roles for the current user.
-    /// </summary>
-    [ComponentInteraction(EditMyPublicRolesId)]
-    public async Task EditMyPublicRolesAsync()
+    /// <param name="role"></param>
+    [SlashCommand("add", "Assign a public role to yourself.")]
+    public async Task AddRoleAsync([Summary("role", "Public role to add")] IRole role)
     {
         if (Context.User is not IGuildUser user) return;
         await DeferAsync(true);
 
-        // If there are no eligible roles, don't bother querying the database.
-        var eligibleRoles = GetEligibleRoles();
-        var eligibleRoleIds = eligibleRoles.Select(x => x.Id).ToArray();
-        if (!eligibleRoleIds.Any())
+        if (!GetEligibleRoles().Contains(role))
         {
-            await FollowupAsync("No public roles are configured on this server.", ephemeral: true);
+            await FollowupAsync("That role is not a public role.", ephemeral: true);
+            return;
+        }
+
+        if (user.RoleIds.Contains(role.Id))
+        {
+            await FollowupAsync("You already have that role.", ephemeral: true);
             return;
         }
 
         var publicRoles = await GetPublicRolesAsync();
+        if (!publicRoles.Contains(role))
+        {
+            await FollowupAsync("That role is not a public role.", ephemeral: true);
+            return;
+        }
+
+        await user.AddRoleAsync(role);
+        await FollowupAsync($"You have been assigned the {role.Name} role.", ephemeral: true);
+    }
+
+    /// <summary>
+    ///     Remove a public role from the current user.
+    /// </summary>
+    /// <param name="role"></param>
+    [SlashCommand("remove", "Remove a public role from yourself.")]
+    public async Task RemoveRoleAsync([Summary("role", "Public role to remove")] IRole role)
+    {
+        if (Context.User is not IGuildUser user) return;
+        await DeferAsync(true);
+
+        if (!GetEligibleRoles().Contains(role))
+        {
+            await FollowupAsync("That role is not a public role.", ephemeral: true);
+            return;
+        }
+
+        if (!user.RoleIds.Contains(role.Id))
+        {
+            await FollowupAsync("You do not have that role.", ephemeral: true);
+            return;
+        }
+
+        var publicRoles = await GetPublicRolesAsync();
+        if (!publicRoles.Contains(role))
+        {
+            await FollowupAsync("That role is not a public role.", ephemeral: true);
+            return;
+        }
+
+        await user.RemoveRoleAsync(role);
+        await FollowupAsync($"The {role.Name} role has been removed.", ephemeral: true);
+    }
+
+    /// <summary>
+    ///     List all public roles.
+    /// </summary>
+    [SlashCommand("list", "List all public roles.")]
+    public async Task ListRolesAsync()
+    {
+        await DeferAsync(true);
+        var publicRolesEnumerable = await GetPublicRolesAsync();
+        var publicRoles = publicRolesEnumerable.ToArray();
         var publicRoleIds = publicRoles.Select(x => x.Id).ToArray();
 
-        // If no public roles are configured, let the user know.
-        if (!publicRoleIds.Any())
+        if (!publicRoles.Any())
         {
             await FollowupAsync("No public roles are configured on this server.", ephemeral: true);
             return;
         }
 
-        // Only include public roles that are eligible.
-        var selectableRoles = publicRoleIds.Intersect(eligibleRoleIds).ToArray();
-        var userPublicRoles = GetUserPublicRoles(user, publicRoleIds);
-        var selections = publicRoleIds.ToDictionary(x => x, x => userPublicRoles.Contains(Context.Guild.GetRole(x)));
-        var selectMenu = BuildRoleSelect(SaveMyRolesId, selectableRoles, selections);
-        var components = new ComponentBuilder()
-            .WithSelectMenu(selectMenu)
+        // If the user does not have the Manage Roles permission, only show roles that the bot is able to assign.
+        if (Context.User is IGuildUser {GuildPermissions.ManageRoles: false})
+            publicRoles = publicRoles.Where(x => IsRoleEligible((SocketRole) x)).ToArray();
+
+        var selectedPublicRoles = publicRoles.Intersect(GetUserPublicRoles((IGuildUser) Context.User, publicRoleIds))
+            .ToArray();
+        var otherPublicRoles = publicRoles.Except(selectedPublicRoles);
+
+        var embed = new EmbedBuilder()
+            .WithTitle("Public Roles")
+            .AddField("Your Public Roles", string.Join('\n', selectedPublicRoles.Select(x => x.Mention)), true)
+            .AddField("Other Public Roles", string.Join('\n', otherPublicRoles.Select(x => x.Mention)), true)
+            .WithColor(Color.Blue)
             .Build();
 
-        await FollowupAsync("Select your public roles.", ephemeral: true, components: components);
+        await FollowupAsync(embed: embed, ephemeral: true);
     }
 
     /// <summary>
-    ///     Save the public roles for the current user.
+    ///     Clear all public roles from the current user.
     /// </summary>
-    [ComponentInteraction(SaveMyRolesId)]
-    public async Task SaveMyRolesAsync()
+    [SlashCommand("clear", "Remove all public roles from yourself.")]
+    public async Task ClearRolesAsync()
     {
         if (Context.User is not IGuildUser user) return;
         await DeferAsync(true);
-        var componentInteraction = (IComponentInteraction) Context.Interaction;
-        var values = componentInteraction.Data.Values.Select(ulong.Parse).ToArray();
-        var selectedRoles = values.Select(x => Context.Guild.GetRole(x)).ToArray();
 
-        // Get a list of public roles for the guild.
         var publicRoles = await GetPublicRolesAsync();
-
-        // Remove any roles that the user no longer has.
-        var rolesToRemove = publicRoles.Where(x => !selectedRoles.Contains(x));
-        foreach (var role in rolesToRemove)
+        var rolesToRemove = user.RoleIds.Where(x => publicRoles.Select(role => role.Id).Contains(x));
+        foreach (var roleId in rolesToRemove)
+        {
+            var role = Context.Guild.GetRole(roleId);
+            if (role is null) continue;
             await user.RemoveRoleAsync(role);
-
-        // Add any roles that the user does not have.
-        var rolesToAdd = selectedRoles.Where(x => !user.RoleIds.Contains(x.Id));
-        foreach (var role in rolesToAdd)
-            await user.AddRoleAsync(role);
-
-        await FollowupAsync("Your roles have been updated.", ephemeral: true);
-    }
-
-    /// <summary>
-    ///     Public role configuration dialog handler.
-    /// </summary>
-    [ComponentInteraction(ConfigurePublicRolesId)]
-    [DefaultMemberPermissions(GuildPermission.ManageRoles)]
-    public async Task ConfigurePublicRolesAsync()
-    {
-        await DeferAsync(true);
-
-        // Get all roles in the guild that are below the bot's highest role.
-        var eligibleRoleIds = GetEligibleRoles().Select(x => x.Id).ToArray();
-
-        var publicRoles = await GetPublicRolesAsync();
-        var publicRoleIds = publicRoles.Select(x => x.Id).ToArray();
-
-        // If no roles are eligible and no public roles are configured, let the user know.
-        if (!eligibleRoleIds.Any())
-        {
-            await RespondAsync(
-                "No roles are eligible to be public roles. Only roles below my highest role can be public roles.",
-                ephemeral: true);
-            return;
         }
 
-        // Include all public roles in the selection even if they are not eligible to prevent ineligible roles from
-        // being impossible to remove.
-        var availableRoles = publicRoleIds.Concat(eligibleRoleIds).Distinct().ToArray();
-        var selections = publicRoleIds.ToDictionary(x => x, x => true);
-        var selectMenu = BuildRoleSelect(SavePublicRolesId, availableRoles, selections);
-        var components = new ComponentBuilder()
-            .WithSelectMenu(selectMenu)
-            .Build();
-
-        await FollowupAsync("Select the roles you would like to make public.", ephemeral: true, components: components);
-    }
-
-    /// <summary>
-    ///     Save the guild's public roles.
-    /// </summary>
-    [ComponentInteraction(SavePublicRolesId)]
-    [DefaultMemberPermissions(GuildPermission.ManageRoles)]
-    public async Task SavePublicRolesAsync()
-    {
-        await DeferAsync(true);
-        var componentInteraction = (IComponentInteraction) Context.Interaction;
-        var values = componentInteraction.Data.Values.Select(ulong.Parse).ToArray();
-
-        await _mediator.Send(new SetPublicRolesCommand
-        {
-            GuildId = Context.Guild.Id,
-            RoleIds = values
-        });
-
-        await FollowupAsync("Public roles have been updated.", ephemeral: true);
+        await FollowupAsync("All public roles have been removed.", ephemeral: true);
     }
 
     /// <summary>
@@ -195,47 +155,24 @@ public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
     }
 
     /// <summary>
-    ///     Build a select menu for selecting public roles.
-    /// </summary>
-    /// <param name="customId">Custom ID for the select menu component.</param>
-    /// <param name="roles">Roles to display in the select menu.</param>
-    /// <param name="defaults">Default selections for the select menu.</param>
-    /// <returns></returns>
-    private SelectMenuBuilder BuildRoleSelect(string customId, IEnumerable<ulong> roles,
-        IDictionary<ulong, bool> defaults)
-    {
-        var options = roles.Select(x =>
-            {
-                var role = Context.Guild.GetRole(x);
-                var builder = new SelectMenuOptionBuilder()
-                    .WithLabel(role.Name)
-                    .WithValue(x.ToString())
-                    .WithDefault(defaults.TryGetValue(x, out var selection) && selection);
-
-                if (!role.Emoji.Name.IsNullOrEmpty())
-                    builder = builder.WithEmote(role.Emoji);
-
-                return builder;
-            })
-            .ToList();
-
-        return new SelectMenuBuilder()
-            .WithType(ComponentType.SelectMenu)
-            .WithCustomId(customId)
-            .WithMaxValues(options.Count)
-            .WithMinValues(0)
-            .WithOptions(options);
-    }
-
-    /// <summary>
     ///     Get all roles in the current guild that are below the bot's highest role.
     ///     These roles can be used as public roles.
     /// </summary>
     /// <returns></returns>
     private IEnumerable<IRole> GetEligibleRoles()
     {
+        return Context.Guild.Roles.Where(IsRoleEligible);
+    }
+
+    /// <summary>
+    ///     Check if a role is eligible to be a public role.
+    /// </summary>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    private bool IsRoleEligible(SocketRole role)
+    {
         var maxBotRole = Context.Guild.CurrentUser.Roles.Max(x => x.Position);
-        return Context.Guild.Roles.Where(x => x.Position < maxBotRole && x is {IsManaged: false, IsEveryone: false});
+        return role is {IsManaged: false, IsEveryone: false} && role.Position < maxBotRole;
     }
 
     /// <summary>
@@ -249,5 +186,96 @@ public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
             GuildId = Context.Guild.Id
         });
         return publicRoles.Select(Context.Guild.GetRole).Where(x => x is not null);
+    }
+
+    [Group("config", "Configure public role settings.")]
+    [RequireUserPermission(GuildPermission.ManageRoles)]
+    public class PublicRoleConfigModule : InteractionModuleBase<SocketInteractionContext>
+    {
+        private readonly IMediator _mediator;
+
+        public PublicRoleConfigModule(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        /// <summary>
+        ///     Set a role as a public role for the guild.
+        /// </summary>
+        /// <param name="role"></param>
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [SlashCommand("add", "Set a role as a public role for the guild.")]
+        public async Task SetPublicRoleAsync(
+            [Summary("role", "The role to set as the public role.")]
+            IRole role)
+        {
+            await DeferAsync(true);
+            var botPosition = Context.Guild.CurrentUser.Hierarchy;
+
+            if (role.Position >= botPosition)
+            {
+                await ModifyOriginalResponseAsync(
+                    x => x.Content = "The role must be lower than the bot's highest role.");
+                return;
+            }
+
+            var publicRoleIds = await _mediator.Send(new GetPublicRolesQuery
+            {
+                GuildId = Context.Guild.Id
+            });
+            var publicRoles = publicRoleIds.Select(id => Context.Guild.GetRole(id))
+                .Where(x => x is {IsManaged: false, IsEveryone: false}).ToList();
+
+            if (publicRoles.Contains(role))
+            {
+                await ModifyOriginalResponseAsync(x => x.Content = "The role is already a public role.");
+                return;
+            }
+
+            if (publicRoles.Count >= 25)
+            {
+                await ModifyOriginalResponseAsync(x => x.Content = "Cannot have more than 25 public roles.");
+                return;
+            }
+
+            var newPublicRoles = publicRoles.Append(role).Select(x => x.Id).ToArray();
+            await _mediator.Send(new SetPublicRolesCommand
+            {
+                GuildId = Context.Guild.Id,
+                RoleIds = newPublicRoles
+            });
+
+            await ModifyOriginalResponseAsync(x => x.Content = "The role has been set as a public role.");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [SlashCommand("remove", "Remove a role as a public role for the guild.")]
+        public async Task RemovePublicRoleAsync(
+            [Summary("role", "The role to remove as a public role.")]
+            IRole role)
+        {
+            await DeferAsync(true);
+            var publicRoleIds = await _mediator.Send(new GetPublicRolesQuery
+            {
+                GuildId = Context.Guild.Id
+            });
+            var publicRoles = publicRoleIds.Select(id => Context.Guild.GetRole(id))
+                .Where(x => x is {IsManaged: false, IsEveryone: false}).ToList();
+
+            if (!publicRoles.Contains(role))
+            {
+                await ModifyOriginalResponseAsync(x => x.Content = "The role is not a public role.");
+                return;
+            }
+
+            var newPublicRoles = publicRoles.Where(x => x != role).Select(x => x.Id).ToArray();
+            await _mediator.Send(new SetPublicRolesCommand
+            {
+                GuildId = Context.Guild.Id,
+                RoleIds = newPublicRoles
+            });
+
+            await ModifyOriginalResponseAsync(x => x.Content = "The role has been removed as a public role.");
+        }
     }
 }
