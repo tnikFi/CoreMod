@@ -2,7 +2,6 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from './pages/Layout'
 import Home from './pages/Home'
 import NotFound from './pages/NotFound'
-import Panel from './pages/panel/Panel'
 import Overview from './pages/panel/Overview'
 import { CssBaseline, ThemeProvider, createTheme, useMediaQuery } from '@mui/material'
 import React from 'react'
@@ -12,6 +11,7 @@ import Moderation from './pages/panel/Moderation'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { SnackbarProvider } from 'notistack'
+const Panel = React.lazy(() => import('./pages/panel/Panel'))
 
 const App = () => {
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>('colorScheme', 'system')
@@ -62,7 +62,9 @@ const App = () => {
                 <Route element={<Layout />}>
                   <Route path="/" element={<Home />} />
                 </Route>
-                <Route path="panel" element={<Panel />}>
+                <Route path="panel" element={<React.Suspense>
+                  <Panel />
+                </React.Suspense>}>
                   <Route path="" element={<Overview />} />
                   <Route path="moderation" element={<Moderation />} />
                 </Route>
