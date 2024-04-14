@@ -77,10 +77,13 @@ const AllModerations: React.FC = () => {
         )
         params.success({ rows: data.data ?? [], totalRows: data.totalItems ?? 0 })
       } catch (error) {
+        enqueueSnackbar(`Failed to fetch moderations: ${(error as Error).message}`, {
+          variant: 'error',
+        })
         params.failure(error as ApiError)
       }
     },
-    [selectedGuild?.id]
+    [enqueueSnackbar, selectedGuild?.id]
   )
 
   const handleRefresh = React.useCallback(() => {
