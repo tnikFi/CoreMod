@@ -75,4 +75,25 @@ guildId?: string,
         });
     }
 
+    /**
+     * @param guildId 
+     * @param requestBody 
+     * @returns RoleDto Success
+     * @throws ApiError
+     */
+    public static patchApiUserPublicRoles(
+guildId?: string,
+requestBody?: Array<RoleDto>,
+): CancelablePromise<Array<RoleDto>> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/User/public-roles',
+            query: {
+                'guildId': guildId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
 }

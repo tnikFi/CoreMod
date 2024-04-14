@@ -1,5 +1,6 @@
 ﻿using Application.Commands.Moderation;
 using Application.Extensions;
+using Application.Queries.Configuration;
 using Application.Queries.Moderation;
 using Common.Permissions;
 using Discord;
@@ -162,7 +163,7 @@ public class GuildsController : BaseController
 
         return Ok(ModerationDto.FromDomainModel(moderation, true));
     }
-    
+
     [HttpDelete("{guildId}/moderations/{moderationId:int}")]
     [RequireGuildPermission(nameof(guildId), GuildPermission.Administrator)]
     public async Task<ActionResult> DeleteModerationAsync(string guildId, int moderationId)
@@ -183,5 +184,29 @@ public class GuildsController : BaseController
         });
 
         return NoContent();
+    }
+
+    [HttpGet("{guildId}/public-roles")]
+    [RequireGuildPermission(nameof(guildId), GuildPermission.UseApplicationCommands)]
+    public async Task<ActionResult<RoleDto[]>> GetPublicRolesAsync(string guildId)
+    {
+        // Try to parse the guild ID and return bad request if it's invalid.
+        if (!ulong.TryParse(guildId, out var guildIdParsed))
+            return BadRequest();
+        var guild = DiscordClient.GetGuild(guildIdParsed);
+
+        if (guild is null) return NotFound();
+
+        var publicRoles = await Mediator.Send(new GetPublicRolesQuery
+        {
+            GuildId = guildIdParsed
+        });
+
+        var botRole = guild.CurrentUser.Roles.Max(x => x.Position);
+        var guildRoles = publicRoles.Select(id => guild.GetRole(id)).Where(role => role is not null)
+            .Where(role => role.Position < botRole && role is {IsManaged: false, IsEveryone: false})
+            .Select(RoleDto.FromSocketRole).ToArray();
+
+        return Ok(guildRoles);
     }
 }

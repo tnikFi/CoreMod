@@ -7,7 +7,7 @@ import GuildStats from '../../components/panel/GuildStats'
 import { Grid } from '@mui/material'
 
 const Overview = () => {
-  const { selectedGuild } = React.useContext(SelectedGuildContext)
+  const { selectedGuild, publicRoles } = React.useContext(SelectedGuildContext)
   const [moderations, setModerations] = React.useState<ModerationDto[]>([])
   const [moderationsLoading, setModerationsLoading] = React.useState(false)
   const [userRoles, setUserRoles] = React.useState<RoleDto[]>([])
@@ -68,6 +68,8 @@ const Overview = () => {
             guildMemberCount={guildMemberCount}
             roles={userRoles}
             selectedGuild={selectedGuild}
+            publicRoles={publicRoles}
+            onRolesChanged={setUserRoles}
             loading={guildStatsLoading}
           />
         </Grid>

@@ -12,7 +12,7 @@ const modalStyle: SxProps<Theme> = {
   p: 4,
 }
 
-interface CenteredModalProps extends ModalProps {
+export interface CenteredModalProps extends ModalProps {
   top?: ResponsiveStyleValue<Property.Top<string | number> | NonNullable<Property.Top<string | number> | undefined>[] | undefined>
   left?: ResponsiveStyleValue<Property.Left<string | number> | NonNullable<Property.Left<string | number> | undefined>[] | undefined>
 }

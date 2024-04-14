@@ -5,6 +5,7 @@
 import type { ChannelDto } from '../models/ChannelDto';
 import type { ModerationDto } from '../models/ModerationDto';
 import type { ModerationDtoPaginatedResult } from '../models/ModerationDtoPaginatedResult';
+import type { RoleDto } from '../models/RoleDto';
 import type { UserDto } from '../models/UserDto';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -133,6 +134,44 @@ moderationId: number,
                 'guildId': guildId,
                 'moderationId': moderationId,
             },
+        });
+    }
+
+    /**
+     * @param guildId 
+     * @returns RoleDto Success
+     * @throws ApiError
+     */
+    public static getApiGuildsPublicRoles(
+guildId: string,
+): CancelablePromise<Array<RoleDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/Guilds/{guildId}/public-roles',
+            path: {
+                'guildId': guildId,
+            },
+        });
+    }
+
+    /**
+     * @param guildId 
+     * @param requestBody 
+     * @returns RoleDto Success
+     * @throws ApiError
+     */
+    public static patchApiGuildsPublicRoles(
+guildId: string,
+requestBody?: Array<string>,
+): CancelablePromise<Array<RoleDto>> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/Guilds/{guildId}/public-roles',
+            path: {
+                'guildId': guildId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 
