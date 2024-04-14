@@ -4,6 +4,7 @@ using Application.Queries.DiscordApiCalls;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Infrastructure.Configuration;
 using MediatR;
 
 namespace Web.Discord.Modules;
@@ -135,11 +136,11 @@ public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
         if (Context.User is not IGuildUser user) return;
         await DeferAsync(true);
 
-        await _mediator.Send(new SetUserPublicRolesQuery()
+        await _mediator.Send(new SetUserPublicRolesQuery
         {
             GuildId = Context.Guild.Id,
             UserId = user.Id,
-            RoleIds = Array.Empty<ulong>(),
+            RoleIds = Array.Empty<ulong>()
         });
 
         await FollowupAsync("All public roles have been removed.", ephemeral: true);
@@ -196,11 +197,13 @@ public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
     [RequireUserPermission(GuildPermission.ManageRoles)]
     public class PublicRoleConfigModule : InteractionModuleBase<SocketInteractionContext>
     {
+        private readonly DiscordConfiguration _discordConfiguration;
         private readonly IMediator _mediator;
 
-        public PublicRoleConfigModule(IMediator mediator)
+        public PublicRoleConfigModule(IMediator mediator, DiscordConfiguration discordConfiguration)
         {
             _mediator = mediator;
+            _discordConfiguration = discordConfiguration;
         }
 
         /// <summary>
@@ -236,9 +239,10 @@ public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
                 return;
             }
 
-            if (publicRoles.Count >= 25)
+            if (publicRoles.Count >= _discordConfiguration.MaxPublicRoles)
             {
-                await ModifyOriginalResponseAsync(x => x.Content = "Cannot have more than 25 public roles.");
+                await ModifyOriginalResponseAsync(x =>
+                    x.Content = $"Cannot have more than {_discordConfiguration.MaxPublicRoles} public roles.");
                 return;
             }
 

@@ -49,7 +49,8 @@ public class TestBase
         services.AddSingleton(new DiscordConfiguration
         {
             DefaultPrefix = "!",
-            MaxPrefixLength = 5
+            MaxPrefixLength = 5,
+            MaxPublicRoles = 25
         });
         services.AddSingleton(Substitute.For<DiscordSocketClient>());
         services.AddSingleton(Substitute.For<ILoggingService>());
