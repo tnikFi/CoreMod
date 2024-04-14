@@ -25,4 +25,5 @@ It is preferred to only submit PRs with functional changes. Cosmetic changes can
 
 ## Do you have questions about the source code or how to use CoreMod?
 
+* If you have a development-related question, first check if it is answered in the [project wiki](https://github.com/tnikFi/CoreMod/wiki).
 * If an [issue](https://github.com/tnikFi/CoreMod/issues?q=is%3Aissue+label%3Aquestion+) regarding your question doesn't already exist, [open a new one](https://github.com/tnikFi/CoreMod/issues/new/choose) and label it as a question. This way, others can benefit from the discussion as well.
