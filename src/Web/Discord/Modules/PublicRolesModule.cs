@@ -1,5 +1,6 @@
 ﻿using Application.Commands.Configuration;
 using Application.Queries.Configuration;
+using Application.Queries.DiscordApiCalls;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -134,14 +135,12 @@ public class PublicRolesModule : InteractionModuleBase<SocketInteractionContext>
         if (Context.User is not IGuildUser user) return;
         await DeferAsync(true);
 
-        var publicRoles = await GetPublicRolesAsync();
-        var rolesToRemove = user.RoleIds.Where(x => publicRoles.Select(role => role.Id).Contains(x));
-        foreach (var roleId in rolesToRemove)
+        await _mediator.Send(new SetUserPublicRolesQuery()
         {
-            var role = Context.Guild.GetRole(roleId);
-            if (role is null) continue;
-            await user.RemoveRoleAsync(role);
-        }
+            GuildId = Context.Guild.Id,
+            UserId = user.Id,
+            RoleIds = Array.Empty<ulong>(),
+        });
 
         await FollowupAsync("All public roles have been removed.", ephemeral: true);
     }
