@@ -12,7 +12,6 @@ interface LazyUserChipProps extends UserChipProps {
 const LazyUserChip: React.FC<LazyUserChipProps> = ({ userId, defaultLabel, ...props }) => {
   const { selectedGuild } = React.useContext(SelectedGuildContext)
   const [user, setUser] = React.useState<UserDto | null>(null)
-  const [loading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
     const fetchUser = async () => {
@@ -23,34 +22,23 @@ const LazyUserChip: React.FC<LazyUserChipProps> = ({ userId, defaultLabel, ...pr
         setUser(response)
       } catch (error) {
         console.error(error)
-      } finally {
-        setLoading(false)
       }
     }
     fetchUser()
   }, [selectedGuild, userId])
 
   return (
-    <>
-      {user ? (
-        <UserChip
-          userId={userId}
-          username={user.username || defaultLabel}
-          nickname={user.nickname}
-          avatarUrl={user.icon}
-          color={user.color || undefined}
-          {...props}
-        />
-      ) : (
-        <UserChip
-          userId={userId}
-          username={loading ? defaultLabel || 'Loading...' : `Unknown User ${userId}`}
-          avatarUrl={null}
-          loading={loading}
-          {...props}
-        />
-      )}
-    </>
+    <React.Suspense fallback={<UserChip userId={userId} username={defaultLabel || 'Loading...'} loading />}>
+      <UserChip
+        userId={userId}
+        username={user?.username || defaultLabel || 'Unknown User'}
+        nickname={user?.nickname}
+        avatarUrl={user?.icon}
+        color={user?.color}
+        disableUsernameCopy={user?.username === undefined}
+        {...props}
+      />
+    </React.Suspense>
   )
 }
 
