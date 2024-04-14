@@ -10,6 +10,7 @@ export interface UserChipProps extends Omit<ChipProps, 'color'> {
   color?: string | null
   avatarUrl?: string | null
   loading?: boolean
+  disableUsernameCopy?: boolean
 }
 
 interface ContextMenuPosition {
@@ -24,6 +25,7 @@ const UserChip: React.FC<UserChipProps> = ({
   color,
   avatarUrl,
   loading,
+  disableUsernameCopy,
   ...props
 }) => {
   const [contextMenu, setContextMenu] = React.useState<ContextMenuPosition | null>(null)
@@ -77,7 +79,7 @@ const UserChip: React.FC<UserChipProps> = ({
             : undefined
         }
         userId={userId}
-        username={username}
+        username={disableUsernameCopy ? undefined : username}
         nickname={nickname}
         avatarUrl={avatarUrl}
       />
