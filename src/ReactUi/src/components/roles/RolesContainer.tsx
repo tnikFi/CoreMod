@@ -5,10 +5,23 @@ import { RoleDto } from '../../api'
 
 export interface RolesContainerProps {
   roles: RoleDto[]
+  deletableRoles?: RoleDto[]
+  onRoleDeleted?: (role: RoleDto) => void
+  
+  /**
+   * Show a loading spinner and disable the delete button for all roles.
+   */
+  loading?: boolean
   sx?: SxProps<Theme>
 }
 
-const RolesContainer: React.FC<RolesContainerProps> = ({ roles, sx }) => {
+const RolesContainer: React.FC<RolesContainerProps> = ({
+  roles,
+  deletableRoles,
+  onRoleDeleted,
+  loading,
+  sx,
+}) => {
   return (
     <Box
       sx={{
@@ -21,8 +34,14 @@ const RolesContainer: React.FC<RolesContainerProps> = ({ roles, sx }) => {
         ...sx,
       }}
     >
-      {roles.map((role, index) => (
-        <RoleChip key={index} {...role} />
+      {roles.map((role) => (
+        <RoleChip
+          key={role.id}
+          canDelete={deletableRoles?.some((x) => x.id === role.id)}
+          onDelete={onRoleDeleted ? () => onRoleDeleted(role) : undefined}
+          loading={loading}
+          {...role}
+        />
       ))}
     </Box>
   )

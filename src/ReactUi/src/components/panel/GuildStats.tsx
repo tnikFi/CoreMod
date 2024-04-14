@@ -62,28 +62,72 @@ const GuildStats: React.FC<GuildStatsProps> = ({
   sx,
 }) => {
   const [roleSelectionOpen, setRoleSelectionOpen] = React.useState(false)
+  const [rolesLoading, setRolesLoading] = React.useState(false)
   const { enqueueSnackbar } = useSnackbar()
 
-  const handleAddPublicRole = async (role: RoleDto) => {
-    try {
-      // Get the public roles the user has
-      const userPublicRoles = roles.filter((r) => publicRoles?.some((pr) => pr.id === r.id))
+  const handleAddRole = React.useCallback(
+    (role: RoleDto) => {
+      const deleteRole = async (role: RoleDto) => {
+        setRolesLoading(true)
+        try {
+          // Get the public roles the user has
+          const userPublicRoles = roles.filter((r) => publicRoles?.some((pr) => pr.id === r.id))
 
-      // Check if the user already has the role
-      if (userPublicRoles.some((r) => r.id === role.id)) return
+          // Check if the user already has the role
+          if (userPublicRoles.some((r) => r.id === role.id)) return
 
-      // Add the role to the user
-      await UserService.patchApiUserPublicRoles(
-        selectedGuild.id ?? undefined,
-        userPublicRoles.concat(role)
-      )
-      if (onRolesChanged) onRolesChanged(roles.concat(role))
-      enqueueSnackbar(`Role "${role.name}" added`, { variant: 'success' })
-    } catch (error) {
-      enqueueSnackbar(`Failed to add role: ${(error as ApiError).message}`, { variant: 'error' })
-      console.error(error)
-    }
-  }
+          // Add the role to the user
+          await UserService.patchApiUserPublicRoles(
+            selectedGuild.id ?? undefined,
+            userPublicRoles.concat(role)
+          )
+          if (onRolesChanged) onRolesChanged(roles.concat(role))
+          enqueueSnackbar(`Role "${role.name}" added`, { variant: 'success' })
+        } catch (error) {
+          enqueueSnackbar(`Failed to add role: ${(error as ApiError).message}`, {
+            variant: 'error',
+          })
+          console.error(error)
+        } finally {
+          setRolesLoading(false)
+        }
+      }
+      deleteRole(role)
+    },
+    [roles, publicRoles, selectedGuild.id, onRolesChanged, enqueueSnackbar]
+  )
+
+  const handleDeleteRole = React.useCallback(
+    (role: RoleDto) => {
+      const deleteRole = async (role: RoleDto) => {
+        setRolesLoading(true)
+        try {
+          // Get the public roles the user has
+          const userPublicRoles = roles.filter((r) => publicRoles?.some((pr) => pr.id === r.id))
+
+          // Check if the user has the role
+          if (!userPublicRoles.some((r) => r.id === role.id)) return
+
+          // Remove the role from the user
+          await UserService.patchApiUserPublicRoles(
+            selectedGuild.id ?? undefined,
+            userPublicRoles.filter((r) => r.id !== role.id)
+          )
+          if (onRolesChanged) onRolesChanged(roles.filter((r) => r.id !== role.id))
+          enqueueSnackbar(`Role "${role.name}" removed`, { variant: 'success' })
+        } catch (error) {
+          enqueueSnackbar(`Failed to remove role: ${(error as ApiError).message}`, {
+            variant: 'error',
+          })
+          console.error(error)
+        } finally {
+          setRolesLoading(false)
+        }
+      }
+      deleteRole(role)
+    },
+    [roles, publicRoles, selectedGuild.id, onRolesChanged, enqueueSnackbar]
+  )
 
   return (
     <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column', ...sx }}>
@@ -156,7 +200,12 @@ const GuildStats: React.FC<GuildStatsProps> = ({
           {loading ? (
             <CircularProgress size={32} />
           ) : roles.length > 0 ? (
-            <RolesContainer roles={roles} />
+            <RolesContainer
+              roles={roles}
+              deletableRoles={publicRoles}
+              onRoleDeleted={handleDeleteRole}
+              loading={rolesLoading}
+            />
           ) : (
             <Typography
               variant="body1"
@@ -177,7 +226,7 @@ const GuildStats: React.FC<GuildStatsProps> = ({
       <AddPublicRoleModal
         open={roleSelectionOpen && publicRoles !== undefined && publicRoles.length > 0}
         roles={publicRoles ? publicRoles.filter((r) => !roles.some((ur) => ur.id === r.id)) : []}
-        onRoleAdded={handleAddPublicRole}
+        onRoleAdded={handleAddRole}
         onClose={() => setRoleSelectionOpen(false)}
       />
     </Paper>
