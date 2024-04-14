@@ -1,6 +1,6 @@
 import React from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { GuildDto, GuildPermissions, OpenAPI, UserService } from '../../api'
+import { GuildDto, GuildPermissions, GuildsService, OpenAPI, RoleDto, UserService } from '../../api'
 import {
   AppBar,
   Avatar,
@@ -11,6 +11,10 @@ import {
   Drawer,
   IconButton,
   List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
   Toolbar,
   Tooltip,
   Typography,
@@ -28,6 +32,7 @@ import Guild from '../../components/navigation/Guild'
 import { SelectedGuildContext } from '../../contexts/SelectedGuildContext'
 import ThemeSelector from '../../components/themes/ThemeSelector'
 import { permissionCallbacks } from '../../utils/PermissionCallbacks'
+import AddIcon from '@mui/icons-material/Add'
 
 const pages: Page[] = [
   {
@@ -65,6 +70,7 @@ const Panel = () => {
   const [guildPermissions, setGuildPermissions] = React.useState<GuildPermissions | undefined>(
     undefined
   )
+  const [publicRoles, setPublicRoles] = React.useState<RoleDto[] | undefined>(undefined)
   const { idToken, idTokenData } = React.useContext(AuthContext)
   const navigate = useNavigate()
 
@@ -113,13 +119,29 @@ const Panel = () => {
     getGuildPermissions()
   }, [selectedGuild])
 
+  // Get the public roles when the selected guild changes
+  React.useEffect(() => {
+    async function getPublicRoles() {
+      setPublicRoles(undefined)
+      if (selectedGuild?.id) {
+        const roles = await GuildsService.getApiGuildsPublicRoles(selectedGuild.id)
+        setPublicRoles(roles)
+      }
+    }
+    getPublicRoles()
+  }, [selectedGuild])
+
   const userName = idTokenData?.userName
   const avatar = idTokenData?.avatar
 
   return (
     <RequireAuthenticated>
       <SelectedGuildContext.Provider
-        value={{ selectedGuild: selectedGuild, guildPermissions: guildPermissions }}
+        value={{
+          selectedGuild: selectedGuild,
+          guildPermissions: guildPermissions,
+          publicRoles: publicRoles,
+        }}
       >
         <Box sx={{ display: { xs: 'block', md: 'flex', maxWidth: '100vw' } }}>
           <AppBar position="fixed" sx={{ display: { xs: 'block', md: 'none' } }}>
@@ -234,6 +256,15 @@ const Panel = () => {
                 />
               ))}
             </List>
+            <Divider />
+            <ListItem disablePadding>
+              <ListItemButton href={import.meta.env.VITE_INVITE_URL} target="_blank">
+                <ListItemIcon>
+                  <AddIcon />
+                </ListItemIcon>
+                <ListItemText primary={'Add to Server'} primaryTypographyProps={{ noWrap: true }} />
+              </ListItemButton>
+            </ListItem>
           </NavDrawer>
 
           <Drawer
@@ -256,6 +287,18 @@ const Panel = () => {
                   selected={guild.id === selectedGuild?.id}
                 />
               ))}
+              <Divider />
+              <ListItem disablePadding>
+                <ListItemButton href={import.meta.env.VITE_INVITE_URL} target="_blank">
+                  <ListItemIcon>
+                    <AddIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={'Add to Server'}
+                    primaryTypographyProps={{ noWrap: true }}
+                  />
+                </ListItemButton>
+              </ListItem>
             </List>
           </Drawer>
 
