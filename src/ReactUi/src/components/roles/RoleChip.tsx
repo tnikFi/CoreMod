@@ -29,7 +29,7 @@ const RoleChip: React.FC<RoleChipProps> = ({ name, color, canDelete, onDelete, l
     <Chip
       icon={
         loading ? (
-          <CircularProgress size={24} sx={{ color: color }} />
+          <CircularProgress size={24} sx={{ 'svg circle': { stroke: color } }} />
         ) : (
         canDelete ? (
           <IconButton sx={{ p: 0 }}>
