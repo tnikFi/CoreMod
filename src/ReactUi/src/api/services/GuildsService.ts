@@ -154,25 +154,4 @@ guildId: string,
         });
     }
 
-    /**
-     * @param guildId 
-     * @param requestBody 
-     * @returns RoleDto Success
-     * @throws ApiError
-     */
-    public static patchApiGuildsPublicRoles(
-guildId: string,
-requestBody?: Array<string>,
-): CancelablePromise<Array<RoleDto>> {
-        return __request(OpenAPI, {
-            method: 'PATCH',
-            url: '/api/Guilds/{guildId}/public-roles',
-            path: {
-                'guildId': guildId,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-
 }
