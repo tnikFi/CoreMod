@@ -87,6 +87,8 @@ builder.Services.AddSingleton<IModerationMessageService, ModerationMessageServic
 builder.Services.AddSingleton<ICommandHandlingService, CommandHandlingService>();
 builder.Services.AddScoped<IUnbanSchedulingService, UnbanSchedulingService>();
 
+builder.Services.AddSpaStaticFiles(options => { options.RootPath = "wwwroot"; });
+
 var app = builder.Build();
 
 // Migrate the database
@@ -141,8 +143,23 @@ app.UseCookiePolicy(new CookiePolicyOptions
     MinimumSameSitePolicy = SameSiteMode.Lax
 });
 
+app.UseRouting();
+
 app.UseAuthorization();
 
-app.MapControllers();
+// Using UseEndpoints to map controllers instead of app.MapControllers since
+// the latter doesn't seem to work with the SPA middleware.
+#pragma warning disable ASP0014
+app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+#pragma warning restore ASP0014
+
+app.Logger.LogInformation(Path.Combine(Directory.GetCurrentDirectory(), "bin", "Debug", "net7.0", "dist"));
+
+app.UseSpaStaticFiles();
+app.UseSpa(spaBuilder =>
+{
+    spaBuilder.Options.SourcePath = "wwwroot";
+    if (app.Environment.IsDevelopment()) spaBuilder.UseProxyToSpaDevelopmentServer("http://localhost:3000");
+});
 
 app.Run();
