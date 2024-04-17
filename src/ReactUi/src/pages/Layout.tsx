@@ -70,7 +70,7 @@ const Layout = () => {
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="static" elevation={0} sx={{ backgroundColor: 'transparent' }}>
         <Container maxWidth={false}>
           <Toolbar disableGutters>
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -80,7 +80,6 @@ const Layout = () => {
                 aria-controls="menu-appbar"
                 aria-haspopup="true"
                 onClick={() => setNavOpen(true)}
-                color="inherit"
               >
                 <MenuIcon />
               </IconButton>
@@ -93,7 +92,8 @@ const Layout = () => {
                     <Button
                       key={page.name}
                       onClick={() => navigate(page.path)}
-                      sx={{ my: 2, color: 'white', display: 'block' }}
+                      sx={{ my: 2, color: 'text.primary', display: 'block' }}
+                      variant="text"
                     >
                       {page.name}
                     </Button>
@@ -103,7 +103,7 @@ const Layout = () => {
             <Box sx={{ flexGrow: 0, gap: 2, display: 'flex' }}>
               <ThemeSelector />
               <UnauthenticatedComponent>
-                <Button color="inherit" onClick={() => login()}>
+                <Button sx={{ color: 'text.primary' }} onClick={() => login()}>
                   Login
                 </Button>
               </UnauthenticatedComponent>
