@@ -30,18 +30,17 @@ const RoleChip: React.FC<RoleChipProps> = ({ name, color, canDelete, onDelete, l
       icon={
         loading ? (
           <CircularProgress size={24} sx={{ 'svg circle': { stroke: color } }} />
-        ) : (
-        canDelete ? (
-          <IconButton sx={{ p: 0 }}>
+        ) : canDelete ? (
+          <IconButton sx={{ p: 0 }} onClick={onDelete}>
             {isHovered ? (
-              <CloseIcon sx={{ height: 24, fill: color }} onClick={onDelete} />
+              <CloseIcon sx={{ height: 24, fill: color }} />
             ) : (
               <CircleIcon sx={{ height: 24, fill: color }} />
             )}
           </IconButton>
         ) : (
           <CircleIcon sx={{ height: 24, fill: color }} />
-        ))
+        )
       }
       label={name}
       variant="outlined"
