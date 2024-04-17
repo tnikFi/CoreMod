@@ -11,6 +11,7 @@ import Moderation from './pages/panel/Moderation'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { SnackbarProvider } from 'notistack'
+import { green } from '@mui/material/colors'
 const Panel = React.lazy(() => import('./pages/panel/Panel'))
 
 const App = () => {
@@ -30,21 +31,10 @@ const App = () => {
               ? 'dark'
               : 'light' ?? 'system',
           primary: {
-            900: '#0017af',
-            800: '#002fc1',
-            700: '#003acc',
-            600: '#1845d8',
-            500: '#1f4ee4',
-            400: '#4e6aea',
-            300: '#7286ee',
-            200: '#9ea8f2',
-            100: '#c5caf7',
-            50: '#e8eafc',
+            main: green[500],
           },
           secondary: {
-            main: '#00dbff',
-            dark: '#00a4c7',
-            light: '#73e6ff',
+            main: green[500],
           },
         },
       }),
