@@ -111,7 +111,8 @@ jobs:
       # Uploading multiple builds of the application is slow, so we zip them first to speed up the process
       - name: Zip build files
         run: |
-          zip -jr server-builds.zip publish
+          cd publish
+          zip -r ../server-builds.zip .
         working-directory: ${{ runner.temp }}
 
       - name: Cache backend build artifacts
@@ -156,8 +157,8 @@ jobs:
 
       - name: Zip builds for upload
         run: |
-          zip -jr linux-x64.zip linux-x64
-          zip -jr linux-arm64.zip linux-arm64
+          (cd linux-x646 && zip -r ../linux-x64.zip .)
+          (cd linux-arm64 && zip -r ../linux-arm64.zip .)
         working-directory: ${{ runner.temp }}
 
       - name: Upload Linux x64 build
