@@ -12,6 +12,7 @@ using Infrastructure.Configuration;
 using Infrastructure.Data.Contexts;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -124,6 +125,11 @@ lifetime.ApplicationStopping.Register(() =>
     // Stop the Discord client
     discordClient.SetStatusAsync(UserStatus.DoNotDisturb).Wait();
     discordClient.LogoutAsync().Wait();
+});
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
 // Configure the HTTP request pipeline.
