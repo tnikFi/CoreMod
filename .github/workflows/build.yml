@@ -72,13 +72,11 @@ jobs:
       - name: Publish application
         run: |
           dotnet publish --configuration Release --runtime win-x86 --self-contained --output ./publish
-          cd publish
-          zip -r ./publish.zip .
         working-directory: ./src/Web/
 
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
           name: publish
-          path: ./src/Web/publish/publish.zip
+          path: ./src/Web/publish
           if-no-files-found: error
