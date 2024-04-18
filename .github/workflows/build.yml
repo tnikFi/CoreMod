@@ -133,7 +133,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: ui-build
-          path: ui-build
+          path: ${{ runner.temp }}/ui-build
       
       - name: Download server build artifacts  
         uses: actions/download-artifact@v2
