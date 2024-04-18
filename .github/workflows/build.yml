@@ -111,16 +111,14 @@ jobs:
       # Uploading multiple builds of the application is slow, so we zip them first to speed up the process
       - name: Zip build files
         run: |
-          zip -r linux-x64.zip linux-x64
-          zip -r linux-arm64.zip linux-arm64
-          rm -rf linux-x64 linux-arm64
-        working-directory: ${{ runner.temp }}/publish
+          zip -jr server-builds.zip publish
+        working-directory: ${{ runner.temp }}
 
       - name: Cache backend build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: server-build
-          path: ${{ runner.temp }}/publish
+          name: server-builds
+          path: ${{ runner.temp }}/server-builds.zip
           if-no-files-found: error
 
   build:
@@ -139,27 +137,27 @@ jobs:
       - name: Download server build artifacts  
         uses: actions/download-artifact@v2
         with:
-          name: server-build
-          path: server-build
+          name: server-builds
+          path: server-builds
       
       - name: Extract server build artifacts
         run: |
-          unzip linux-x64.zip -d ${{ runner.temp }}/linux-x64
-          unzip linux-arm64.zip -d ${{ runner.temp }}/linux-arm64
-        working-directory: server-build
+          unzip server-builds.zip -d ${{ runner.temp }}
+        working-directory: server-builds
 
       - name: Copy UI files to server
         run: |
-          mkdir -p ${{ runner.temp }}/linux-x64/wwwroot
-          mkdir -p ${{ runner.temp }}/linux-arm64/wwwroot
-          cp -r ui-build/* ${{ runner.temp }}/linux-x64/wwwroot
-          cp -r ui-build/* ${{ runner.temp }}/linux-arm64/wwwroot
+          mkdir -p linux-x64/wwwroot
+          mkdir -p linux-arm64/wwwroot
+          cp -r ui-build/* linux-x64/wwwroot
+          cp -r ui-build/* linux-arm64/wwwroot
         shell: bash
+        working-directory: ${{ runner.temp }}
 
       - name: Zip builds for upload
         run: |
-          zip -r linux-x64.zip linux-x64
-          zip -r linux-arm64.zip linux-arm64
+          zip -jr linux-x64.zip linux-x64
+          zip -jr linux-arm64.zip linux-arm64
         working-directory: ${{ runner.temp }}
 
       - name: Upload Linux x64 build
