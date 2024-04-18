@@ -138,8 +138,8 @@ jobs:
         run: |
           mkdir -p server-build/linux-x64/wwwroot
           mkdir -p server-build/linux-arm64/wwwroot
-          cp -r ui-build/* server-build/win-x64/wwwroot
           cp -r ui-build/* server-build/linux-x64/wwwroot
+          cp -r ui-build/* server-build/linux-arm64/wwwroot
         shell: bash
 
       - name: Upload Linux x64 build
