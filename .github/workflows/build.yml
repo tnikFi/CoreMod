@@ -100,19 +100,19 @@ jobs:
 
       - name: Build server for Linux x64
         run: |
-          dotnet publish --configuration Release --runtime linux-x64 --self-contained --output ./publish/linux-x64
+          dotnet publish --configuration Release --runtime linux-x64 --self-contained --output ${{ runner.temp }}/publish/linux-x64
         working-directory: ./src/Web/
       
       - name: Build server for Linux ARM64
         run: |
-          dotnet publish --configuration Release --runtime linux-arm64 --self-contained --output ./publish/linux-arm64
+          dotnet publish --configuration Release --runtime linux-arm64 --self-contained --output ${{ runner.temp }}/publish/linux-arm64
         working-directory: ./src/Web/
 
       - name: Cache backend build artifacts
         uses: actions/upload-artifact@v2
         with:
           name: server-build
-          path: ./src/Web/publish
+          path: ${{ runner.temp }}/publish
           if-no-files-found: error
 
   build:
