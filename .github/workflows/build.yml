@@ -44,17 +44,21 @@ jobs:
         run: npm run lint
         working-directory: src/ReactUi
 
+      - name: Set up environment file for production
+        run: |
+          touch .env.production
+          echo "VITE_GITHUB_URL=${{ github.server_url }}/${{ github.repository }}" >> .env.production
+          echo "VITE_DOCUMENTATION_URL=${{ github.server_url }}/${{ github.repository }}/wiki" >> .env.production
+          echo "VITE_BUG_REPORT_URL=${{ github.server_url }}/${{ github.repository }}/issues" >> .env.production
+          echo "VITE_FEATURE_REQUEST_URL=${{ github.server_url }}/${{ github.repository }}/issues" >> .env.production
+          echo "VITE_TOKEN_ENDPOINT=${{ env.TOKEN_ENDPOINT }}" >> .env.production
+          echo "VITE_LOGOUT_ENDPOINT=${{ env.LOGOUT_ENDPOINT }}" >> .env.production
+          echo "VITE_REDIRECT_URI=${{ env.REDIRECT_URI }}" >> .env.production
+          echo "VITE_CLIENT_ID=${{ env.CLIENT_ID }}" >> .env.production
+        working-directory: src/ReactUi
+
       - name: Build React application
         run: npm run build
-        env:
-          VITE_GITHUB_URL: ${{ github.server_url }}/${{ github.repository }}
-          VITE_DOCUMENTATION_URL: ${{ github.server_url }}/${{ github.repository }}/wiki
-          VITE_BUG_REPORT_URL: ${{ github.server_url }}/${{ github.repository }}/issues
-          VITE_FEATURE_REQUEST_URL: ${{ github.server_url }}/${{ github.repository }}/issues
-          VITE_TOKEN_ENDPOINT: ${{ env.TOKEN_ENDPOINT }}
-          VITE_LOGOUT_ENDPOINT: ${{ env.LOGOUT_ENDPOINT }}
-          VITE_REDIRECT_URI: ${{ env.REDIRECT_URI }}
-          VITE_CLIENT_ID: ${{ env.CLIENT_ID }}
         working-directory: src/ReactUi
 
       - name: Cache frontend build artifacts
