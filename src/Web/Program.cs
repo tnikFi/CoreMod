@@ -158,8 +158,6 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 #pragma warning restore ASP0014
 
-app.Logger.LogInformation(Path.Combine(Directory.GetCurrentDirectory(), "bin", "Debug", "net7.0", "dist"));
-
 app.UseSpaStaticFiles();
 app.UseSpa(spaBuilder =>
 {
