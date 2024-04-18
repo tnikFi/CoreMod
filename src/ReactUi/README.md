@@ -1,6 +1,6 @@
-# CoreMod React UI
+# Palantir React UI
 
-React frontend for the CoreMod Discord moderation bot project.
+React frontend for the Palantir Discord moderation bot project.
 
 ## Development
 
