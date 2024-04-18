@@ -57,6 +57,10 @@ jobs:
           echo "VITE_CLIENT_ID=${{ env.CLIENT_ID }}" >> .env.production
         working-directory: src/ReactUi
 
+      - name: Output environment file
+        run: cat .env.production
+        working-directory: src/ReactUi
+
       - name: Build React application
         run: npm run build
         working-directory: src/ReactUi
@@ -94,9 +98,14 @@ jobs:
       - name: Test solution
         run: dotnet test --no-build --configuration Release
 
-      - name: Publish application
+      - name: Build server for Linux x64
         run: |
-          dotnet publish --configuration Release --runtime win-x86 --self-contained --output ./publish
+          dotnet publish --configuration Release --runtime linux-x64 --self-contained --output ./publish/linux-x64
+        working-directory: ./src/Web/
+      
+      - name: Build server for Linux ARM64
+        run: |
+          dotnet publish --configuration Release --runtime linux-arm64 --self-contained --output ./publish/linux-arm64
         working-directory: ./src/Web/
 
       - name: Cache backend build artifacts
@@ -127,12 +136,20 @@ jobs:
 
       - name: Copy UI files to server
         run: |
-          mkdir -p server-build/wwwroot
-          cp -r ui-build/* server-build/wwwroot
+          mkdir -p server-build/linux-x64/wwwroot
+          mkdir -p server-build/linux-arm64/wwwroot
+          cp -r ui-build/* server-build/win-x64/wwwroot
+          cp -r ui-build/* server-build/linux-x64/wwwroot
         shell: bash
 
-      - name: Upload artifacts
+      - name: Upload Linux x64 build
         uses: actions/upload-artifact@v2
         with:
-          name: build
-          path: server-build
+          name: build-linux-x64
+          path: server-build/linux-x64
+      
+      - name: Upload Linux ARM64 build
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-linux-arm64
+          path: server-build/linux-arm64
