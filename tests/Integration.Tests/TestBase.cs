@@ -18,7 +18,11 @@ namespace Integration.Tests;
 public class TestBase
 {
     private IMediator _mediator;
+    
+    // NUnit1032 disabled because IServiceProvider doesn't implement IDisposable
+#pragma warning disable NUnit1032
     private IServiceProvider _serviceProvider;
+#pragma warning restore NUnit1032
     protected IDiscordClient DiscordClient => _serviceProvider.GetRequiredService<IDiscordClient>();
 
     protected IUnbanSchedulingService UnbanSchedulingService =>
