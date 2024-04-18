@@ -51,10 +51,10 @@ jobs:
           echo "VITE_DOCUMENTATION_URL=${{ github.server_url }}/${{ github.repository }}/wiki" >> .env.production
           echo "VITE_BUG_REPORT_URL=${{ github.server_url }}/${{ github.repository }}/issues" >> .env.production
           echo "VITE_FEATURE_REQUEST_URL=${{ github.server_url }}/${{ github.repository }}/issues" >> .env.production
-          echo "VITE_TOKEN_ENDPOINT=${{ env.TOKEN_ENDPOINT }}" >> .env.production
-          echo "VITE_LOGOUT_ENDPOINT=${{ env.LOGOUT_ENDPOINT }}" >> .env.production
-          echo "VITE_REDIRECT_URI=${{ env.REDIRECT_URI }}" >> .env.production
-          echo "VITE_CLIENT_ID=${{ env.CLIENT_ID }}" >> .env.production
+          echo "VITE_TOKEN_ENDPOINT=${{ vars.TOKEN_ENDPOINT }}" >> .env.production
+          echo "VITE_LOGOUT_ENDPOINT=${{ vars.LOGOUT_ENDPOINT }}" >> .env.production
+          echo "VITE_REDIRECT_URI=${{ vars.REDIRECT_URI }}" >> .env.production
+          echo "VITE_CLIENT_ID=${{ vars.CLIENT_ID }}" >> .env.production
         working-directory: src/ReactUi
 
       - name: Output environment file
