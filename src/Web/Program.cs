@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +22,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", false, true);
 builder.Configuration.AddUserSecrets<Program>();
 
-// Add logger.
-builder.Services.AddLogging();
+// Configure Serilog
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
 // Add services to the container.
 
@@ -152,8 +157,6 @@ app.UseAuthorization();
 #pragma warning disable ASP0014
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 #pragma warning restore ASP0014
-
-app.Logger.LogInformation(Path.Combine(Directory.GetCurrentDirectory(), "bin", "Debug", "net7.0", "dist"));
 
 app.UseSpaStaticFiles();
 app.UseSpa(spaBuilder =>
