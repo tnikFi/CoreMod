@@ -157,7 +157,7 @@ jobs:
 
       - name: Zip builds for upload
         run: |
-          (cd linux-x646 && zip -r ../linux-x64.zip .)
+          (cd linux-x64 && zip -r ../linux-x64.zip .)
           (cd linux-arm64 && zip -r ../linux-arm64.zip .)
         working-directory: ${{ runner.temp }}
 
