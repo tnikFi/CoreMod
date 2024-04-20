@@ -71,7 +71,7 @@ const Home = () => {
           >
             <Box display={'flex'} flexDirection={'column'} gap={3}>
               <Typography variant="h3">Moderation, administration, open source.</Typography>
-              <Typography variant="subtitle1">
+              <Typography variant="body1">
                 An open source Discord bot that provides moderation and administration tools for
                 your server. Invite the bot to your server to get started.
               </Typography>
