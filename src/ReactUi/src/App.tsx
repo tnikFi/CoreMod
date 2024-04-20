@@ -34,7 +34,7 @@ const App = () => {
             main: green[500],
           },
           secondary: {
-            main: green[500],
+            main: green[700],
           },
         },
       }),

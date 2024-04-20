@@ -151,6 +151,8 @@ const Home = () => {
                 <Link
                   href="https://docs.discordnet.dev/"
                   aria-label="Read Discord.Net documentation"
+                  color={'secondary'}
+                  fontWeight={'bold'}
                 >
                   Discord.Net
                 </Link>
