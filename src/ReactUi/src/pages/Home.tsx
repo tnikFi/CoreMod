@@ -7,6 +7,7 @@ import {
   Link,
   Paper,
   Typography,
+  useMediaQuery,
   useTheme,
 } from '@mui/material'
 import React from 'react'
@@ -24,11 +25,43 @@ const Home = () => {
   const navigate = useNavigate()
   const { login } = React.useContext(AuthContext)
   const isDarkMode = React.useMemo(() => theme.palette.mode === 'dark', [theme.palette.mode])
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   return (
     <>
       <Container sx={{ display: 'flex', flexDirection: 'column', gap: 10, mb: 10 }}>
-        <Box height={'60vh'} display={'flex'} flexDirection={'column'} justifyContent={'center'}>
+        <Box>
+          <Box my={5}>
+            {isMobile && (
+              <Box display={'flex'} justifyContent={'center'}>
+                <img
+                  src="/images/logo512.png"
+                  alt="Logo"
+                  height={128}
+                  style={{
+                    filter: isDarkMode ? 'none' : 'invert(1)',
+                    display: isMobile ? 'initial' : 'none',
+                  }}
+                />
+              </Box>
+            )}
+            <Typography variant="h1" align={isMobile ? 'center' : 'justify'}>
+              <span style={{ display: isMobile ? 'none' : 'initial' }}>
+                <img
+                  src="/images/logo512.png"
+                  alt="Logo"
+                  height={128}
+                  style={{
+                    verticalAlign: 'middle',
+                    filter: isDarkMode ? 'none' : 'invert(1)',
+                    display: isMobile ? 'none' : 'initial',
+                  }}
+                />
+              </span>
+              Palantir
+            </Typography>
+          </Box>
+
           <Box
             mb={2}
             display={'flex'}
