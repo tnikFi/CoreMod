@@ -192,7 +192,7 @@ jobs:
         working-directory: ${{ runner.temp }}
 
       - name: JSON file transform
-        uses: tnikFi/json-file-transform@v1
+        uses: tnikFi/json-file-transform@v2
         with:
           files: ${{ runner.temp }}/bin/**/appsettings.json
           key-value-pairs: |
