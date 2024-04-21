@@ -76,7 +76,7 @@ const Home = () => {
                 your server. Invite the bot to your server to get started.
               </Typography>
             </Box>
-            <Paper sx={{ display: { xs: 'none', md: 'initial' }, height: 200 }} elevation={4}>
+            <Paper sx={{ display: { xs: 'none', md: 'initial' }, height: 200, aspectRatio: 'calc(16/9)' }} elevation={4}>
               {isDarkMode ? (
                 <img
                   src="/images/panel_overview_desktop.png"
