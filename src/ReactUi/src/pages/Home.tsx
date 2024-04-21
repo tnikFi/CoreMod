@@ -98,6 +98,7 @@ const Home = () => {
               color="primary"
               href={import.meta.env.VITE_INVITE_URL}
               target="_blank"
+              sx={{ textAlign: 'center' }}
             >
               Invite to Server
             </Button>
