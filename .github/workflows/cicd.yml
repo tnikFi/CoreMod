@@ -207,7 +207,7 @@ jobs:
             Authentication.Jwt.SigningKey = ${{ secrets.JWT_SIGNING_KEY }}
 
       - name: Stop the Kestrel service
-        run: systemctl stop ${{ vars.SERVICE_NAME }}
+        run: sudo systemctl stop ${{ vars.SERVICE_NAME }}
 
       - name: Clean up old files
         run: |
@@ -218,4 +218,4 @@ jobs:
           cp -r ${{ runner.temp }}/bin/* ${{ vars.SITE_ROOT }}
 
       - name: Start the Kestrel service
-        run: systemctl start ${{ vars.SERVICE_NAME }}
+        run: sudo systemctl start ${{ vars.SERVICE_NAME }}
