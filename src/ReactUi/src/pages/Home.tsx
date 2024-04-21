@@ -186,7 +186,7 @@ const Home = () => {
                 Cross-Platform Support
               </Typography>
               <Typography>
-                The bot is built using .NET 7 with cross-platform support in mind. If you want to
+                The bot is built using .NET 8 with cross-platform support in mind. If you want to
                 self-host the bot, you can do so on the platform of your choice.
               </Typography>
             </Grid>
