@@ -55,6 +55,7 @@ jobs:
           echo "VITE_LOGOUT_ENDPOINT=${{ vars.LOGOUT_ENDPOINT }}" >> .env.production
           echo "VITE_REDIRECT_URI=${{ vars.REDIRECT_URI }}" >> .env.production
           echo "VITE_CLIENT_ID=${{ vars.CLIENT_ID }}" >> .env.production
+          echo "VITE_INVITE_URL=${{ vars.INVITE_URL }}" >> .env.production
         working-directory: src/ReactUi
 
       - name: Output environment file
