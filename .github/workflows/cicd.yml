@@ -102,7 +102,7 @@ jobs:
         run: |
           dotnet publish --configuration Release --runtime linux-x64 --self-contained --output ${{ runner.temp }}/publish/linux-x64
         working-directory: ./src/Web/
-      
+
       - name: Build server for Linux ARM64
         run: |
           dotnet publish --configuration Release --runtime linux-arm64 --self-contained --output ${{ runner.temp }}/publish/linux-arm64
@@ -134,13 +134,13 @@ jobs:
         with:
           name: ui-build
           path: ${{ runner.temp }}/ui-build
-      
-      - name: Download server build artifacts  
+
+      - name: Download server build artifacts
         uses: actions/download-artifact@v2
         with:
           name: server-builds
           path: server-builds
-      
+
       - name: Extract server build artifacts
         run: |
           unzip server-builds.zip -d ${{ runner.temp }}
@@ -166,7 +166,7 @@ jobs:
         with:
           name: build-linux-x64
           path: ${{ runner.temp }}/linux-x64.zip
-      
+
       - name: Upload Linux ARM64 build
         uses: actions/upload-artifact@v2
         with:
@@ -205,6 +205,16 @@ jobs:
             Authentication.Jwt.Issuer = ${{ vars.JWT_ISSUER }}
             Authentication.Jwt.Audience = ${{ vars.JWT_AUDIENCE }}
             Authentication.Jwt.SigningKey = ${{ secrets.JWT_SIGNING_KEY }}
+
+      # Prevent accidentally removing all files in the filesystem
+      # Learned this the hard way
+      - name: Exit if SITE_ROOT is not set
+        if: ${{ vars.SITE_ROOT == '' }}
+        run: |
+          echo "Variable SITE_ROOT is not set. Exiting to prevent data loss."
+          exit 1
+        env:
+          SITE_ROOT: ${{ vars.SITE_ROOT }}
 
       - name: Stop the Kestrel service
         run: sudo systemctl stop ${{ vars.SERVICE_NAME }}
