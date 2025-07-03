@@ -26,13 +26,13 @@ jobs:
   build-ui:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout code
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "npm"
           cache-dependency-path: src/ReactUi/package-lock.json
 
@@ -67,7 +67,7 @@ jobs:
         working-directory: src/ReactUi
 
       - name: Cache frontend build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ui-build
           path: src/ReactUi/dist
@@ -76,11 +76,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout code
 
       - name: Cache NuGet packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
@@ -88,7 +88,7 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Install .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
 
       - name: Restore solution
         run: dotnet restore
@@ -117,7 +117,7 @@ jobs:
         working-directory: ${{ runner.temp }}
 
       - name: Cache backend build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: server-builds
           path: ${{ runner.temp }}/server-builds.zip
@@ -127,17 +127,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-ui, build-server]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout code
 
       - name: Download UI build artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: ui-build
           path: ${{ runner.temp }}/ui-build
 
       - name: Download server build artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: server-builds
           path: server-builds
@@ -163,13 +163,13 @@ jobs:
         working-directory: ${{ runner.temp }}
 
       - name: Upload Linux x64 build
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: build-linux-x64
           path: ${{ runner.temp }}/linux-x64.zip
 
       - name: Upload Linux ARM64 build
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: build-linux-arm64
           path: ${{ runner.temp }}/linux-arm64.zip
@@ -181,7 +181,7 @@ jobs:
     environment: production
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: ${{ vars.BUILD_ARTIFACT }}
           path: ${{ runner.temp }}
