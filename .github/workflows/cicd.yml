@@ -131,13 +131,13 @@ jobs:
         name: Checkout code
 
       - name: Download UI build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ui-build
           path: ${{ runner.temp }}/ui-build
 
       - name: Download server build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: server-builds
           path: server-builds
@@ -181,7 +181,7 @@ jobs:
     environment: production
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ vars.BUILD_ARTIFACT }}
           path: ${{ runner.temp }}
