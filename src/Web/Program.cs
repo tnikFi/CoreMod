@@ -5,6 +5,7 @@ using Application.Services;
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
+using Discord.Rest;
 using Discord.WebSocket;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -87,6 +88,13 @@ builder.Services.AddSingleton<DiscordSocketClient>();
 builder.Services.AddSingleton<IDiscordClient>(x => x.GetRequiredService<DiscordSocketClient>());
 builder.Services.AddSingleton<CommandService>();
 builder.Services.AddSingleton<InteractionService>();
+
+// Register the DiscordRestClient as the SocketClient's Rest property
+builder.Services.AddSingleton<DiscordRestClient>(x =>
+{
+    var discordSocketClient = x.GetRequiredService<DiscordSocketClient>();
+    return discordSocketClient.Rest;
+});
 
 builder.Services.AddSingleton<ILoggingService, LoggingService>();
 builder.Services.AddSingleton<IModerationMessageService, ModerationMessageService>();
