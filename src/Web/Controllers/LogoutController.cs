@@ -47,7 +47,19 @@ public class LogoutController : ControllerBase
         };
         var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
+        
+        // Check if the postLogoutRedirectUri is valid and allowed.
+        var isValidRedirectUri = Uri.TryCreate(postLogoutRedirectUri, UriKind.Absolute, out var uriResult) &&
+                                 (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+        var isAllowedRedirect = isValidRedirectUri && _authConfiguration.AllowedLogoutRedirects
+            .Any(allowedUri => uriResult?.Equals(new Uri(allowedUri, UriKind.Absolute)) ?? false);
+        
+        // Use the provided redirect URI if it's valid and allowed, otherwise use the first allowed redirect URI.
+        var redirectUri = isAllowedRedirect
+            ? postLogoutRedirectUri
+            : _authConfiguration.AllowedLogoutRedirects.FirstOrDefault() ??
+              throw new InvalidOperationException("No allowed redirect URIs configured.");
 
-        return Redirect(postLogoutRedirectUri);
+        return Redirect(redirectUri);
     }
 }
