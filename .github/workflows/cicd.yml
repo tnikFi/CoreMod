@@ -192,7 +192,7 @@ jobs:
         working-directory: ${{ runner.temp }}
 
       - name: JSON file transform
-        uses: tnikFi/json-file-transform@v2
+        uses: tnikFi/json-file-transform@v3
         with:
           files: ${{ runner.temp }}/bin/**/appsettings.json
           key-value-pairs: |
@@ -206,6 +206,7 @@ jobs:
             Authentication.Jwt.Issuer = ${{ vars.JWT_ISSUER }}
             Authentication.Jwt.Audience = ${{ vars.JWT_AUDIENCE }}
             Authentication.Jwt.SigningKey = ${{ secrets.JWT_SIGNING_KEY }}
+            Authentication.AllowedLogoutRedirects = ${{ vars.ALLOWED_LOGOUT_REDIRECTS }}
 
       # Prevent accidentally removing all files in the filesystem
       # Learned this the hard way
